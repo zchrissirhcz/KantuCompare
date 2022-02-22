@@ -19,12 +19,12 @@
      <rect>
       <x>80</x>
       <y>50</y>
-      <width>121</width>
+      <width>51</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>OpenImage1</string>
+     <string>Open</string>
     </property>
    </widget>
    <widget class="QPushButton" name="Compare">
@@ -43,9 +43,9 @@
    <widget class="QLabel" name="pathLeft">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>140</x>
       <y>60</y>
-      <width>241</width>
+      <width>331</width>
       <height>31</height>
      </rect>
     </property>
@@ -56,9 +56,9 @@
    <widget class="QLabel" name="pathRight">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>600</x>
       <y>60</y>
-      <width>261</width>
+      <width>341</width>
       <height>31</height>
      </rect>
     </property>
@@ -116,19 +116,19 @@
     <property name="geometry">
      <rect>
       <x>530</x>
-      <y>50</y>
-      <width>131</width>
-      <height>51</height>
+      <y>60</y>
+      <width>51</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>OpenImage2</string>
+     <string>Open</string>
     </property>
    </widget>
    <widget class="QScrollArea" name="scrollAreaCompareResult">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>280</x>
       <y>470</y>
       <width>400</width>
       <height>320</height>
@@ -147,6 +147,19 @@
       </rect>
      </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="pixelDiff">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>560</y>
+      <width>201</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>像素误差和</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

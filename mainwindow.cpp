@@ -19,15 +19,15 @@ void MainWindow::on_OpenImageLeft_clicked()
     QString filename = QFileDialog::getOpenFileName(this,
         tr("选择图片"),
         "",
-        tr("Images(*.png *.bmp *.jpg *.tif *.GIF)"));
+        tr(supported_image_exts.c_str()));
     if (filename.isEmpty())
     {
         return;
     }
     else
     {
-        std::string str = filename.toStdString();  // 将filename转变为string类型；
-        image_left = cv::imread(str);
+        std::string str = filename.toStdString();
+        image_left = imk::loadImage(str);
         cv::cvtColor(image_left, image_left, cv::COLOR_BGR2RGB);
         cv::resize(image_left, image_left, cv::Size(300, 300));
         QImage img = QImage((const unsigned char*)(image_left.data), image_left.cols, image_left.rows, QImage::Format_RGB888);
@@ -45,15 +45,15 @@ void MainWindow::on_OpenImageRight_clicked()
     QString filename = QFileDialog::getOpenFileName(this,
         tr("选择图片"),
         "",
-        tr("Images(*.png *.bmp *.jpg *.tif *.GIF)"));
+        tr(supported_image_exts.c_str()));
     if (filename.isEmpty())
     {
         return;
     }
     else
     {
-        std::string str = filename.toStdString();  // 将filename转变为string类型；
-        image_right = cv::imread(str);
+        std::string str = filename.toStdString();
+        image_right = imk::loadImage(str);
         cv::cvtColor(image_right, image_right, cv::COLOR_BGR2RGB);
         cv::resize(image_right, image_right, cv::Size(300, 300));
         QImage img = QImage((const unsigned char*)(image_right.data), image_right.cols, image_right.rows, QImage::Format_RGB888);
@@ -77,8 +77,8 @@ void MainWindow::on_Compare_clicked()
     if (!image_left.empty() && !image_right.empty())
     {
         cv::absdiff(image_left, image_right, image_compare);
-        cv::Scalar sum_pixel = cv::sum(image_compare);
-        int sum = sum_pixel.val[0] + sum_pixel.val[1] + sum_pixel.val[2] + sum_pixel.val[3];
+        cv::Scalar pixel_diff = cv::sum(image_compare);
+        int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
         //cv::setNumThreads(1);
         QImage::Format format = QImage::Format_RGB888;
         if (sum == 0) {
@@ -96,6 +96,9 @@ void MainWindow::on_Compare_clicked()
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
         ui->scrollAreaCompareResult->setWidget(label_compare);
+
+        std::string pixel_diff_text = "pixel diff sum:<br/> [" + std::to_string(int(pixel_diff.val[0])) + ", " + std::to_string(int(pixel_diff.val[1])) + ", " + std::to_string(int(pixel_diff.val[2])) + "]";
+        ui->pixelDiff->setText(QString::fromStdString(pixel_diff_text));
 
         return;
     }

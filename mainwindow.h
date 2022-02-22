@@ -39,6 +39,7 @@ private:
     QLabel* label_left;
     QLabel* label_right;
     QLabel* label_compare;
+    std::string supported_image_exts = "Images(*.png *.bmp *.jpg *.tif *.GIF *.NV21 *.NV12)";
 
 };
 #endif // MAINWINDOW_H
