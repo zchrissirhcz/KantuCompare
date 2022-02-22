@@ -17,7 +17,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_OpenImageLeft_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-        tr("选择图片"),
+        tr(supported_image_exts.c_str()),
         "",
         tr(supported_image_exts.c_str()));
     if (filename.isEmpty())
@@ -43,7 +43,7 @@ void MainWindow::on_OpenImageLeft_clicked()
 void MainWindow::on_OpenImageRight_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
-        tr("选择图片"),
+        tr(supported_image_exts.c_str()),
         "",
         tr(supported_image_exts.c_str()));
     if (filename.isEmpty())
@@ -97,8 +97,8 @@ void MainWindow::on_Compare_clicked()
         label_compare->resize(QSize(img.width(), img.height()));
         ui->scrollAreaCompareResult->setWidget(label_compare);
 
-        std::string pixel_diff_text = "pixel diff sum:<br/> [" + std::to_string(int(pixel_diff.val[0])) + ", " + std::to_string(int(pixel_diff.val[1])) + ", " + std::to_string(int(pixel_diff.val[2])) + "]";
-        ui->pixelDiff->setText(QString::fromStdString(pixel_diff_text));
+        std::string pixel_diff_text = "pixel diff sum: [" + std::string(pixel_diff.val[0]) + ", " + std::string(pixel_diff.val[1]) + ", " + std::string(pixel_diff.val[2]) + "]";
+        ui->pixelDiff->setText(pixel_diff_text);
 
         return;
     }
