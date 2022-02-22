@@ -31,7 +31,7 @@ private slots:
     void on_OpenImageLeft_clicked();
     void on_OpenImageRight_clicked();
     void on_Compare_clicked();
-
+    void on_toleranceSlider_valueChanged(int value);
 
 private:
     Ui::MainWindow* ui;

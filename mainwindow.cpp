@@ -8,6 +8,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("ImageCompare");
+
+    // 容差 滑块
+    ui->toleranceSlider->setRange(0, 255);//设置范围
+    ui->toleranceSlider->setValue(0); //设置当前值
+    int val = ui->toleranceSlider->value(); //获取值
+    ui->toleranceLabel->setText(QString::number(val));//把获取到的值显示在文本框
 }
 
 MainWindow::~MainWindow()
@@ -132,3 +138,9 @@ void MainWindow::on_Compare_clicked()
 
 }
 
+
+
+void MainWindow::on_toleranceSlider_valueChanged(int value)
+{
+    ui->toleranceLabel->setText(QString::number(value));
+}
