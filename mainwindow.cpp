@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle("ImageCompare");
 }
 
 MainWindow::~MainWindow()
@@ -82,7 +83,7 @@ void MainWindow::on_Compare_clicked()
         //cv::setNumThreads(1);
         QImage::Format format = QImage::Format_RGB888;
         if (sum == 0) {
-            cv:cvtColor(image_left, image_compare, cv::COLOR_BGR2GRAY);
+            cv::cvtColor(image_left, image_compare, cv::COLOR_BGR2GRAY);
             format = QImage::Format_Grayscale8;
         } else {
             int thresh = 100;
@@ -97,8 +98,11 @@ void MainWindow::on_Compare_clicked()
         label_compare->resize(QSize(img.width(), img.height()));
         ui->scrollAreaCompareResult->setWidget(label_compare);
 
-        std::string pixel_diff_text = "pixel diff sum: [" + std::string(pixel_diff.val[0]) + ", " + std::string(pixel_diff.val[1]) + ", " + std::string(pixel_diff.val[2]) + "]";
-        ui->pixelDiff->setText(pixel_diff_text);
+        std::string v0 = std::to_string((int)(pixel_diff.val[0]));
+        std::string v1 = std::to_string((int)(pixel_diff.val[1]));
+        std::string v2 = std::to_string((int)(pixel_diff.val[2]));
+        std::string pixel_diff_text = "pixel diff sum:<br/>[" + v0 + ", " + v1 + ", " + v2 + "]";
+        ui->pixelDiff->setText(QString::fromStdString(pixel_diff_text));
 
         return;
     }
