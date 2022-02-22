@@ -4,9 +4,9 @@
 #include <QMainWindow>
 
 
-#include<QGraphicsScene>
-#include<QGraphicsView>                   //graphicsview类
-#include<opencv2/imgproc/imgproc.hpp>
+#include <QGraphicsScene>
+#include <QGraphicsView>                   //graphicsview类
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>  //opencv申明
 #include <qfiledialog.h>                //getopenfilename 类申明

@@ -21,11 +21,22 @@ find_package(OpenCV REQUIRED)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
+
+
+
+add_library(image_compare_core STATIC
+    image_compare_core.hpp
+    image_compare_core.cpp
+)
+target_link_libraries(image_compare_core PUBLIC ${OpenCV_LIBS})
+
+
+
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -51,7 +62,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(ImageCompare PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${OpenCV_LIBS})
+target_link_libraries(ImageCompare PRIVATE Qt${QT_VERSION_MAJOR}::Widgets image_compare_core)
 
 set_target_properties(ImageCompare PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -64,3 +75,9 @@ set_target_properties(ImageCompare PROPERTIES
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(ImageCompare)
 endif()
+
+
+add_executable(testbed
+    testbed.cpp
+)
+target_link_libraries(testbed image_compare_core)
