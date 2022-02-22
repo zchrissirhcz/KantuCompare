@@ -79,8 +79,16 @@ void MainWindow::on_Compare_clicked()
     if (!image_left.empty() && !image_right.empty())
     {
         cv::absdiff(image_left, image_right, image_compare);
+        cv::Scalar sum_pixel = cv::sum(image_compare);
+        int sum = sum_pixel.val[0] + sum_pixel.val[1] + sum_pixel.val[2] + sum_pixel.val[3];
+        cv::setNumThreads(1);
+        QImage::Format format = QImage::Format_RGB888;
+        if (sum == 0) {
+            cv:cvtColor(image_left, image_compare, cv::COLOR_BGR2GRAY);
+            format = QImage::Format_Grayscale8;
+        }
 
-        QImage img = QImage((const unsigned char*)(image_compare.data), image_compare.cols, image_compare.rows, QImage::Format_RGB888);
+        QImage img = QImage((const unsigned char*)(image_compare.data), image_compare.cols, image_compare.rows, format);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));

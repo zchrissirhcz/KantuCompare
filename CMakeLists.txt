@@ -11,7 +11,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(OpenCV_DIR "D:/lib/opencv/4.5.5/build")
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+    set(OpenCV_DIR "D:/lib/opencv/4.5.5/build")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(OpenCV_DIR "/home/zz/artifacts/opencv/linux-x64/4.5.5/lib/cmake/opencv4")
+endif()
 find_package(OpenCV REQUIRED)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
