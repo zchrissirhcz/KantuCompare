@@ -48,6 +48,8 @@ void MainWindow::on_OpenImageLeft_clicked()
         ui->scrollAreaLeft->setWidget(label_left);
 
         ui->pathLeft->setText(filename);
+
+        compare_and_show_image();
     }
 }
 
@@ -74,12 +76,9 @@ void MainWindow::on_OpenImageRight_clicked()
         ui->scrollAreaRight->setWidget(label_right);
 
         ui->pathRight->setText(filename);
-    }
-}
 
-void MainWindow::on_Compare_clicked()
-{
-    compare_and_show_image();
+        compare_and_show_image();
+    }
 }
 
 void MainWindow::compare_and_show_image()
