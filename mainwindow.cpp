@@ -14,6 +14,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toleranceSlider->setValue(0); //设置当前值
     int val = ui->toleranceSlider->value(); //获取值
     ui->toleranceLabel->setText(QString::number(val));//把获取到的值显示在文本框
+
+    // 路径 可以让鼠标选择复制
+    ui->pathLeft->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    ui->pathRight->setTextInteractionFlags(Qt::TextSelectableByMouse);
 }
 
 MainWindow::~MainWindow()

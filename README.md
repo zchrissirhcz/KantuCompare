@@ -3,6 +3,14 @@
 Beyond Compare 图片比较功能的 Qt 简易实现。
 
 
+## Features
+- 显示差异图
+- 鼠标调节差异图阈值
+
+## TODOs
+- 显示像素差异值分布的直方图
+- 不同尺寸图像的处理
+
 ## References
 
 [利用Qt实现一个图片对比选择浏览器](https://blog.csdn.net/a15005784320/article/details/108151406)
