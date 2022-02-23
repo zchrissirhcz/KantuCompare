@@ -25,8 +25,8 @@ int main( int argc, char** argv ){
     
     /// Read image ( same size, same type )
     std::string load_prefix = "/home/zz/data";
-    std::string path1 = load_prefix + "/frontground.png";
-    std::string path2 = load_prefix + "/background.png";
+    std::string path1 = load_prefix + "/background.png";
+    std::string path2 = load_prefix + "/frontground.png";
     src1 = imread(path1);
     src2 = imread(path2);
     
@@ -42,7 +42,7 @@ int main( int argc, char** argv ){
     imshow( "Linear Blend", dst );
     imwrite( "girl_blending.jpg", dst );
 
-    int thresh = 100;
+    int thresh = 22;
 
     cv::Mat shadow = dst.clone();
     cv::Mat under = cv::Mat(src1.size(), src1.type(), cv::Scalar(255, 0, 0));
@@ -79,10 +79,16 @@ int main( int argc, char** argv ){
     //     }
     // }
     cv::Mat diff;
-    cv::Scalar below_color(0, 0, 255);
-    cv::Scalar above_color(255, 0, 0);
+    cv::Scalar below_color(220, 0, 0);
+    cv::Scalar above_color(0, 0, 220);
     imk::getDiffImage(src1, src2, diff, thresh, below_color, above_color);
     imshow( "diff", diff );
+
+    cv::Mat final;
+    alpha = 0.7;
+    beta = 0.3;
+    addWeighted( diff, alpha, dst, beta, 0.0, final);
+    imshow( "final", final );
     
     waitKey(0);
     return 0;

@@ -98,10 +98,16 @@ void MainWindow::compare_and_show_image()
         } else {
             cv::Scalar above_color(255-50, 0, 0);
             cv::Scalar below_color(0, 0, 255-50);
-            imk::getDiffImage(image_left, image_right, image_compare, toleranceThresh, below_color, above_color);
+            cv::Mat diff;
+            imk::getDiffImage(image_left, image_right, diff, toleranceThresh, below_color, above_color);
+
+            cv::Mat blend;
+            cv::addWeighted(image_left, 0.5, image_right, 0.5, 0.0, blend);
+
+            addWeighted( diff, 0.7, blend, 0.3, 0.0, image_compare);
         }
 
-        QImage img = QImage((const unsigned char*)(image_compare.data), image_compare.cols, image_compare.rows, format);
+        QImage img = QImage(image_compare.data, image_compare.cols, image_compare.rows, format);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
@@ -118,7 +124,7 @@ void MainWindow::compare_and_show_image()
     if (!image_left.empty())
     {
         image_compare = image_left.clone();
-        QImage img = QImage((const unsigned char*)(image_compare.data), image_compare.cols, image_compare.rows, QImage::Format_RGB888);
+        QImage img = QImage(image_compare.data, image_compare.cols, image_compare.rows, QImage::Format_RGB888);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
@@ -130,7 +136,7 @@ void MainWindow::compare_and_show_image()
     if (!image_right.empty())
     {
         image_compare = image_right.clone();
-        QImage img = QImage((const unsigned char*)(image_compare.data), image_compare.cols, image_compare.rows, QImage::Format_RGB888);
+        QImage img = QImage(image_compare.data, image_compare.cols, image_compare.rows, QImage::Format_RGB888);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
