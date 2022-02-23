@@ -75,7 +75,11 @@ void MainWindow::on_OpenImageRight_clicked()
 
 void MainWindow::on_Compare_clicked()
 {
+    compare_and_show_image();
+}
 
+void MainWindow::compare_and_show_image()
+{
     if (image_left.empty() && image_right.empty())
     {
         return;
@@ -92,10 +96,9 @@ void MainWindow::on_Compare_clicked()
             cv::cvtColor(image_left, image_compare, cv::COLOR_BGR2GRAY);
             format = QImage::Format_Grayscale8;
         } else {
-            int thresh = 100;
             cv::Scalar above_color(255-50, 0, 0);
             cv::Scalar below_color(0, 0, 255-50);
-            imk::getDiffImage(image_left, image_right, image_compare, thresh, below_color, above_color);
+            imk::getDiffImage(image_left, image_right, image_compare, toleranceThresh, below_color, above_color);
         }
 
         QImage img = QImage((const unsigned char*)(image_compare.data), image_compare.cols, image_compare.rows, format);
@@ -143,4 +146,6 @@ void MainWindow::on_Compare_clicked()
 void MainWindow::on_toleranceSlider_valueChanged(int value)
 {
     ui->toleranceLabel->setText(QString::number(value));
+    toleranceThresh = value;
+    compare_and_show_image();
 }
