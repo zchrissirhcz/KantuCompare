@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1162</width>
-    <height>1000</height>
+    <height>876</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="OpenImageLeft">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>20</y>
+      <x>10</x>
+      <y>30</y>
       <width>60</width>
       <height>30</height>
      </rect>
@@ -30,35 +30,47 @@
    <widget class="QLabel" name="pathLeft">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>20</y>
-      <width>431</width>
-      <height>31</height>
+      <x>70</x>
+      <y>30</y>
+      <width>490</width>
+      <height>30</height>
      </rect>
     </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
     <property name="text">
-     <string>path1</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="pathRight">
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>20</y>
-      <width>401</width>
-      <height>31</height>
+      <x>640</x>
+      <y>30</y>
+      <width>490</width>
+      <height>30</height>
      </rect>
     </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
     <property name="text">
-     <string>path2</string>
+     <string/>
     </property>
    </widget>
    <widget class="QScrollArea" name="scrollAreaLeft">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>10</x>
       <y>70</y>
-      <width>500</width>
+      <width>550</width>
       <height>350</height>
      </rect>
     </property>
@@ -70,7 +82,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>498</width>
+       <width>548</width>
        <height>348</height>
       </rect>
      </property>
@@ -79,9 +91,9 @@
    <widget class="QScrollArea" name="scrollAreaRight">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>579</x>
       <y>70</y>
-      <width>500</width>
+      <width>550</width>
       <height>350</height>
      </rect>
     </property>
@@ -93,7 +105,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>498</width>
+       <width>548</width>
        <height>348</height>
       </rect>
      </property>
@@ -102,8 +114,8 @@
    <widget class="QPushButton" name="OpenImageRight">
     <property name="geometry">
      <rect>
-      <x>620</x>
-      <y>20</y>
+      <x>580</x>
+      <y>30</y>
       <width>60</width>
       <height>30</height>
      </rect>
@@ -115,9 +127,9 @@
    <widget class="QScrollArea" name="scrollAreaCompareResult">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>470</y>
-      <width>500</width>
+      <x>310</x>
+      <y>440</y>
+      <width>550</width>
       <height>350</height>
      </rect>
     </property>
@@ -129,7 +141,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>498</width>
+       <width>548</width>
        <height>348</height>
       </rect>
      </property>
@@ -138,8 +150,8 @@
    <widget class="QLabel" name="pixelDiff">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>590</y>
+      <x>920</x>
+      <y>490</y>
       <width>201</width>
       <height>111</height>
      </rect>
@@ -151,8 +163,8 @@
    <widget class="QSlider" name="toleranceSlider">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>750</y>
+      <x>50</x>
+      <y>720</y>
       <width>231</width>
       <height>22</height>
      </rect>
@@ -164,8 +176,8 @@
    <widget class="QLabel" name="toleranceLabel">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>700</y>
+      <x>120</x>
+      <y>670</y>
       <width>40</width>
       <height>40</height>
      </rect>
@@ -177,8 +189,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>700</y>
+      <x>50</x>
+      <y>670</y>
       <width>40</width>
       <height>40</height>
      </rect>
@@ -194,7 +206,7 @@
      <x>0</x>
      <y>0</y>
      <width>1162</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
