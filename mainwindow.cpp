@@ -25,6 +25,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QImage QImageFromMat(const cv::Mat& mat)
+{
+    // https://blog.51cto.com/u_15064638/4107835  这 step 略坑， 不填step会导致可能歪斜。。
+    return QImage(mat.data, mat.cols, mat.rows, mat.step1(), QImage::Format_RGB888);
+}
+
+void autoResize(cv::Mat& image, QScrollArea* scrollArea)
+{
+    // TODO: 不要对原图做resize。这样会导致 compare 结果很怪异。
+    // 应当保持原图， 但是对 QImage 做 resize。
+    // 参考：https://blog.csdn.net/u013165921/article/details/79380638
+
+    //cv::resize(image, image, cv::Size(300, 300));
+    double width_scale = image.cols * 1.0 / (scrollArea->width() * 0.9);
+    double height_scale = image.rows * 1.0 / (scrollArea->height() * 0.9);
+    double scale = std::max(width_scale, height_scale);
+    //cv::Size dsize = image.size() / scale;
+    cv::resize(image, image, cv::Size(0, 0), 1.0/scale, 1.0/scale, cv::INTER_LINEAR);
+}
+
 void MainWindow::on_OpenImageLeft_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
@@ -40,8 +60,8 @@ void MainWindow::on_OpenImageLeft_clicked()
         std::string str = filename.toStdString();
         image_left = imk::loadImage(str);
         cv::cvtColor(image_left, image_left, cv::COLOR_BGR2RGB);
-        cv::resize(image_left, image_left, cv::Size(300, 300));
-        QImage img = QImage((const unsigned char*)(image_left.data), image_left.cols, image_left.rows, QImage::Format_RGB888);
+        autoResize(image_left, ui->scrollAreaLeft);
+        QImage img = QImageFromMat(image_left);
         label_left = new QLabel();
         label_left->setPixmap(QPixmap::fromImage(img));
         label_left->resize(QSize(img.width(), img.height()));
@@ -68,8 +88,8 @@ void MainWindow::on_OpenImageRight_clicked()
         std::string str = filename.toStdString();
         image_right = imk::loadImage(str);
         cv::cvtColor(image_right, image_right, cv::COLOR_BGR2RGB);
-        cv::resize(image_right, image_right, cv::Size(300, 300));
-        QImage img = QImage((const unsigned char*)(image_right.data), image_right.cols, image_right.rows, QImage::Format_RGB888);
+        autoResize(image_right, ui->scrollAreaRight);
+        QImage img = QImageFromMat(image_right);
         label_right = new QLabel();
         label_right->setPixmap(QPixmap::fromImage(img));
         label_right->resize(QSize(img.width(), img.height()));
@@ -90,7 +110,48 @@ void MainWindow::compare_and_show_image()
 
     if (!image_left.empty() && !image_right.empty())
     {
-        cv::absdiff(image_left, image_right, image_compare);
+        cv::Mat left_image_ref;
+        cv::Mat right_image_ref;
+        if (image_left.size() != image_right.size())
+        {
+            cv::Size big_size;
+            big_size.height = std::max(image_left.size().height, image_right.size().height);
+            big_size.width = std::max(image_left.size().width, image_right.size().width);
+
+            cv::Mat image_left_big(big_size, CV_8UC3, cv::Scalar(0));
+            cv::Mat image_right_big(big_size, CV_8UC3, cv::Scalar(0));
+            for (int i = 0; i < image_left.rows; i++)
+            {
+                for (int j = 0; j < image_left.cols; j++)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        image_left_big.ptr(i, j)[k] = image_left.ptr(i, j)[k];
+                    }
+                }
+            }
+
+            for (int i = 0; i < image_right.rows; i++)
+            {
+                for (int j = 0; j < image_right.cols; j++)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        image_right_big.ptr(i, j)[k] = image_right.ptr(i, j)[k];
+                    }
+                }
+            }
+
+            left_image_ref = image_left_big;
+            right_image_ref = image_right_big;
+        }
+        else  // size equal
+        {
+            left_image_ref = image_left;
+            right_image_ref = image_right;
+        }
+
+        cv::absdiff(left_image_ref, right_image_ref, image_compare);
         cv::Scalar pixel_diff = cv::sum(image_compare);
         int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
         //cv::setNumThreads(1);
@@ -102,15 +163,15 @@ void MainWindow::compare_and_show_image()
             cv::Scalar above_color(255-50, 0, 0);
             cv::Scalar below_color(0, 0, 255-50);
             cv::Mat diff;
-            imk::getDiffImage(image_left, image_right, diff, toleranceThresh, below_color, above_color);
+            imk::getDiffImage(left_image_ref, right_image_ref, diff, toleranceThresh, below_color, above_color);
 
             cv::Mat blend;
-            cv::addWeighted(image_left, 0.5, image_right, 0.5, 0.0, blend);
+            cv::addWeighted(left_image_ref, 0.5, right_image_ref, 0.5, 0.0, blend);
 
             addWeighted( diff, 0.7, blend, 0.3, 0.0, image_compare);
         }
 
-        QImage img = QImage(image_compare.data, image_compare.cols, image_compare.rows, format);
+        QImage img = QImageFromMat(image_compare);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
@@ -127,7 +188,7 @@ void MainWindow::compare_and_show_image()
     if (!image_left.empty())
     {
         image_compare = image_left.clone();
-        QImage img = QImage(image_compare.data, image_compare.cols, image_compare.rows, QImage::Format_RGB888);
+        QImage img = QImageFromMat(image_compare);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
@@ -139,7 +200,7 @@ void MainWindow::compare_and_show_image()
     if (!image_right.empty())
     {
         image_compare = image_right.clone();
-        QImage img = QImage(image_compare.data, image_compare.cols, image_compare.rows, QImage::Format_RGB888);
+        QImage img = QImageFromMat(image_compare);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
