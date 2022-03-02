@@ -163,11 +163,21 @@ int test_diff_hist()
     return 0;
 }
 
+void save_roi_image()
+{
+    std::string load_prefix = "/home/zz/data";
+    std::string path1 = load_prefix + "/1920x1080.png";
+    cv::Mat image = cv::imread(path1);
+    cv::Rect rect(0, 0, 1920/2, 1080/2);
+    cv::Mat roi = image(rect);
+    cv::imwrite("/home/zz/data/1920x1080_half.png", roi);
+}
+
 int main()
 {
-
     //test_tolerance();
     test_diff_hist();
+    //save_roi_image();
 
     return 0;
 }

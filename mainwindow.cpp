@@ -139,8 +139,8 @@ void MainWindow::compare_and_show_image()
             big_size.height = std::max(image_left.size().height, image_right.size().height);
             big_size.width = std::max(image_left.size().width, image_right.size().width);
 
-            cv::Mat image_left_big(big_size, CV_8UC3, cv::Scalar(0));
-            cv::Mat image_right_big(big_size, CV_8UC3, cv::Scalar(0));
+            cv::Mat image_left_big(big_size, image_left.type(), cv::Scalar(0));
+            cv::Mat image_right_big(big_size, image_right.type(), cv::Scalar(0));
             for (int i = 0; i < image_left.rows; i++)
             {
                 for (int j = 0; j < image_left.cols; j++)
@@ -187,9 +187,25 @@ void MainWindow::compare_and_show_image()
         //cv::setNumThreads(1);
         QImage::Format format = QImage::Format_RGB888;
         if (sum == 0) {
-            //TODO: if the left and right image is differnt size, but same in the overlaped region, we should not use gray image!
-            cv::cvtColor(diff_image_left, diff_image_compare, cv::COLOR_BGR2GRAY);
-            format = QImage::Format_Grayscale8;
+            // if the left and right image is differnt size, but same in the overlaped region, we compute the gray image, but assign to RGB pixels
+            cv::Size diff_size = diff_image_compare.size();
+            for (int i = 0; i < diff_size.height; i++)
+            {
+                for (int j = 0; j < diff_size.width; j++)
+                {
+                    float R2Y = 0.299;
+                    float G2Y = 0.587;
+                    float B2Y = 0.114;
+                    int B = diff_image_left.ptr(i, j)[0];
+                    int G = diff_image_left.ptr(i, j)[1];
+                    int R = diff_image_left.ptr(i, j)[2];
+                    int gray = cv::saturate_cast<uchar>(R2Y * R + G2Y * G + B2Y * B);
+
+                    diff_image_compare.ptr(i, j)[0] = gray;
+                    diff_image_compare.ptr(i, j)[1] = gray;
+                    diff_image_compare.ptr(i, j)[2] = gray;
+                }
+            }
         }
         else
         {
