@@ -31,35 +31,55 @@ QImage QImageFromMat(const cv::Mat& mat)
     return QImage(mat.data, mat.cols, mat.rows, mat.step1(), QImage::Format_RGB888);
 }
 
-void autoSize(QLabel* imgLabel, QScrollArea* scrollArea) // 自适应窗口
+// TODO: 改为 MainWindow 成员函数， 调整3个区域的大小
+// autoSize(label_left, ui->scrollAreaLeft);
+//void MainWindow::autoSize(QLabel* imgLabel, QScrollArea* scrollArea) // 自适应窗口
+void MainWindow::autoSize(QLabel* imgLabel)
 {
-    QImage Img;
-    double ImgRatio = 1.0 * imgLabel->pixmap()->toImage().width() / imgLabel->pixmap()->toImage().height();     // 图像宽高比
-    double WinRatio = 1.0 * (scrollArea->width() - 2) / (scrollArea->height() - 2); // 窗口宽高比
-    if (ImgRatio > WinRatio)        // 图像宽高比大于图像宽高比
-    {
-        Img = imgLabel->pixmap()->toImage().scaled((scrollArea->width() - 2), (scrollArea->width() - 2) / ImgRatio, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    }
-    else                            // 图像宽高比小于等于图像宽高比
-    {
-        Img = imgLabel->pixmap()->toImage().scaled((scrollArea->height() - 2) * ImgRatio, (scrollArea->height() - 2), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    }
-    imgLabel->setPixmap(QPixmap::fromImage(Img));   // 显示图像
-    imgLabel->resize(Img.width(), Img.height());
-}
+    //double imgRatio = 1.0 * imgLabel->pixmap()->toImage().width() / imgLabel->pixmap()->toImage().height();     // 图像宽高比
+    int max_image_width = std::max(image_left.size().width, image_right.size().width);
+    int max_image_height = std::max(image_left.size().height, image_right.size().height);
+    double imgRatio = 1.0 * max_image_width / max_image_height;
+    cv::Size max_image_size;
+    max_image_size.width = max_image_width;
+    max_image_size.height = max_image_height;
 
-void autoResize(cv::Mat& image, QScrollArea* scrollArea)
-{
-    // TODO: 不要对原图做resize。这样会导致 compare 结果很怪异。
-    // 应当保持原图， 但是对 QImage 做 resize。
-    // 参考：https://blog.csdn.net/u013165921/article/details/79380638
+    // assume three scrollArea have same size
+    int win_width = ui->scrollAreaLeft->width() - 2;
+    int win_height = ui->scrollAreaLeft->height() - 2;
+    double winRatio = 1.0 * win_width / win_height; // 窗口宽高比
 
-    //cv::resize(image, image, cv::Size(300, 300));
-    double width_scale = image.cols * 1.0 / (scrollArea->width() * 0.9);
-    double height_scale = image.rows * 1.0 / (scrollArea->height() * 0.9);
-    double scale = std::max(width_scale, height_scale);
-    //cv::Size dsize = image.size() / scale;
-    cv::resize(image, image, cv::Size(0, 0), 1.0/scale, 1.0/scale, cv::INTER_LINEAR);
+    fprintf(stderr, "imgRatio = %lf, winRatio = %lf\n", imgRatio, winRatio);
+
+    cv::Size scaled_max_image_size;
+
+    QImage img;
+    if (imgRatio > winRatio)        // 图像宽高比大于窗口宽高比
+    {
+        //img = imgLabel->pixmap()->toImage().scaled(win_width, win_width / imgRatio, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        scaled_max_image_size.width = win_width;
+        scaled_max_image_size.height = win_width / imgRatio;
+    }
+    else                            // 图像宽高比小于等于窗口宽高比
+    {
+        //img = imgLabel->pixmap()->toImage().scaled(win_height * imgRatio, win_height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        scaled_max_image_size.width = win_height * imgRatio;
+        scaled_max_image_size.height = win_height;
+    }
+
+    cv::Size cur_image_size;
+    cur_image_size.width = imgLabel->pixmap()->toImage().width();
+    cur_image_size.height = imgLabel->pixmap()->toImage().height();
+    double ratio = scaled_max_image_size.width * 1.0 / max_image_width;
+    //cv::Size scaled_cur_image_size = cur_image_size * ratio;
+    cv::Size scaled_cur_image_size;
+    scaled_cur_image_size.height = cur_image_size.height * ratio;
+    scaled_cur_image_size.width = cur_image_size.width * ratio;
+    img = imgLabel->pixmap()->toImage().scaled(scaled_cur_image_size.width, scaled_cur_image_size.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+
+    imgLabel->setPixmap(QPixmap::fromImage(img));   // 显示图像
+    imgLabel->resize(img.width(), img.height());
 }
 
 void MainWindow::on_OpenImageLeft_clicked()
@@ -77,12 +97,11 @@ void MainWindow::on_OpenImageLeft_clicked()
         std::string str = filename.toStdString();
         image_left = imk::loadImage(str);
         cv::cvtColor(image_left, image_left, cv::COLOR_BGR2RGB);
-        //autoResize(image_left, ui->scrollAreaLeft);
         QImage img = QImageFromMat(image_left);
         label_left = new QLabel();
         label_left->setPixmap(QPixmap::fromImage(img));
         label_left->resize(QSize(img.width(), img.height()));
-        autoSize(label_left, ui->scrollAreaLeft);
+        autoSize(label_left);
         ui->scrollAreaLeft->setWidget(label_left);
 
         ui->pathLeft->setText(filename);
@@ -106,12 +125,11 @@ void MainWindow::on_OpenImageRight_clicked()
         std::string str = filename.toStdString();
         image_right = imk::loadImage(str);
         cv::cvtColor(image_right, image_right, cv::COLOR_BGR2RGB);
-        //autoResize(image_right, ui->scrollAreaRight);
         QImage img = QImageFromMat(image_right);
         label_right = new QLabel();
         label_right->setPixmap(QPixmap::fromImage(img));
         label_right->resize(QSize(img.width(), img.height()));
-        autoSize(label_right, ui->scrollAreaRight);
+        autoSize(label_right);
         ui->scrollAreaRight->setWidget(label_right);
 
         ui->pathRight->setText(filename);
@@ -224,7 +242,7 @@ void MainWindow::compare_and_show_image()
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
-        autoSize(label_compare, ui->scrollAreaCompareResult);
+        autoSize(label_compare);
         ui->scrollAreaCompareResult->setWidget(label_compare);
 
         std::string v0 = std::to_string((int)(pixel_diff.val[0]));
@@ -250,7 +268,7 @@ void MainWindow::compare_and_show_image()
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
-        autoSize(label_compare, ui->scrollAreaCompareResult);
+        autoSize(label_compare);
         ui->scrollAreaCompareResult->setWidget(label_compare);
 
         return;

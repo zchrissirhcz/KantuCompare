@@ -42,6 +42,8 @@ private:
     int toleranceThresh = 10;
 
     void compare_and_show_image();
+    //void autoSize(QLabel* imgLabel, QScrollArea* scrollArea);
+    void autoSize(QLabel* imgLabel);
 
 };
 #endif // MAINWINDOW_H
