@@ -31,6 +31,23 @@ QImage QImageFromMat(const cv::Mat& mat)
     return QImage(mat.data, mat.cols, mat.rows, mat.step1(), QImage::Format_RGB888);
 }
 
+void autoSize(QLabel* imgLabel, QScrollArea* scrollArea) // 自适应窗口
+{
+    QImage Img;
+    double ImgRatio = 1.0 * imgLabel->pixmap()->toImage().width() / imgLabel->pixmap()->toImage().height();     // 图像宽高比
+    double WinRatio = 1.0 * (scrollArea->width() - 2) / (scrollArea->height() - 2); // 窗口宽高比
+    if (ImgRatio > WinRatio)        // 图像宽高比大于图像宽高比
+    {
+        Img = imgLabel->pixmap()->toImage().scaled((scrollArea->width() - 2), (scrollArea->width() - 2) / ImgRatio, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    else                            // 图像宽高比小于等于图像宽高比
+    {
+        Img = imgLabel->pixmap()->toImage().scaled((scrollArea->height() - 2) * ImgRatio, (scrollArea->height() - 2), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+    imgLabel->setPixmap(QPixmap::fromImage(Img));   // 显示图像
+    imgLabel->resize(Img.width(), Img.height());
+}
+
 void autoResize(cv::Mat& image, QScrollArea* scrollArea)
 {
     // TODO: 不要对原图做resize。这样会导致 compare 结果很怪异。
@@ -60,11 +77,12 @@ void MainWindow::on_OpenImageLeft_clicked()
         std::string str = filename.toStdString();
         image_left = imk::loadImage(str);
         cv::cvtColor(image_left, image_left, cv::COLOR_BGR2RGB);
-        autoResize(image_left, ui->scrollAreaLeft);
+        //autoResize(image_left, ui->scrollAreaLeft);
         QImage img = QImageFromMat(image_left);
         label_left = new QLabel();
         label_left->setPixmap(QPixmap::fromImage(img));
         label_left->resize(QSize(img.width(), img.height()));
+        autoSize(label_left, ui->scrollAreaLeft);
         ui->scrollAreaLeft->setWidget(label_left);
 
         ui->pathLeft->setText(filename);
@@ -88,11 +106,12 @@ void MainWindow::on_OpenImageRight_clicked()
         std::string str = filename.toStdString();
         image_right = imk::loadImage(str);
         cv::cvtColor(image_right, image_right, cv::COLOR_BGR2RGB);
-        autoResize(image_right, ui->scrollAreaRight);
+        //autoResize(image_right, ui->scrollAreaRight);
         QImage img = QImageFromMat(image_right);
         label_right = new QLabel();
         label_right->setPixmap(QPixmap::fromImage(img));
         label_right->resize(QSize(img.width(), img.height()));
+        autoSize(label_right, ui->scrollAreaRight);
         ui->scrollAreaRight->setWidget(label_right);
 
         ui->pathRight->setText(filename);
@@ -175,6 +194,7 @@ void MainWindow::compare_and_show_image()
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
+        autoSize(label_compare, ui->scrollAreaCompareResult);
         ui->scrollAreaCompareResult->setWidget(label_compare);
 
         std::string v0 = std::to_string((int)(pixel_diff.val[0]));
@@ -185,30 +205,26 @@ void MainWindow::compare_and_show_image()
 
         return;
     }
-    if (!image_left.empty())
+    if (!image_left.empty() || !image_right.empty())
     {
-        image_compare = image_left.clone();
+        if (!image_left.empty())
+        {
+            image_compare = image_left.clone();
+        }
+        else // !image_right.empty()
+        {
+            image_compare = image_right.clone();
+        }
+
         QImage img = QImageFromMat(image_compare);
         label_compare = new QLabel();
         label_compare->setPixmap(QPixmap::fromImage(img));
         label_compare->resize(QSize(img.width(), img.height()));
+        autoSize(label_compare, ui->scrollAreaCompareResult);
         ui->scrollAreaCompareResult->setWidget(label_compare);
 
         return;
     }
-
-    if (!image_right.empty())
-    {
-        image_compare = image_right.clone();
-        QImage img = QImageFromMat(image_compare);
-        label_compare = new QLabel();
-        label_compare->setPixmap(QPixmap::fromImage(img));
-        label_compare->resize(QSize(img.width(), img.height()));
-        ui->scrollAreaCompareResult->setWidget(label_compare);
-
-        return;
-    }
-
 }
 
 
