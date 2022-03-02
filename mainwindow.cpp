@@ -129,8 +129,10 @@ void MainWindow::compare_and_show_image()
 
     if (!image_left.empty() && !image_right.empty())
     {
-        cv::Mat left_image_ref;
-        cv::Mat right_image_ref;
+        cv::Scalar pixel_diff;
+        cv::Mat diff_image_left;
+        cv::Mat diff_image_right;
+        cv::Mat diff_image_compare;
         if (image_left.size() != image_right.size())
         {
             cv::Size big_size;
@@ -161,33 +163,45 @@ void MainWindow::compare_and_show_image()
                 }
             }
 
-            left_image_ref = image_left_big;
-            right_image_ref = image_right_big;
+            cv::addWeighted(image_left_big, 1.0, image_right_big, 1.0, 0.0, image_compare);
+
+            const int roi_width = std::min(image_left.size().width, image_right.size().width);
+            const int roi_height = std::min(image_left.size().height, image_right.size().height);
+            cv::Rect rect(0, 0, roi_width, roi_height);
+
+            diff_image_left = image_left(rect);
+            diff_image_right = image_right(rect);
+            diff_image_compare = image_compare(rect);
         }
         else  // size equal
         {
-            left_image_ref = image_left;
-            right_image_ref = image_right;
+            diff_image_left = image_left;
+            diff_image_right = image_right;
+            image_compare.create(image_left.size(), image_left.type());
+            diff_image_compare = image_compare;
         }
 
-        cv::absdiff(left_image_ref, right_image_ref, image_compare);
-        cv::Scalar pixel_diff = cv::sum(image_compare);
+        cv::absdiff(diff_image_left, diff_image_right, diff_image_compare);
+        pixel_diff = cv::sum(diff_image_compare);
         int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
         //cv::setNumThreads(1);
         QImage::Format format = QImage::Format_RGB888;
         if (sum == 0) {
-            cv::cvtColor(image_left, image_compare, cv::COLOR_BGR2GRAY);
+            //TODO: if the left and right image is differnt size, but same in the overlaped region, we should not use gray image!
+            cv::cvtColor(diff_image_left, diff_image_compare, cv::COLOR_BGR2GRAY);
             format = QImage::Format_Grayscale8;
-        } else {
+        }
+        else
+        {
             cv::Scalar above_color(255-50, 0, 0);
             cv::Scalar below_color(0, 0, 255-50);
             cv::Mat diff;
-            imk::getDiffImage(left_image_ref, right_image_ref, diff, toleranceThresh, below_color, above_color);
+            imk::getDiffImage(diff_image_left, diff_image_right, diff, toleranceThresh, below_color, above_color);
 
             cv::Mat blend;
-            cv::addWeighted(left_image_ref, 0.5, right_image_ref, 0.5, 0.0, blend);
+            cv::addWeighted(diff_image_left, 0.5, diff_image_right, 0.5, 0.0, blend);
 
-            addWeighted( diff, 0.7, blend, 0.3, 0.0, image_compare);
+            addWeighted( diff, 0.7, blend, 0.3, 0.0, diff_image_compare);
         }
 
         QImage img = QImageFromMat(image_compare);
