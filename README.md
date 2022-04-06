@@ -7,6 +7,23 @@ Beyond Compare 的个人重制版。
   - 显示差异图
   - 鼠标调节差异图阈值
 
+## Build
+假定你熟悉基于 CMake 的 C/C++ 构建（不依赖 qmake）
+
+- 安装 Qt 环境
+    - Qt 库： 必选
+    - QtCreator: 可选
+- 安装 OpenCV
+    - 4.5.5
+- 开始编译
+    ```
+    mkdir build
+    cd build
+    cmake ..
+    make -j
+    ./ImageCompare  # 以后会改名叫 SmallCompare
+    ```
+
 ## 缘由
 实现和优化图像处理函数时比较结果图差异， 发现 Beyond Compare 加载的图像多次出现结果不对情况，例如要显示[assets/nvidia_logo.bmp](assets/nvidia_logo.bmp):
 
