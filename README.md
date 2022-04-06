@@ -1,15 +1,29 @@
-# Image Compare
+# Small Compare
 
-Beyond Compare 图片比较功能的 Qt 简易实现。
-
+Beyond Compare 的个人重制版。
 
 ## Features
-- 显示差异图
-- 鼠标调节差异图阈值
+- 图片比较
+  - 显示差异图
+  - 鼠标调节差异图阈值
+
+## 缘由
+实现和优化图像处理函数时比较结果图差异， 发现 Beyond Compare 加载的图像多次出现结果不对情况，例如要显示[assets/nvidia_logo.bmp](assets/nvidia_logo.bmp):
+
+![](assets/nvidia_logo.bmp)
+
+而 Beyond Compare 显示为棋盘格状的错误结果，进而导致和 [assets/nvidia_logo.png](assets/nvidia_logo.png) 的差异：
+![](assets/beyond_compare_show_image.png)
+
+而实际上两张图的像素并无差异（Small Compare比较结果， 基于 OpenCV 4.5 的图像编解码）:
+![](assets/small_compare_show_image.png)
 
 ## TODOs
-- 显示像素差异值分布的直方图
-- 不同尺寸图像的处理
+- 图片比较
+  - 显示像素差异值分布的直方图
+  - 不同尺寸图像的处理
+- 文本比较
+
 
 ## References
 
