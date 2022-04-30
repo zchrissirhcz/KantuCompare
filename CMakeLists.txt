@@ -14,15 +14,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(overlook.cmake)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  set(OpenCV_DIR "D:/lib/opencv/4.5.5/build")
+  #set(OpenCV_DIR "D:/lib/opencv/4.5.5/build")
+  set(OpenCV_DIR "D:/artifacts/opencv/4.5.5/build")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
   set(OpenCV_DIR "/home/zz/artifacts/opencv/linux-x64/4.5.5/lib/cmake/opencv4")
 endif()
 find_package(OpenCV REQUIRED)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  set(Qt5_DIR "D:/soft/Qt/Qt5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5")
-  set(QT_DIR "D:/soft/Qt/Qt5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5")
+#   set(Qt5_DIR "D:/soft/Qt/Qt5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5")
+#   set(QT_DIR "D:/soft/Qt/Qt5.14.2/5.14.2/msvc2017_64/lib/cmake/Qt5")
+  set(QT_INSTALL_DIR "D:/artifacts/Qt/Qt5.14.0/5.14.0/msvc2017_64")
+  set(Qt5_DIR "${QT_INSTALL_DIR}/lib/cmake/Qt5")
+  set(QT_DIR "${Qt5_DIR}")
 endif()
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
@@ -73,3 +77,7 @@ add_executable(testbed
   testbed.cpp
 )
 target_link_libraries(testbed image_compare_core)
+
+# On windows, have to manually put those two directories into PATH:
+message(STATUS ">>> OpenCV DLL path: ${OpenCV_DIR}/${OpenCV_ARCH}/${OpenCV_RUNTIME}/bin")
+message(STATUS ">>> QT DLL path: ${QT_INSTALL_DIR}/bin")

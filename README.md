@@ -7,23 +7,6 @@ Beyond Compare 的个人重制版。
   - 显示差异图
   - 鼠标调节差异图阈值
 
-## Build
-假定你熟悉基于 CMake 的 C/C++ 构建（不依赖 qmake）
-
-- 安装 Qt 环境
-    - Qt 库： 必选
-    - QtCreator: 可选
-- 安装 OpenCV
-    - 4.5.5
-- 开始编译
-    ```
-    mkdir build
-    cd build
-    cmake ..
-    make -j
-    ./ImageCompare  # 以后会改名叫 SmallCompare
-    ```
-
 ## 缘由
 实现和优化图像处理函数时比较结果图差异， 发现 Beyond Compare 加载的图像多次出现结果不对情况，例如要显示[assets/nvidia_logo.bmp](assets/nvidia_logo.bmp):
 
@@ -34,6 +17,22 @@ Beyond Compare 的个人重制版。
 
 而实际上两张图的像素并无差异（Small Compare比较结果， 基于 OpenCV 4.5 的图像编解码）:
 ![](assets/small_compare_show_image.png)
+
+## Build
+假定你熟悉基于 CMake 的 C/C++ 构建（不依赖 qmake）
+
+- 安装 Qt 环境（Qt 库：必选；QtCreator: 可选）
+  - 以 VS2022 为例，安装 qt-opensource-windows-x86-5.14.0.exe，勾选 vs2017 x64 工具，安装得到 D:\artifacts\Qt\Qt5.14.0\5.14.0\msvc2017_64 目录）
+- 安装 OpenCV
+    - 4.5.5
+- 开始编译
+    ```
+    mkdir build
+    cd build
+    cmake ..
+    make -j
+    ./ImageCompare  # 以后会改名叫 SmallCompare
+    ```
 
 ## TODOs
 - 图片比较
