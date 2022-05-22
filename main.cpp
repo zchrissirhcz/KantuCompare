@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
 #include <opencv2/opencv.hpp>
+#include "tinyfiledialogs.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -83,9 +84,11 @@ static void ShowImageWindow(bool* p_open = NULL)
     GLuint texture = getTextureFromImage(image);
     cv::Size image_size = image.size();
 
-    ImGui::Begin(image_path.c_str());
-    ImGui::Text("Size: W=%d, H=%d", image_size.width, image_size.height);
-    ImGui::Image((void*)(uintptr_t)texture, ImVec2(image_size.width, image_size.height));
+    if (ImGui::Begin("image"))
+    {
+        ImGui::Text("Size: W=%d, H=%d   File: %s", image_size.width, image_size.height, image_path.c_str());
+        ImGui::Image((void*)(uintptr_t)texture, ImVec2(image_size.width, image_size.height));
+    }
     ImGui::End();
 }
 
