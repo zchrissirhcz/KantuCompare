@@ -76,6 +76,19 @@ static GLuint getTextureFromImage(const cv::Mat& image)
     return image_texture;
 }
 
+static void ShowImageWindow(bool* p_open = NULL)
+{
+    std::string image_path = "/Users/zz/data/1920x1080.jpg";
+    cv::Mat image = cv::imread(image_path);
+    GLuint texture = getTextureFromImage(image);
+    cv::Size image_size = image.size();
+
+    ImGui::Begin(image_path.c_str());
+    ImGui::Text("Size: W=%d, H=%d", image_size.width, image_size.height);
+    ImGui::Image((void*)(uintptr_t)texture, ImVec2(image_size.width, image_size.height));
+    ImGui::End();
+}
+
 int main(int, char**)
 {
     // Setup window
@@ -135,13 +148,7 @@ int main(int, char**)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         if (show_image_window)
-        {
-            cv::Mat image = cv::imread("/Users/zz/data/1920x1080.jpg");
-            GLuint texture = getTextureFromImage(image);
-            ImGui::Begin("image");
-            ImGui::Image((void*)(uintptr_t)texture, ImVec2(image.size().width, image.size().height));
-            ImGui::End();
-        }
+            ShowImageWindow(&show_image_window);
 
         // Rendering
         ImGui::Render();
