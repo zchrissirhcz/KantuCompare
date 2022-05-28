@@ -1,3 +1,4 @@
+#include <opencv2/core/hal/interface.h>
 #ifdef __MACH__
 #define GL_SILENCE_DEPRECATION
 #endif
@@ -16,6 +17,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "tinyfiledialogs.h"
+#include "imageutils.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -49,48 +51,148 @@ static const char* decide_gl_glsl_versions()
     return glsl_version;
 }
 
-static GLuint getTextureFromImage(const cv::Mat& image)
+const char* filepath = NULL;
+
+void* load_image(void *)
 {
-    cv::Mat im0 = image;
-    if (image.channels() == 3)
+    char const* lFilterPatterns[2] = { "*.jpg", "*.png" };
+    const char* lTheOpenFileName = tinyfd_openFileDialog(
+                        "let us read the password back",
+                        "",
+                        2,
+                        lFilterPatterns,
+                        NULL,
+                        0);
+    if (!lTheOpenFileName)
     {
-        cv::cvtColor(image, im0, cv::COLOR_BGR2BGRA);
+        tinyfd_messageBox(
+                "Error",
+                "Open file name is NULL",
+                "ok",
+                "error",
+                1);
+        return NULL;
+        
     }
+    else {
+        std::cout << "file choosed: " << lTheOpenFileName << std::endl;
+        filepath = lTheOpenFileName;
+    }
+    
+    return NULL;
+}
 
-    // Create a OpenGL texture identifier
-    GLuint image_texture;
-    glGenTextures(1, &image_texture);
-    glBindTexture(GL_TEXTURE_2D, image_texture);
 
-    // Setup filtering parameters for display
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+static void showImage(const char* windowName, bool *open, const RichImage& image)
+{
+    if (*open)
+    {
+        ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
 
-    // Upload pixels into texture
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.size().width, image.size().height, 0, GL_BGRA, GL_UNSIGNED_BYTE, im0.data);
+        GLuint texture = image.get_texture();
+        ImGui::SetNextWindowSizeConstraints(ImVec2(100, 100), ImVec2(INFINITY, INFINITY));
 
-    return image_texture;
+        if (ImGui::Begin(windowName, open))
+        {
+            ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
+            ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
+            ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+        }
+        ImGui::End();
+    }
 }
 
 static void ShowImageWindow(bool* p_open = NULL)
 {
-    std::string image_path = "/Users/zz/data/1920x1080.jpg";
-    cv::Mat image = cv::imread(image_path);
-    GLuint texture = getTextureFromImage(image);
-    cv::Size image_size = image.size();
+    static std::vector<RichImage> data;
+    static bool window2 = false;
+    static int  selectedItem = -1;
+    static int actualitem = -1;
+    static bool show_diff_image = false;
 
-    if (ImGui::Begin("image"))
+    ImGui::ShowMetricsWindow(&window2);
+    ImGui::SetNextWindowBgAlpha(0.5f); // Transparent background
+    if (ImGui::Begin("name", p_open))
     {
-        ImGui::Text("Size: W=%d, H=%d   File: %s", image_size.width, image_size.height, image_path.c_str());
-        ImGui::Image((void*)(uintptr_t)texture, ImVec2(image_size.width, image_size.height));
+        // Load Image
+        if (ImGui::Button("Load Image"))
+        {
+            load_image(NULL);
+            if (filepath != NULL)
+            {
+                data.push_back(RichImage());
+                cv::Mat mat = cv::imread(filepath); 
+                data.back().load_mat(mat);
+                data[data.size() - 1].set_name(filepath);
+                filepath = NULL;
+            }
+        }
+        for(int i = 0; i < data.size(); i++)
+        {
+            ImGui::PushID(i);
+            
+            if (ImGui::Selectable(data[i].get_name(), data[i].get_open()))
+            {
+                selectedItem = i;
+            }
+            
+            ImGui::PopID();
+            ImGui::Text("value: %s", *(data[i].get_open()) ? "true" : "false");
+        }
+        
+        // Display test image
+        static RichImage diff_image;
+        static int diff_thresh = 1;
+        ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255);
+
+        if (ImGui::Button("Compare"))
+        {
+            // TODO: get diff image with respect to size equal or not, and use diff_thresh
+            cv::Mat diff_mat(255, 255, CV_8UC3);
+            if (data.size()==2)
+            {
+                cv::Mat& mat1 = data[0].mat;
+                cv::Mat& mat2 = data[1].mat;
+                
+                cv::Size dsize(256, 256);
+
+                cv::Mat tmp1;
+                cv::resize(mat1, tmp1, dsize);
+                
+                cv::Mat tmp2;
+                cv::resize(mat2, tmp2, dsize);
+
+                cv::absdiff(tmp1, tmp2, diff_mat);
+            }
+            else
+            {
+                diff_mat = cv::Scalar(0, 0, 0);
+            }
+
+            if (diff_image.mat.empty())
+            {
+                diff_image.clear(); // free texture memory
+            }
+            diff_image.load_mat(diff_mat);
+            bool show_compare_image = true;
+            show_diff_image = true;
+        }
+
+        if (show_diff_image)
+        {
+            showImage("Diff Image", &show_diff_image, diff_image);
+        }
+
+        for(int i = 0; i < data.size(); i++)
+        {
+            ImGui::PushID(i);
+            showImage(data[i].get_name(), data[i].get_open(), data[i]);
+            ImGui::PopID();
+        }
     }
     ImGui::End();
 }
+
 
 int main(int, char**)
 {

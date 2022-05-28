@@ -38,6 +38,7 @@ add_executable(ImageCompare
   ${IMGUI_DIR}/imgui_tables.cpp
   ${IMGUI_DIR}/imgui_widgets.cpp
   ${IMGUI_DIR}/imgui_demo.cpp
+  tinyfiledialogs.c
 )
 target_link_libraries(ImageCompare
   glfw

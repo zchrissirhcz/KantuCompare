@@ -1,0 +1,8 @@
+Licenses for dependencies:
+
+1. Dear ImGui
+Copyright (c) 2014-2022 Omar Cornut, MIT License
+
+2. tinyfiledialogs
+- tinyfiledialogs.h, v3.8.8 [Apr 22, 2021] zlib licence
+- tinyfiledialogs.h, v3.8.8 [Apr 22, 2021] zlib licence
