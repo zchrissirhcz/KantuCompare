@@ -1,16 +1,10 @@
 #pragma once
 
-#define GL_SILENCE_DEPRECATION
-
 #include <opencv2/opencv.hpp>
 #include <GLFW/glfw3.h>
 #include <string>
 #include <sstream>
 #include <iostream>
-
-using namespace cv;
-using namespace std;
-
 
 static GLuint getTextureFromImage(const cv::Mat& image)
 {
@@ -46,7 +40,7 @@ public:
     GLuint texture;
     cv::Mat mat;
     bool open;
-    string name;
+    std::string name;
     
 public:
     RichImage(): texture(0), open(false) {}
@@ -64,7 +58,7 @@ public:
         }
         else
         {
-            cout << "We HAVE SOMETHING AT TEXTURE" << "\n";
+            std::cout << "We HAVE SOMETHING AT TEXTURE" << "\n";
         }
     }
 
@@ -80,7 +74,7 @@ public:
         } 
         
         if (change_color_order)
-            cv::cvtColor(frame, frame, COLOR_BGR2RGB);
+            cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
 
         // image must have same size
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -98,21 +92,6 @@ public:
     GLuint get_texture() const
     {
         return texture;
-    }
-
-    // this function could be omitted using the above function
-    // but we had to change the use of it ( the above)
-    cv::Mat* get_mat_direction()
-    {
-        return &mat;
-    }
-
-    void switch_open()
-    {
-        if (open)
-            open = false;
-        else
-            open = true;
     }
 
     bool* get_open()

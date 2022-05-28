@@ -46,4 +46,8 @@ target_link_libraries(ImageCompare
   ${OpenCV_LIBS}
 )
 
+if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  add_definitions(-DGL_SILENCE_DEPRECATION)
+endif()
+
 message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
