@@ -7,6 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # imgui
 set(IMGUI_DIR "$ENV{HOME}/work/imgui")
+#set(IMGUI_DIR "$ENV{HOME}/work/imgui-docking")
+#add_definitions(-DIMGUI_WITH_DOCKING)
 include_directories(
   ${IMGUI_DIR}
   ${IMGUI_DIR}/backends
@@ -30,6 +32,7 @@ set(OpenCV_DIR "/Users/zz/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
 find_package(OpenCV REQUIRED)
 
 add_executable(ImageCompare
+  imageutils.h
   main.cpp
   ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
   ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
@@ -38,7 +41,10 @@ add_executable(ImageCompare
   ${IMGUI_DIR}/imgui_tables.cpp
   ${IMGUI_DIR}/imgui_widgets.cpp
   ${IMGUI_DIR}/imgui_demo.cpp
+  tinyfiledialogs.h
   tinyfiledialogs.c
+  image_compare_core.hpp
+  image_compare_core.cpp
 )
 target_link_libraries(ImageCompare
   glfw

@@ -3,11 +3,10 @@
 Simple cross-platform (macOS, Linux, Windows) image comparison GUI tool.
 
 ## Usage
-Click "Load Image" button for image loading and displaying.
-Then do it again, to load another image.
-Then click "Compare" button to display the diff image.
+Choose two input images by click "Load Image1" and "Load Image2" buttons respectively, then the difference image appeared automatically.
+When the mouse drags the threshold slider, the difference image is automatically updated.
 
-Currently it resize the two input image to 256x256, then do the absdiff.
+![](snapshot.png)
 
 ## Dependencies
 - [Dear ImGui](https://github.com/ocornut/imgui) with [glfw](https://github.com/glfw/glfw) and OpenGL backends

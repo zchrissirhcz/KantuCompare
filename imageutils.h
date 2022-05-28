@@ -3,8 +3,6 @@
 #include <opencv2/opencv.hpp>
 #include <GLFW/glfw3.h>
 #include <string>
-#include <sstream>
-#include <iostream>
 
 static GLuint getTextureFromImage(const cv::Mat& image)
 {
@@ -52,13 +50,17 @@ public:
 
         if (!texture)
         {
-            //open = true;
+            open = true;
             mat = frame; // maybe i should copy that frame (clone it)
             texture = getTextureFromImage(mat);
         }
         else
         {
-            std::cout << "We HAVE SOMETHING AT TEXTURE" << "\n";
+            //printf("We HAVE SOMETHING AT TEXTURE\n");
+            clear();
+            open = true;
+            mat = frame;
+            texture = getTextureFromImage(mat);
         }
     }
 
