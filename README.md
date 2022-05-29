@@ -12,6 +12,10 @@ Load two images in "Image1" and "Image2" window respectively, then the diff imag
 - [OpenCV](https://github.com/opencv/opencv)
 - [CMake](https://cmake.org)
 
+## Remarks
+The initial implementation is based on Qt, and is not updated anymore, for the sake of license and law (for example, on the company's computer, a lawyer's letter is received when the QtCreator development environment is installed).
+You can switch to the [Qt branch](https://github.com/zchrissirhcz/small-compare/tree/qt) to view the source code.
+
 ## References
 - https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 - https://github.com/aang7/Pix
