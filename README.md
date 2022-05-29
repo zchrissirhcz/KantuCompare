@@ -16,3 +16,4 @@ When the mouse drags the threshold slider, the difference image is automatically
 ## References
 - https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 - https://github.com/aang7/Pix
+- https://github.com/shangchiwu/advanced-image-processor

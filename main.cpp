@@ -21,7 +21,18 @@ public:
     
     void StartUp()
     {
-        glfwSetWindowTitle(window, u8"Simple Image Compare - 简易图像对比工具");
+        // Title
+        glfwSetWindowTitle(window, u8"Simple Image Compare Tool");
+
+        // Style
+        ImGui::StyleColorsDark();
+        ImGuiStyle &style = ImGui::GetStyle();
+        style.WindowRounding = 8.f;
+        style.ChildRounding = 6.f;
+        style.FrameRounding = 6.f;
+        style.PopupRounding = 6.f;
+        style.GrabRounding = 6.f;
+        style.ChildRounding = 6.f;
 
         // Load Fonts
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
@@ -77,10 +88,10 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
 {
     if (*open)
     {
-        ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
+        //ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
 
         GLuint texture = image.get_texture();
-        ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(INFINITY, INFINITY));
+        ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(INFINITY, INFINITY));
 
         if (ImGui::Begin(windowName, open))
         {
@@ -207,10 +218,11 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
 
         diff = diff_image_compare.clone();
-        printf("compare get pixel diff: (%d, %d, %d)\n", 
+        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n", 
             (int)pixel_diff.val[0],
             (int)pixel_diff.val[1],
-            (int)pixel_diff.val[2]
+            (int)pixel_diff.val[2],
+            toleranceThresh
         );
     }
 
