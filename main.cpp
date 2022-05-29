@@ -1,24 +1,26 @@
-#include <opencv2/core/types.hpp>
+#include <cstddef>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h>
+#include <stdio.h>
 #include <string>
-#include <opencv2/opencv.hpp>
-#include "tinyfiledialogs.h"
-#include "imageutils.h"
+#include <vector>
+
+#include "imgui_internal.h"
 
 #include "app_design.hpp"
+#include "tinyfiledialogs.h"
+#include "RichImage.hpp"
 #include "image_compare_core.hpp"
 
 class MyApp : public App<MyApp>
 {
 public:
-    void Update()
-    {
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+    MyApp() = default;
+    ~MyApp() = default;
 
-        if (show_image_window)
-            ShowImageWindow(&show_image_window);
-    }
-    
     void StartUp()
     {
         // Title
@@ -34,72 +36,113 @@ public:
         style.GrabRounding = 6.f;
         style.ChildRounding = 6.f;
 
-        // Load Fonts
+        // Load Fonts only on specific OS for portability
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
+#if __APPLE__
         std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
         ImGuiIO& io = ImGui::GetIO();
         ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
         io.Fonts->Build();
         IM_ASSERT(font != NULL);
+#endif
 
 #if IMGUI_WITH_DOCKING
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
     }
 
+    void Update()
+    {
+        ImGui::Begin("Image1", NULL);
+        {
+            float x = ImGui::GetCursorPosX();
+            ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
+            if (ImGui::Button("Load"))
+            {
+                LoadImage(imageLeft);
+                compare_condition_updated = true;
+            }
+            if (!imageLeft.mat.empty())
+            {
+                std::string text = cv::format("%s\nW=%d,H=%d", imageLeft.get_name(), imageLeft.mat.size().width, imageLeft.mat.size().height);
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(x); // align back to the left
+
+                ImGui::Text("%s", text.c_str());
+                std::string winname = std::string("Image1 - ") + imageLeft.get_name();
+                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
+            }
+        }
+        ImGui::End();
+
+        ImGui::Begin("Image2", NULL);
+        {
+            float x = ImGui::GetCursorPosX();
+            ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
+            if (ImGui::Button("Load"))
+            {
+                LoadImage(imageRight);
+                compare_condition_updated = true;
+            }
+            if (!imageRight.mat.empty())
+            {
+                std::string text = cv::format("%s\nW=%d,H=%d", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height);
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(x); // align back to the left
+
+                ImGui::Text("%s", text.c_str());
+                std::string winname = std::string("Image2 - ") + imageRight.get_name();
+                ShowImage(winname.c_str(), imageRight.get_open(), imageRight);
+            }
+        }
+        ImGui::End();
+
+        ImGui::Begin("DiffImage", NULL);
+        {
+            int old_diff_thresh = diff_thresh;
+            ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255);
+            if (diff_thresh != old_diff_thresh)
+            {
+                compare_condition_updated = true;
+                old_diff_thresh = diff_thresh;
+            }
+            ComputeDiffImage();
+            if (show_diff_image)
+            {
+                ShowImage("Diff Image", &show_diff_image, diff_image);
+            }
+        }
+        ImGui::End();
+    }
+
 private:
-    void ShowImageWindow(bool* p_open = NULL);
+    void UI_ChooseImageFile();
+    void LoadImage(RichImage& image);
+    void ComputeDiffImage();
     void ShowImage(const char* windowName, bool *open, const RichImage& image);
-    void LoadImage();
 
 private:
-    bool show_demo_window = false;
-    bool show_image_window = true;
+    bool window_open = true;
+    bool Check = true;
     const char* filepath = NULL;
+    RichImage imageLeft;
+    RichImage imageRight;
+    RichImage diff_image;
+    bool compare_condition_updated = false;
+    bool show_diff_image = false;
+    int diff_thresh = 1;
 };
-
-void MyApp::LoadImage()
-{
-    char const* lFilterPatterns[3] = { "*.jpg", "*.png", "*.jpeg" };
-    const char* lTheOpenFileName = tinyfd_openFileDialog(
-                        "let us read the password back",
-                        "",
-                        3,
-                        lFilterPatterns,
-                        NULL,
-                        0);
-    if (!lTheOpenFileName)
-    {
-        tinyfd_messageBox(
-                "Error",
-                "Open file name is NULL",
-                "ok",
-                "error",
-                1);
-    }
-    else
-    {
-        std::cout << "file choosed: " << lTheOpenFileName << std::endl;
-        filepath = lTheOpenFileName;
-    }
-}
 
 void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image)
 {
     if (*open)
     {
-        //ImGui::SetNextWindowBgAlpha(0.4f); // Transparent background
-
         GLuint texture = image.get_texture();
         ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(INFINITY, INFINITY));
 
-        if (ImGui::Begin(windowName, open))
-        {
-            ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
-            ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
-            ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
-        }
-        ImGui::End();
+        ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
+        ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
+        ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
     }
 }
 
@@ -229,101 +272,68 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
     return diff;
 }
 
-void MyApp::ShowImageWindow(bool* p_open)
+void MyApp::ComputeDiffImage()
 {
-    //static std::vector<RichImage> data;
-    static RichImage imageLeft;
-    static RichImage imageRight;
-    static bool window2 = false;
-    static int  selectedItem = -1;
-    static int actualitem = -1;
-    static bool show_diff_image = false;
-    static bool input_image_updated = false;
-
-    ImGui::ShowMetricsWindow(&window2);
-    ImGui::SetNextWindowBgAlpha(0.5f); // Transparent background
-    if (ImGui::Begin("name", p_open))
+    if ((!imageLeft.mat.empty() && !imageRight.mat.empty() && compare_condition_updated))
     {
-        // Load Image
-        if (ImGui::Button("Load Image1"))
+        cv::Mat diff_mat;
+        if (!imageLeft.mat.empty() && !imageRight.mat.empty())
         {
-            LoadImage();
-            if (filepath != NULL)
-            {
-                cv::Mat mat = cv::imread(filepath); 
-                imageLeft.load_mat(mat);
-                imageLeft.set_name(filepath);
-                filepath = NULL;
-            }
-            input_image_updated = true;
+            diff_mat = compare_two_mat(imageLeft.mat, imageRight.mat, diff_thresh);
         }
-        if (ImGui::Button("Load Image2"))
+        else
         {
-            LoadImage();
-            if (filepath != NULL)
-            {
-                cv::Mat mat = cv::imread(filepath); 
-                imageRight.load_mat(mat);
-                imageRight.set_name(filepath);
-                filepath = NULL;
-            }
-            input_image_updated = true;
-        }
-        
-        // Display test image
-        static RichImage diff_image;
-        static int diff_thresh = 1;
-        int old_diff_thresh = diff_thresh;
-        ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255);
-        if (diff_thresh != old_diff_thresh)
-        {
-            input_image_updated = true;
-            old_diff_thresh = diff_thresh;
+            diff_mat.create(255, 255, CV_8UC3);
+            diff_mat = cv::Scalar(128, 128, 128);
         }
 
-        if ((!imageLeft.mat.empty() && !imageRight.mat.empty() && input_image_updated))
+        if (diff_image.mat.empty())
         {
-            cv::Mat diff_mat;
-            if (!imageLeft.mat.empty() && !imageRight.mat.empty())
-            {
-                diff_mat = compare_two_mat(imageLeft.mat, imageRight.mat, diff_thresh);
-            }
-            else
-            {
-                diff_mat.create(255, 255, CV_8UC3);
-                diff_mat = cv::Scalar(128, 128, 128);
-            }
-
-            if (diff_image.mat.empty())
-            {
-                diff_image.clear(); // free texture memory
-            }
-            diff_image.load_mat(diff_mat);
-            show_diff_image = true;
-            input_image_updated = false;
+            diff_image.clear(); // free texture memory
         }
-
-        if (show_diff_image)
-        {
-            ShowImage("Diff Image", &show_diff_image, diff_image);
-        }
-
-        if (!imageLeft.mat.empty())
-        {
-            std::string winname = std::string("Image1 - ") + imageLeft.get_name();
-            ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
-        }
-        if (!imageRight.mat.empty())
-        {
-            std::string winname = std::string("Image2 - ") + imageRight.get_name();
-            ShowImage(winname.c_str(), imageRight.get_open(), imageRight);
-        }
+        diff_image.load_mat(diff_mat);
+        compare_condition_updated = false;
+        show_diff_image = true;
     }
-    ImGui::End();
 }
 
+void MyApp::UI_ChooseImageFile()
+{
+    char const* lFilterPatterns[3] = { "*.jpg", "*.png", "*.jpeg" };
+    const char* lTheOpenFileName = tinyfd_openFileDialog(
+                        "let us read the password back",
+                        "",
+                        3,
+                        lFilterPatterns,
+                        NULL,
+                        0);
+    if (!lTheOpenFileName)
+    {
+        tinyfd_messageBox(
+                "Error",
+                "Open file name is NULL",
+                "ok",
+                "error",
+                1);
+    }
+    else
+    {
+        printf("file choosed: %s\n", lTheOpenFileName);
+        filepath = lTheOpenFileName;
+    }
+}
 
-int main(int, char**)
+void MyApp::LoadImage(RichImage& image)
+{
+    UI_ChooseImageFile();
+    if (filepath)
+    {
+        image.loadFromFile(filepath);
+    }
+    filepath = NULL;
+}
+
+int main( int argc, char** argv )
 {
     MyApp app;
     app.Run();

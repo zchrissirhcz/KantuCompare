@@ -32,8 +32,8 @@ set(OpenCV_DIR "/Users/zz/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
 find_package(OpenCV REQUIRED)
 
 add_executable(ImageCompare
-  imageutils.h
   main.cpp
+  RichImage.hpp
   ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
   ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
   ${IMGUI_DIR}/imgui.cpp

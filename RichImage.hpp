@@ -42,6 +42,13 @@ public:
     
 public:
     RichImage(): texture(0), open(false) {}
+
+    void loadFromFile(const char* filepath)
+    {
+        cv::Mat mat = cv::imread(filepath); 
+        load_mat(mat);
+        set_name(filepath);
+    }
     
     void load_mat(cv::Mat& frame)
     {

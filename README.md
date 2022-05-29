@@ -3,8 +3,7 @@
 Simple cross-platform (macOS, Linux, Windows) image comparison GUI tool.
 
 ## Usage
-Choose two input images by click "Load Image1" and "Load Image2" buttons respectively, then the difference image appeared automatically.
-When the mouse drags the threshold slider, the difference image is automatically updated.
+Load two images in "Image1" and "Image2" window respectively, then the diff image appeared. With new loaded image1 / image2, or adjusted threshold value, diff image updated.
 
 ![](snapshot.png)
 
@@ -17,3 +16,4 @@ When the mouse drags the threshold slider, the difference image is automatically
 - https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 - https://github.com/aang7/Pix
 - https://github.com/shangchiwu/advanced-image-processor
+- https://www.youtube.com/watch?v=OYQp0GuoByM
