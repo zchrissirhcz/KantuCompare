@@ -239,7 +239,6 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
             {
                 for (int j = 0; j < diff_size.width; j++)
                 {
-                    // TODO: what if the channels is not equal to 3? e.g. 4 channels, or 1 channel?
                     float R2Y = 0.299;
                     float G2Y = 0.587;
                     float B2Y = 0.114;
@@ -256,15 +255,9 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
         else
         {
-            cv::Scalar above_color(255-50, 0, 0);
-            cv::Scalar below_color(0, 0, 255-50);
-            cv::Mat diff;
-            imk::getDiffImage(diff_image_left, diff_image_right, diff, toleranceThresh, below_color, above_color);
-
-            cv::Mat blend;
-            cv::addWeighted(diff_image_left, 0.5, diff_image_right, 0.5, 0.0, blend);
-
-            addWeighted(diff, 0.7, blend, 0.3, 0.0, diff_image_compare);
+            cv::Scalar above_color(0, 0, 255-50);
+            cv::Scalar below_color(255-50, 0, 0);
+            imk::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
         }
 
         diff = diff_image_compare.clone();
