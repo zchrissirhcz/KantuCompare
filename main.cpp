@@ -261,7 +261,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
             imk::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
         }
 
-        diff = diff_image_compare.clone();
+        diff = image_compare.clone();
         printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n", 
             (int)pixel_diff.val[0],
             (int)pixel_diff.val[1],
