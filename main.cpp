@@ -64,7 +64,7 @@ public:
             }
             if (!imageLeft.mat.empty())
             {
-                std::string text = cv::format("%s\nW=%d,H=%d", imageLeft.get_name(), imageLeft.mat.size().width, imageLeft.mat.size().height);
+                std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageLeft.get_name(), imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
                 ImGui::SameLine();
                 ImGui::SetCursorPosX(x); // align back to the left
 
@@ -86,7 +86,7 @@ public:
             }
             if (!imageRight.mat.empty())
             {
-                std::string text = cv::format("%s\nW=%d,H=%d", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height);
+                std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
                 ImGui::SameLine();
                 ImGui::SetCursorPosX(x); // align back to the left
 

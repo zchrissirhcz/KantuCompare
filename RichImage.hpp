@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <GLFW/glfw3.h>
 #include <string>
+#include "image_compare_core.hpp"
 
 static GLuint getTextureFromImage(const cv::Mat& image)
 {
@@ -51,6 +52,7 @@ public:
     cv::Mat mat;
     bool open;
     std::string name;
+    int filesize;
     
 public:
     RichImage(): texture(0), open(false) {}
@@ -74,6 +76,7 @@ public:
         }
         load_mat(mat);
         set_name(filepath);
+        filesize = imk::get_file_size(filepath);
     }
     
     void load_mat(cv::Mat& frame)

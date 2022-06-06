@@ -1,22 +1,12 @@
 #include "image_compare_core.hpp"
 
 
-#include <sys/stat.h>
+#include <filesystem>
 
-/// @brief get file size. Works on Linux.
-// https://blog.csdn.net/yutianzuijin/article/details/27205121
-int get_file_size(const char* filename)
+int imk::get_file_size(const std::string filepath)
 {
-    struct stat statbuf;
-    stat(filename,&statbuf);
-    int size=statbuf.st_size;
-
-    return size;
-}
-
-int get_file_size(const std::string& filename)
-{
-    return get_file_size(filename.c_str());
+    std::filesystem::path p{filepath};
+    return std::filesystem::file_size(p);
 }
 
 void imk::getDiffImage(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
@@ -226,7 +216,7 @@ FileMetaInfo get_meat_info(const std::string& filename)
         meta_info.height = height;
         meta_info.width = width;
 
-        int actual_size = get_file_size(filename);
+        int actual_size = imk::get_file_size(filename);
         int expected_size = -1;
         if (ext=="nv21" || ext=="nv12")
         {
