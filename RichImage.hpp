@@ -1,5 +1,6 @@
 #pragma once
 
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <GLFW/glfw3.h>
 #include <string>
@@ -7,10 +8,6 @@
 static GLuint getTextureFromImage(const cv::Mat& image)
 {
     cv::Mat im0 = image;
-    // if (image.channels() == 3)
-    // {
-    //     cv::cvtColor(image, im0, cv::COLOR_BGR2BGRA);
-    // }
 
     // Create a OpenGL texture identifier
     GLuint image_texture;
@@ -27,7 +24,22 @@ static GLuint getTextureFromImage(const cv::Mat& image)
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.size().width, image.size().height, 0, GL_BGR, GL_UNSIGNED_BYTE, im0.data);
+
+    const int channels = image.channels();
+    switch (channels)
+    {
+    case 4:
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, im0.size().width, im0.size().height, 0, GL_BGRA, GL_UNSIGNED_BYTE, im0.data);
+        break;
+    case 3:
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, im0.size().width, im0.size().height, 0, GL_BGR, GL_UNSIGNED_BYTE, im0.data);
+        break;
+    case 1:
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, im0.size().width, im0.size().height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, im0.data);
+        break;
+    default:
+        fprintf(stderr, "only support 1, 3, 4 channels\n");
+    }
 
     return image_texture;
 }
@@ -45,7 +57,7 @@ public:
 
     void loadFromFile(const char* filepath)
     {
-        cv::Mat mat = cv::imread(filepath); 
+        cv::Mat mat = cv::imread(filepath, cv::IMREAD_UNCHANGED); 
         load_mat(mat);
         set_name(filepath);
     }
