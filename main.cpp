@@ -250,6 +250,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
                     diff_image_compare.ptr(i, j)[0] = gray;
                     diff_image_compare.ptr(i, j)[1] = gray;
                     diff_image_compare.ptr(i, j)[2] = gray;
+                    diff_image_compare.ptr(i, j)[3] = 255;
                 }
             }
         }
