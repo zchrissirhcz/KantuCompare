@@ -208,6 +208,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
                 }
             }
 
+            // TODO: fix the transparency(alpha) for diff region in diff region(the intersection) and non-diff region(the union minus the intersection)
             cv::addWeighted(image_left_big, 1.0, image_right_big, 1.0, 0.0, image_compare);
 
             const int roi_width = std::min(image_left.size().width, image_right.size().width);
