@@ -62,10 +62,11 @@ public:
         int min_len = std::min(mvp_size.x, mvp_size.y) / 2;
         ImVec2 win_size(min_len, min_len);
         ImGuiCond_ cond = ImGuiCond_FirstUseEver;
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar;
 
         ImGui::SetNextWindowPos(ImVec2(mvp_size.x/5, 0), cond);
         ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Image1", NULL);
+        ImGui::Begin("Image1", NULL, flags);
         {
             float x = ImGui::GetCursorPosX();
             ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
@@ -89,7 +90,7 @@ public:
 
         ImGui::SetNextWindowPos(ImVec2(mvp_size.x/2, 0), cond);
         ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Image2", NULL);
+        ImGui::Begin("Image2", NULL, flags);
         {
             float x = ImGui::GetCursorPosX();
             ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
@@ -113,7 +114,7 @@ public:
 
         ImGui::SetNextWindowPos(ImVec2(mvp_size.x*2/5, mvp_size.y/2), cond);
         ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("DiffImage", NULL);
+        ImGui::Begin("DiffImage", NULL, flags);
         {
             int old_diff_thresh = diff_thresh;
             ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255);
