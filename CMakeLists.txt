@@ -27,7 +27,7 @@ option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
-add_subdirectory(${GLFW_DIR} binary_dir EXCLUDE_FROM_ALL)
+add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR}/glfw EXCLUDE_FROM_ALL)
 
 # opengl: using the system bundled
 find_package(OpenGL REQUIRED)
@@ -50,6 +50,8 @@ add_executable(ImageCompare
   tinyfiledialogs.c
   image_compare_core.hpp
   image_compare_core.cpp
+  my_widgets.hpp
+  my_widgets.cpp
 )
 target_link_libraries(ImageCompare
   glfw

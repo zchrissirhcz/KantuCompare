@@ -8,12 +8,12 @@
 #include <string>
 #include <vector>
 
-#include "imgui_internal.h"
-
 #include "app_design.hpp"
 #include "tinyfiledialogs.h"
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
+
+#include "my_widgets.hpp"
 
 class MyApp : public App<MyApp>
 {
@@ -25,6 +25,7 @@ public:
     {
         // Title
         glfwSetWindowTitle(window, u8"Simple Image Compare Tool");
+        glfwSetWindowSize(window, 960, 640);
 
         // Style
         ImGui::StyleColorsDark();
@@ -117,7 +118,14 @@ public:
         ImGui::Begin("DiffImage", NULL, flags);
         {
             int old_diff_thresh = diff_thresh;
-            ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255);
+            ImGuiSliderFlags slider_flags = ImGuiSliderFlags_NoInput;
+            // slider will always be 200 pixel wide
+            //ImGui::PushItemWidth(200);
+            //ImGui::NewLine();
+            //ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255, "%d", slider_flags);
+            //ImGui::VSliderInt("diff thresh", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
+            scp::VSliderInt("diff thresh", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
+            ImGui::SameLine();
             if (diff_thresh != old_diff_thresh)
             {
                 compare_condition_updated = true;
