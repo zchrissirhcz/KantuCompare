@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # imgui: using the latest source code
-set(IMGUI_DIR "$ENV{HOME}/work/imgui")
+set(IMGUI_DIR "$ENV{HOME}/work/github/imgui")
 #set(IMGUI_DIR "$ENV{HOME}/work/imgui-docking")
 #add_definitions(-DIMGUI_WITH_DOCKING)
 include_directories(
@@ -16,7 +16,7 @@ include_directories(
 
 # glfw: using the latest source code
 # find_package(glfw3 REQUIRED)
-set(GLFW_DIR "$ENV{HOME}/work/glfw") # Set this to point to an up-to-date GLFW repo
+set(GLFW_DIR "$ENV{HOME}/work/github/glfw") # Set this to point to an up-to-date GLFW repo
 option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" OFF)
 option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
