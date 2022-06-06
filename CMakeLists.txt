@@ -5,6 +5,11 @@ project(image_compare)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(sleek.cmake)
+
+set(CMAKE_BUILD_TYPE Debug)
+sleek_add_flags("-fstandalone-debug")
+
 # imgui: using the latest source code
 set(IMGUI_DIR "$ENV{HOME}/work/github/imgui")
 #set(IMGUI_DIR "$ENV{HOME}/work/imgui-docking")

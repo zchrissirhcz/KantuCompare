@@ -148,6 +148,13 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
 
 static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh)
 {
+    if (image_left.channels() != 4 || image_right.channels() != 4)
+    {
+        fprintf(stderr, "only support BGRA image for comparision\n");
+        return cv::Mat();
+    }
+    const int channels = 4;
+
     // TODO: support 1, 2, 4 channel image comparison
     cv::Mat diff;
     if (image_left.empty() && image_right.empty())
@@ -169,7 +176,6 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         cv::Mat diff_image_left;
         cv::Mat diff_image_right;
         cv::Mat diff_image_compare;
-        const int channels = image_left.channels();
 
         cv::Mat image_compare;
         if (image_left.size() != image_right.size())
@@ -225,7 +231,8 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
         //cv::setNumThreads(1);
         
-        if (sum == 0) {
+        if (sum == 0)
+        {
             // if the left and right image is differnt size, but same in the overlaped region, we compute the gray image, but assign to RGB pixels
             cv::Size diff_size = diff_image_compare.size();
             for (int i = 0; i < diff_size.height; i++)

@@ -58,6 +58,20 @@ public:
     void loadFromFile(const char* filepath)
     {
         cv::Mat mat = cv::imread(filepath, cv::IMREAD_UNCHANGED); 
+        switch (mat.channels())
+        {
+        case 1:
+            cv::cvtColor(mat, mat, cv::COLOR_GRAY2BGRA);
+            break;
+        case 3:
+            cv::cvtColor(mat, mat, cv::COLOR_BGR2BGRA);
+            break;
+        case 4:
+            // NOP
+            break;
+        default:
+            printf("only support 1, 3, 4 channels\n"); // TODO: fix me. consider encapsulate cv::imread(), support 2 channels.
+        }
         load_mat(mat);
         set_name(filepath);
     }
