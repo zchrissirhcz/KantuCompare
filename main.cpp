@@ -38,13 +38,15 @@ public:
 
         // Load Fonts only on specific OS for portability
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
+        ImGuiIO& io = ImGui::GetIO();
 #if __APPLE__
         std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
-        ImGuiIO& io = ImGui::GetIO();
         ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
         io.Fonts->Build();
         IM_ASSERT(font != NULL);
 #endif
+
+        //io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 #if IMGUI_WITH_DOCKING
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -53,6 +55,16 @@ public:
 
     void Update()
     {
+        const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+        ImGuiIO& io = ImGui::GetIO();
+        ImVec2 display_size = io.DisplaySize;
+        ImVec2 mvp_size = main_viewport->Size;
+        int min_len = std::min(mvp_size.x, mvp_size.y) / 2;
+        ImVec2 win_size(min_len, min_len);
+        ImGuiCond_ cond = ImGuiCond_FirstUseEver;
+
+        ImGui::SetNextWindowPos(ImVec2(mvp_size.x/5, 0), cond);
+        ImGui::SetNextWindowSize(win_size, cond);
         ImGui::Begin("Image1", NULL);
         {
             float x = ImGui::GetCursorPosX();
@@ -75,6 +87,8 @@ public:
         }
         ImGui::End();
 
+        ImGui::SetNextWindowPos(ImVec2(mvp_size.x/2, 0), cond);
+        ImGui::SetNextWindowSize(win_size, cond);
         ImGui::Begin("Image2", NULL);
         {
             float x = ImGui::GetCursorPosX();
@@ -97,6 +111,8 @@ public:
         }
         ImGui::End();
 
+        ImGui::SetNextWindowPos(ImVec2(mvp_size.x*2/5, mvp_size.y/2), cond);
+        ImGui::SetNextWindowSize(win_size, cond);
         ImGui::Begin("DiffImage", NULL);
         {
             int old_diff_thresh = diff_thresh;
@@ -138,7 +154,7 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
     if (*open)
     {
         GLuint texture = image.get_texture();
-        ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(INFINITY, INFINITY));
+        //ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(INFINITY, INFINITY));
 
         ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
         ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
