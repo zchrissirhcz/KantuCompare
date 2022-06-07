@@ -16,7 +16,7 @@ Load two images in "Image1" and "Image2" window respectively, then the diff imag
 **Get sources and configure dependencies**
 ```bash
 # switch to working directory
-cd ~/work
+cd ~/work/github
 
 # get imgui latest source
 git clone https://github.com/ocornut/imgui
@@ -44,11 +44,10 @@ code .
 
 **configure && build && run**
 ```bash
-mkdir build
 cd build
-cmake ..
-cmake --build .
-./ImageCompare
+./linux-x64.sh    # for Linux / macOS
+#.\vs2022-x64.cmd # for Windows with Visual Studio 2022
+./ImageCompare    # start the application
 ```
 
 ## Remarks

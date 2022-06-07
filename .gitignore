@@ -44,4 +44,4 @@ build/log.txt
 .DS_Store
 
 # Dear ImGui config file
-imgui.ini
+**/imgui.ini
