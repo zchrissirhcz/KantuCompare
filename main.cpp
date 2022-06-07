@@ -113,19 +113,19 @@ public:
         }
         ImGui::End();
 
-        ImGui::SetNextWindowPos(ImVec2(mvp_size.x*2/5, mvp_size.y/2), cond);
+        ImGui::SetNextWindowPos(ImVec2(mvp_size.x*4/5, mvp_size.y/2), cond);
         ImGui::SetNextWindowSize(win_size, cond);
         ImGui::Begin("DiffImage", NULL, flags);
         {
             int old_diff_thresh = diff_thresh;
             ImGuiSliderFlags slider_flags = ImGuiSliderFlags_NoInput;
-            // slider will always be 200 pixel wide
-            //ImGui::PushItemWidth(200);
+            // slider will always be 256 pixel wide
+            ImGui::PushItemWidth(256);
             //ImGui::NewLine();
-            //ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255, "%d", slider_flags);
-            //ImGui::VSliderInt("diff thresh", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
-            scp::VSliderInt("diff thresh", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
-            ImGui::SameLine();
+            ImGui::SliderInt("Tolerance", &diff_thresh, 0, 255, "%d", slider_flags);
+            //ImGui::VSliderInt("Tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
+            //scp::VSliderInt("tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
+            //ImGui::SameLine();
             if (diff_thresh != old_diff_thresh)
             {
                 compare_condition_updated = true;
@@ -256,7 +256,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         pixel_diff = cv::sum(diff_image_compare);
         int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
         //cv::setNumThreads(1);
-        
+
         if (sum == 0)
         {
             // if the left and right image is differnt size, but same in the overlaped region, we compute the gray image, but assign to RGB pixels
@@ -288,7 +288,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
 
         diff = image_compare.clone();
-        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n", 
+        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n",
             (int)pixel_diff.val[0],
             (int)pixel_diff.val[1],
             (int)pixel_diff.val[2],
