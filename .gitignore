@@ -42,3 +42,6 @@ build/log.txt
 
 # MacOS Cache
 .DS_Store
+
+# Dear ImGui config file
+imgui.ini

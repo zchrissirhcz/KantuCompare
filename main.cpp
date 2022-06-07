@@ -41,10 +41,10 @@ public:
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
 #if __APPLE__
-        std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
-        ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        io.Fonts->Build();
-        IM_ASSERT(font != NULL);
+        // std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
+        // ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        // io.Fonts->Build();
+        // IM_ASSERT(font != NULL);
 #endif
 
         //io.ConfigWindowsMoveFromTitleBarOnly = true;
@@ -122,7 +122,8 @@ public:
             // slider will always be 256 pixel wide
             ImGui::PushItemWidth(256);
             //ImGui::NewLine();
-            ImGui::SliderInt("Tolerance", &diff_thresh, 0, 255, "%d", slider_flags);
+            ImGui::Text("Tolerance");
+            ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "%d", slider_flags);
             //ImGui::VSliderInt("Tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
             //scp::VSliderInt("tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
             //ImGui::SameLine();
