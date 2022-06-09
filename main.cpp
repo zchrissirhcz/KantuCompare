@@ -15,11 +15,16 @@
 
 #include "my_widgets.hpp"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui_internal.h"
+
 class MyApp : public App<MyApp>
 {
 public:
     MyApp() = default;
     ~MyApp() = default;
+
+    void myUpdateMouseWheel();
 
     void StartUp()
     {
@@ -41,10 +46,10 @@ public:
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
 #if __APPLE__
-        std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
-        ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        io.Fonts->Build();
-        IM_ASSERT(font != NULL);
+        // std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
+        // ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        // io.Fonts->Build();
+        // IM_ASSERT(font != NULL);
 #endif
 
         //io.ConfigWindowsMoveFromTitleBarOnly = true;
@@ -52,10 +57,15 @@ public:
 #if IMGUI_WITH_DOCKING
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
+
+        //io.FontAllowUserScaling = true;
+
     }
 
     void Update()
     {
+        myUpdateMouseWheel();
+
         const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
         ImGuiIO& io = ImGui::GetIO();
         ImVec2 display_size = io.DisplaySize;
@@ -63,15 +73,17 @@ public:
         int min_len = std::min(mvp_size.x, mvp_size.y) / 2;
         ImVec2 win_size(min_len, min_len);
         ImGuiCond_ cond = ImGuiCond_FirstUseEver;
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar;
+        ImGuiWindowFlags flags = 0; //ImGuiWindowFlags_NoTitleBar;
+
+        const char* image_path1 = NULL;
 
         ImGui::SetNextWindowPos(ImVec2(mvp_size.x/5, 0), cond);
         ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Image1", NULL, flags);
+        ImGui::Begin("Meta1", NULL, flags);
         {
             float x = ImGui::GetCursorPosX();
             ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
-            if (ImGui::Button("Load"))
+            if (ImGui::Button("Load1"))
             {
                 LoadImage(imageLeft);
                 compare_condition_updated = true;
@@ -83,6 +95,15 @@ public:
                 ImGui::SetCursorPosX(x); // align back to the left
 
                 ImGui::Text("%s", text.c_str());
+            }
+        }
+        ImGui::End();
+
+
+        ImGui::Begin("Image1", NULL, flags);
+        {
+            if (!imageLeft.mat.empty())
+            {
                 std::string winname = std::string("Image1 - ") + imageLeft.get_name();
                 ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
             }
@@ -91,7 +112,7 @@ public:
 
         ImGui::SetNextWindowPos(ImVec2(mvp_size.x/2, 0), cond);
         ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Image2", NULL, flags);
+        ImGui::Begin("Meta2", NULL, flags);
         {
             float x = ImGui::GetCursorPosX();
             ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
@@ -107,31 +128,46 @@ public:
                 ImGui::SetCursorPosX(x); // align back to the left
 
                 ImGui::Text("%s", text.c_str());
+            }
+        }
+        ImGui::End();
+
+
+        ImGui::Begin("Image2", NULL, flags);
+        {
+            if (!imageRight.mat.empty())
+            {
                 std::string winname = std::string("Image2 - ") + imageRight.get_name();
                 ShowImage(winname.c_str(), imageRight.get_open(), imageRight);
             }
         }
         ImGui::End();
 
-        ImGui::SetNextWindowPos(ImVec2(mvp_size.x*2/5, mvp_size.y/2), cond);
+        ImGui::SetNextWindowPos(ImVec2(mvp_size.x*4/5, mvp_size.y/2), cond);
         ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("DiffImage", NULL, flags);
+        ImGui::Begin("Meta3", NULL, flags);
         {
             int old_diff_thresh = diff_thresh;
             ImGuiSliderFlags slider_flags = ImGuiSliderFlags_NoInput;
-            // slider will always be 200 pixel wide
-            //ImGui::PushItemWidth(200);
+            // slider will always be 256 pixel wide
+            ImGui::PushItemWidth(256);
             //ImGui::NewLine();
-            //ImGui::SliderInt("diff thresh", &diff_thresh, 0, 255, "%d", slider_flags);
-            //ImGui::VSliderInt("diff thresh", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
-            scp::VSliderInt("diff thresh", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
-            ImGui::SameLine();
+            ImGui::Text("Tolerance");
+            ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "%d", slider_flags);
+            //ImGui::VSliderInt("Tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
+            //scp::VSliderInt("tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
+            //ImGui::SameLine();
             if (diff_thresh != old_diff_thresh)
             {
                 compare_condition_updated = true;
                 old_diff_thresh = diff_thresh;
             }
             ComputeDiffImage();
+        }
+        ImGui::End();
+
+        ImGui::Begin("DiffImage", NULL, flags);
+        {
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image);
@@ -158,6 +194,72 @@ private:
     int diff_thresh = 1;
 };
 
+static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER    = 2.00f;    // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain time, unless mouse moved.
+
+static void StartLockWheelingWindow(ImGuiWindow* window)
+{
+    ImGuiContext& g = *GImGui;
+    if (g.WheelingWindow == window)
+        return;
+    g.WheelingWindow = window;
+    g.WheelingWindowRefMousePos = g.IO.MousePos;
+    g.WheelingWindowTimer = WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER;
+}
+
+// When with mouse wheel moving (vertically), and current window name contains 'Image', resize current window's size
+void MyApp::myUpdateMouseWheel()
+{
+    ImGuiContext& g = *GImGui;
+
+    ImGuiWindow* cur_window = g.WheelingWindow;
+
+    // Reset the locked window if we move the mouse or after the timer elapses
+    if (cur_window != NULL)
+    {
+        std::string window_name = cur_window->Name;
+        if (window_name.length() < 5 || window_name.find("Image") == std::string::npos)
+        {
+            return;
+        }
+        //printf("!! cur_window->Name: %s\n", cur_window->Name);
+        
+        g.WheelingWindowTimer -= g.IO.DeltaTime;
+        if (ImGui::IsMousePosValid() && ImLengthSqr(g.IO.MousePos - g.WheelingWindowRefMousePos) > g.IO.MouseDragThreshold * g.IO.MouseDragThreshold)
+            g.WheelingWindowTimer = 0.0f;
+        if (g.WheelingWindowTimer <= 0.0f)
+        {
+            g.WheelingWindow = NULL;
+            g.WheelingWindowTimer = 0.0f;
+        }
+    }
+
+    float wheel_y = g.IO.MouseWheel;
+
+    if ((g.ActiveId != 0 && g.ActiveIdUsingMouseWheel) || (g.HoveredIdPreviousFrame != 0 && g.HoveredIdPreviousFrameUsingMouseWheel))
+        return;
+
+    ImGuiWindow* window = g.WheelingWindow ? g.WheelingWindow : g.HoveredWindow;
+    if (!window || window->Collapsed)
+        return;
+
+    if (wheel_y != 0.0f)
+    {
+        StartLockWheelingWindow(window);
+        const float new_font_scale = ImClamp(window->FontWindowScale + g.IO.MouseWheel * 0.10f, 0.50f, 2.50f);
+        const float scale = new_font_scale / window->FontWindowScale;
+        window->FontWindowScale = new_font_scale;
+        if (window == window->RootWindow)
+        {
+            const ImVec2 offset = window->Size * (1.0f - scale) * (g.IO.MousePos - window->Pos) / window->Size;
+            ImGui::SetWindowPos(window, window->Pos + offset, 0);
+            window->Size = ImFloor(window->Size * scale);
+            window->SizeFull = ImFloor(window->SizeFull * scale);
+        }
+        // TODO: Zoom the image/texture in the current window
+        return;
+    }
+}
+
 void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image)
 {
     if (*open)
@@ -167,7 +269,15 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
 
         ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
         ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
+
+        //ImGui::BeginChild("Image1Content", ImVec2(0, 0), true);
+        //ImGui::Begin("Image1Content", NULL);
         ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+        //ImGui::EndChild();
+        //ImGui::End();
+        //
+        //ImGui::Image((void*)(uintptr_t)texture, ImVec2(image.mat.size().width, image.mat.size().height));
+        
     }
 }
 
@@ -256,7 +366,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         pixel_diff = cv::sum(diff_image_compare);
         int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
         //cv::setNumThreads(1);
-        
+
         if (sum == 0)
         {
             // if the left and right image is differnt size, but same in the overlaped region, we compute the gray image, but assign to RGB pixels
@@ -288,7 +398,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
 
         diff = image_compare.clone();
-        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n", 
+        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n",
             (int)pixel_diff.val[0],
             (int)pixel_diff.val[1],
             (int)pixel_diff.val[2],
