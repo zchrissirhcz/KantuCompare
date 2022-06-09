@@ -272,11 +272,11 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
 
         //ImGui::BeginChild("Image1Content", ImVec2(0, 0), true);
         //ImGui::Begin("Image1Content", NULL);
-        //ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+        ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
         //ImGui::EndChild();
         //ImGui::End();
         //
-        ImGui::Image((void*)(uintptr_t)texture, ImVec2(image.mat.size().width, image.mat.size().height));
+        //ImGui::Image((void*)(uintptr_t)texture, ImVec2(image.mat.size().width, image.mat.size().height));
         
     }
 }
