@@ -174,6 +174,8 @@ public:
             }
         }
         ImGui::End();
+
+        StatusbarUI();
     }
 
 private:
@@ -181,6 +183,8 @@ private:
     void LoadImage(RichImage& image);
     void ComputeDiffImage();
     void ShowImage(const char* windowName, bool *open, const RichImage& image);
+
+    void StatusbarUI();
 
 private:
     bool window_open = true;
@@ -192,6 +196,8 @@ private:
     bool compare_condition_updated = false;
     bool show_diff_image = false;
     int diff_thresh = 1;
+
+    const float statusbarSize = 50;
 };
 
 static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER    = 2.00f;    // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain time, unless mouse moved.
@@ -258,6 +264,29 @@ void MyApp::myUpdateMouseWheel()
         // TODO: Zoom the image/texture in the current window
         return;
     }
+}
+
+void MyApp::StatusbarUI()
+{
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - statusbarSize));
+    ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, statusbarSize));
+    //ImGui::SetNextWindowViewport(viewport->ID);
+    ImGuiWindowFlags window_flags = 0
+        //| ImGuiWindowFlags_NoDocking
+        | ImGuiWindowFlags_NoTitleBar
+        | ImGuiWindowFlags_NoResize
+        | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoSavedSettings
+        ;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+    ImGui::Begin("STATUSBAR", NULL, window_flags);
+    ImGui::PopStyleVar();
+    ImGui::Text("Status bar message.");
+    ImGui::End();
+    ImGui::PopStyleColor();
 }
 
 void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image)

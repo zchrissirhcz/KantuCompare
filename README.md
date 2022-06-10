@@ -60,3 +60,4 @@ You can switch to the [Qt branch](https://github.com/zchrissirhcz/small-compare/
 - https://github.com/aang7/Pix
 - https://github.com/shangchiwu/advanced-image-processor
 - https://www.youtube.com/watch?v=OYQp0GuoByM
+- https://github.com/Smorodov/imgui_image_viewer
