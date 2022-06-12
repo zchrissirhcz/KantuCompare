@@ -134,7 +134,7 @@ public:
             if (!imageLeft.mat.empty())
             {
                 std::string winname = std::string("Image1 - ") + imageLeft.get_name();
-                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
+                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft, 1.0f);
             }
             ImGui::EndChild();
 
@@ -146,7 +146,7 @@ public:
             if (!imageRight.mat.empty())
             {
                 std::string winname = std::string("Image2 - ") + imageRight.get_name();
-                ShowImage(winname.c_str(), imageRight.get_open(), imageRight);
+                ShowImage(winname.c_str(), imageRight.get_open(), imageRight, 0.0f);
             }
             ImGui::EndChild();
         }
@@ -201,7 +201,7 @@ public:
             ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5, ImGui::GetWindowHeight()), false);
             if (show_diff_image)
             {
-                ShowImage("Diff Image", &show_diff_image, diff_image);
+                ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
             }
             ImGui::EndChild();
         }
@@ -223,7 +223,7 @@ private:
     void UI_ChooseImageFile();
     void LoadImage(RichImage& image);
     void ComputeDiffImage();
-    void ShowImage(const char* windowName, bool *open, const RichImage& image);
+    void ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio = 0.f);
 
     void StatusbarUI();
 
@@ -336,15 +336,15 @@ void MyApp::StatusbarUI()
     ImGui::PopStyleColor();
 }
 
-void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image)
+void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio)
 {
     if (*open)
     {
         GLuint texture = image.get_texture();
         //ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(INFINITY, INFINITY));
 
-        ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
-        ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
+        // ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
+        // ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
 
         //ImGui::BeginChild("Image1Content", ImVec2(0, 0), true);
         //ImGui::Begin("Image1Content", NULL);
@@ -354,8 +354,18 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
         //
         ImVec2 actual_image_size(image.mat.size().width, image.mat.size().height);
         ImVec2 rendered_texture_size = actual_image_size * (zoom_percent * 1.0 / 100);
-        ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
-        
+        if (align_to_right_ratio >= 0 && align_to_right_ratio <= 1)
+        {
+            ImVec2 win_size = ImGui::GetCurrentWindow()->Size;
+            ImVec2 offset((win_size.x - rendered_texture_size.x) * align_to_right_ratio, 0);
+            ImVec2 p_min = ImGui::GetCursorScreenPos() + offset;
+            ImVec2 p_max = p_min + rendered_texture_size;
+            ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+        }
+        else
+        {
+            ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
+        }
     }
 }
 
