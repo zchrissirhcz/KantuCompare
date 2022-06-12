@@ -59,6 +59,17 @@ public:
 
     }
 
+    void showText(const char* text, const char* inputId)
+    {
+        char input[256];
+        strcpy(input, text);
+        ImGui::PushID(inputId);
+        ImGui::PushItemWidth(ImGui::GetWindowSize().x);
+        ImGui::InputText("", input, 256, ImGuiInputTextFlags_ReadOnly);
+        ImGui::PopItemWidth();
+        ImGui::PopID();
+    }
+
     void Update()
     {
         //ImGui::ShowDemoWindow();
@@ -80,7 +91,7 @@ public:
 
         ImGui::Begin("Testing menu", NULL, flags);
         
-        ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 1 / 10), true, ImGuiWindowFlags_NoScrollbar);
+        ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 1 / 9), true, ImGuiWindowFlags_NoScrollbar);
         {
             ImGui::BeginChild("##leftpath", ImVec2(ImGui::GetWindowWidth() / 2 - 10, ImGui::GetWindowHeight()), false);
             if (ImGui::Button("Load##1"))
@@ -90,11 +101,14 @@ public:
             }
             if (!imageLeft.mat.empty())
             {
-                std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageLeft.get_name(), imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
+                
                 ImGui::SameLine();
                 //ImGui::SetCursorPosX(x); // align back to the left
 
-                ImGui::Text("%s", text.c_str());
+                //ImGui::Text("%s", text.c_str());
+                showText(imageLeft.get_name(), "1");
+                std::string meta_info = cv::format("W=%d,H=%d; %d bytes", imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
+                showText(meta_info.c_str(), "2");
             }
             ImGui::EndChild();
 
@@ -114,13 +128,16 @@ public:
                 ImGui::SameLine();
                 //ImGui::SetCursorPosX(x); // align back to the left
 
-                ImGui::Text("%s", text.c_str());
+                //ImGui::Text("%s", text.c_str());
+                showText(imageRight.get_name(), "3");
+                std::string meta_info = cv::format("W=%d,H=%d; %d bytes", imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
+                showText(meta_info.c_str(), "4");
             }
             ImGui::EndChild();
         }
         ImGui::EndChild();
 
-        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 10), true);
+        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 9), true);
         {
             ImVec2 vMin = ImGui::GetWindowContentRegionMin();
             ImVec2 vMax = ImGui::GetWindowContentRegionMax();
@@ -156,7 +173,7 @@ public:
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
         //ImGui::SameLine();
 
-        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 10), false);
+        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 9), false);
         {
             ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/5, ImGui::GetWindowHeight()), false);
             {
