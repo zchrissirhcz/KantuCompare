@@ -32,21 +32,21 @@ public:
         // Style
         ImGui::StyleColorsDark();
         ImGuiStyle &style = ImGui::GetStyle();
-        style.WindowRounding = 8.f;
-        style.ChildRounding = 6.f;
-        style.FrameRounding = 6.f;
-        style.PopupRounding = 6.f;
-        style.GrabRounding = 6.f;
-        style.ChildRounding = 6.f;
+        // style.WindowRounding = 8.f;
+        // style.ChildRounding = 6.f;
+        // style.FrameRounding = 6.f;
+        // style.PopupRounding = 6.f;
+        // style.GrabRounding = 6.f;
+        // style.ChildRounding = 6.f;
 
         // Load Fonts only on specific OS for portability
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
-#if __APPLE__
-        // std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
-        // ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        // io.Fonts->Build();
-        // IM_ASSERT(font != NULL);
+#if __APPLE__ && __ARM_NEON
+        std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
+        ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        io.Fonts->Build();
+        IM_ASSERT(font != NULL);
 #endif
 
         //io.ConfigWindowsMoveFromTitleBarOnly = true;
@@ -80,9 +80,9 @@ public:
 
         ImGui::Begin("Testing menu", NULL, flags);
         
-        ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 1 / 10), true);
+        ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 1 / 10), true, ImGuiWindowFlags_NoScrollbar);
         {
-            ImGui::BeginChild("##leftpath", ImVec2(ImGui::GetWindowWidth() / 2, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("##leftpath", ImVec2(ImGui::GetWindowWidth() / 2 - 10, ImGui::GetWindowHeight()), false);
             if (ImGui::Button("Load##1"))
             {
                 LoadImage(imageLeft);
@@ -102,7 +102,7 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("##rightpath", ImVec2(ImGui::GetWindowWidth() / 2, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("##rightpath", ImVec2(ImGui::GetWindowWidth() / 2 - 10, ImGui::GetWindowHeight()), false);
             if (ImGui::Button("Load##2"))
             {
                 LoadImage(imageRight);
@@ -120,7 +120,7 @@ public:
         }
         ImGui::EndChild();
 
-        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 4 / 10), true);
+        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 10), true);
         {
             ImVec2 vMin = ImGui::GetWindowContentRegionMin();
             ImVec2 vMax = ImGui::GetWindowContentRegionMax();
@@ -130,7 +130,7 @@ public:
             // vMax.x += ImGui::GetWindowPos().x;
             // vMax.y += ImGui::GetWindowPos().y;
             float window_content_height = vMax.y - vMin.y;
-            ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth()/2, window_content_height), false);
+            ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
             if (!imageLeft.mat.empty())
             {
                 std::string winname = std::string("Image1 - ") + imageLeft.get_name();
@@ -142,7 +142,7 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth()/2, window_content_height), false);
+            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
             if (!imageRight.mat.empty())
             {
                 std::string winname = std::string("Image2 - ") + imageRight.get_name();
@@ -156,64 +156,83 @@ public:
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
         //ImGui::SameLine();
 
-        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 4 / 10), false);
+        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 10), false);
         {
             ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/5, ImGui::GetWindowHeight()), false);
-            // zoom
             {
-                int old_zoom_percent = zoom_percent;
-                ImGui::PushItemWidth(200);
-                char text[20] = {0};
-                sprintf(text, "Zoom: %d%%", zoom_percent);
-                ImGui::Text("%s", text);
-                ImGuiSliderFlags zoom_slider_flags = ImGuiSliderFlags_NoInput;
-                ImGui::SliderInt("##Zoom", &zoom_percent, zoom_percent_min, zoom_percent_max, "", zoom_slider_flags);
-                if (zoom_percent != old_zoom_percent)
+                // zoom
                 {
-                    old_zoom_percent = zoom_percent;
+                    int old_zoom_percent = zoom_percent;
+                    ImGui::PushItemWidth(200);
+                    char text[20] = {0};
+                    sprintf(text, "Zoom: %d%%", zoom_percent);
+                    ImGui::Text("%s", text);
+                    ImGuiSliderFlags zoom_slider_flags = ImGuiSliderFlags_NoInput;
+                    ImGui::SliderInt("##Zoom", &zoom_percent, zoom_percent_min, zoom_percent_max, "", zoom_slider_flags);
+                    if (zoom_percent != old_zoom_percent)
+                    {
+                        old_zoom_percent = zoom_percent;
+                    }
+                }
+                // tolerance
+                {
+                    int old_diff_thresh = diff_thresh;
+                    ImGui::PushItemWidth(256);
+                    char text[20] = {0};
+                    sprintf(text, "Tolerance: %d", diff_thresh);
+                    ImGui::Text("%s", text);
+                    ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
+                    ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
+                    if (diff_thresh != old_diff_thresh)
+                    {
+                        compare_condition_updated = true;
+                        old_diff_thresh = diff_thresh;
+                    }
+                }
+                {
+                    ImGui::Text("Pixel Detail(TODO)");
                 }
             }
-            // tolerance
-            {
-                int old_diff_thresh = diff_thresh;
-                ImGui::PushItemWidth(256);
-                char text[20] = {0};
-                sprintf(text, "Tolerance: %d", diff_thresh);
-                ImGui::Text("%s", text);
-                ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
-                ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
-                if (diff_thresh != old_diff_thresh)
-                {
-                    compare_condition_updated = true;
-                    old_diff_thresh = diff_thresh;
-                }
-            }
-            {
-                ImGui::Text("Pixel Detail(TODO)");
-            }
-            ComputeDiffImage();
             ImGui::EndChild();
+
+            ComputeDiffImage();
 
             ImGui::SameLine();
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5 - 50, ImGui::GetWindowHeight()), false);
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
+                ImGuiWindow* window = ImGui::GetCurrentWindow();
+                if (window->ScrollbarX || window->ScrollbarY)
+                {
+                    ImGui::PushClipRect(window->OuterRectClipped.Min, window->OuterRectClipped.Max, false);
+                    if (window->ScrollbarX)
+                    {
+                        ImRect r = ImGui::GetWindowScrollbarRect(window, ImGuiAxis_X);
+                        window->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
+                    }
+                    if (window->ScrollbarY)
+                    {
+                        ImRect r = ImGui::GetWindowScrollbarRect(window, ImGuiAxis_Y);
+                        window->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
+                    }
+                    ImGui::PopClipRect();
+                }
             }
             ImGui::EndChild();
         }
         ImGui::EndChild();
 
         //ImGui::SameLine();
-        ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+        //ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
         //ImGui::SameLine();
 
-        ImGui::BeginChild("##StatusBarRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() / 10), false);
-        ImGui::Text("Important status(TODO)");
-        ImGui::EndChild();
+        // ImGui::BeginChild("##StatusBarRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() / 10), false);
+        // ImGui::Text("Important status(TODO)");
+        // ImGui::EndChild();
         //StatusbarUI();
 
         ImGui::End();
@@ -295,11 +314,8 @@ void MyApp::myUpdateMouseWheel()
     if (wheel_y != 0.0f)
     {
         StartLockWheelingWindow(window);
-        // const float new_font_scale = ImClamp(window->FontWindowScale + g.IO.MouseWheel * 0.10f, 0.50f, 2.50f);
-        // const float scale = new_font_scale / window->FontWindowScale;
         
-        
-        zoom_percent = zoom_percent + g.IO.MouseWheel * 0.40f;
+        zoom_percent = zoom_percent + g.IO.MouseWheel * 5;
         if (zoom_percent > zoom_percent_max)
         {
             zoom_percent = zoom_percent_max;
@@ -354,18 +370,54 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
         //
         ImVec2 actual_image_size(image.mat.size().width, image.mat.size().height);
         ImVec2 rendered_texture_size = actual_image_size * (zoom_percent * 1.0 / 100);
+
+        bool clamped_x_by_window = false;
+        bool clamped_y_by_window = false;
+
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 image_window_size = rendered_texture_size;
+        if (rendered_texture_size.x > window_size.x)
+        {
+            //rendered_texture_size.x = window_size.x;
+            clamped_x_by_window = true;
+        }
+        if (rendered_texture_size.y > window_size.y)
+        {
+            //rendered_texture_size.y = window_size.y;
+            clamped_y_by_window = true;
+        }
+        bool clamped_by_window = clamped_x_by_window | clamped_y_by_window;
+        if (clamped_by_window)
+        {
+            image_window_size = window_size;
+        }
+
         if (align_to_right_ratio >= 0 && align_to_right_ratio <= 1)
         {
             ImVec2 win_size = ImGui::GetCurrentWindow()->Size;
-            ImVec2 offset((win_size.x - rendered_texture_size.x) * align_to_right_ratio, 0);
+            ImVec2 offset;
+            offset.y = 0;
+            if (clamped_x_by_window)
+                offset.x = 0;
+            else
+                offset.x = (win_size.x - rendered_texture_size.x) * align_to_right_ratio;
             ImVec2 p_min = ImGui::GetCursorScreenPos() + offset;
             ImVec2 p_max = p_min + rendered_texture_size;
-            ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+            //ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+            ImGui::SetNextWindowPos(p_min);
         }
         else
         {
+            //ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
+            ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
+        }
+
+        std::string label = cv::format("image##%d", texture);
+        ImGui::BeginChild(label.c_str(), image_window_size, clamped_by_window, ImGuiWindowFlags_HorizontalScrollbar);
+        {
             ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
         }
+        ImGui::EndChild();
     }
 }
 
