@@ -3,9 +3,12 @@
 Simple cross-platform (macOS, Linux, Windows) image comparison GUI tool.
 
 ## Usage
-Load two images in "Image1" and "Image2" window respectively, then the diff image appeared. With new loaded image1 / image2, or adjusted threshold value, diff image updated.
+Click "Load" buttons to load images. Once both two input images loaded, the diff image is computed and displayed.
 
-![](snapshot.png)
+- Change `Tolerance` slider to get different compare result.
+- Change `Zoom` slider or use mouse wheel to scale current image.
+
+![](snapshots/snapshot_2022-06-12.png)
 
 ## How to build
 **Required dependencies**
@@ -18,8 +21,8 @@ Load two images in "Image1" and "Image2" window respectively, then the diff imag
 # switch to working directory
 cd ~/work/github
 
-# get imgui latest source
-git clone https://github.com/ocornut/imgui
+# get imgui latest source, docking branch
+git clone https://github.com/ocornut/imgui -b docking imgui-docking
 # or get it from mirror:
 # https://gitee.com/mirrors/imgui
 
