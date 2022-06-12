@@ -1,20 +1,19 @@
-#include <cstddef>
+#include <stdio.h>
+#include <stddef.h>
+
+#include <string>
+#include <vector>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <GLFW/glfw3.h>
-#include <stdio.h>
-#include <string>
-#include <vector>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui_internal.h"
 
 #include "app_design.hpp"
 #include "tinyfiledialogs.h"
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
-
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
 
 class MyApp : public App<MyApp>
 {
@@ -67,7 +66,7 @@ public:
         myUpdateMouseWheel(); // not working now.
 
         static bool use_work_area = true;
-        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollWithMouse;
 
         // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
         // Based on your use case you may want one of the other.
@@ -123,11 +122,19 @@ public:
 
         ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 4 / 10), true);
         {
-            ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth()/2, ImGui::GetWindowHeight()), false);
+            ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+            ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+            // vMin.x += ImGui::GetWindowPos().x;
+            // vMin.y += ImGui::GetWindowPos().y;
+            // vMax.x += ImGui::GetWindowPos().x;
+            // vMax.y += ImGui::GetWindowPos().y;
+            float window_content_height = vMax.y - vMin.y;
+            ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth()/2, window_content_height), false);
             if (!imageLeft.mat.empty())
             {
                 std::string winname = std::string("Image1 - ") + imageLeft.get_name();
-                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
+                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft, 1.0f);
             }
             ImGui::EndChild();
 
@@ -135,11 +142,11 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth()/2, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth()/2, window_content_height), false);
             if (!imageRight.mat.empty())
             {
                 std::string winname = std::string("Image2 - ") + imageRight.get_name();
-                ShowImage(winname.c_str(), imageRight.get_open(), imageRight);
+                ShowImage(winname.c_str(), imageRight.get_open(), imageRight, 0.0f);
             }
             ImGui::EndChild();
         }
@@ -156,9 +163,11 @@ public:
             {
                 int old_zoom_percent = zoom_percent;
                 ImGui::PushItemWidth(200);
-                ImGui::Text("Zoom");
+                char text[20] = {0};
+                sprintf(text, "Zoom: %d%%", zoom_percent);
+                ImGui::Text("%s", text);
                 ImGuiSliderFlags zoom_slider_flags = ImGuiSliderFlags_NoInput;
-                ImGui::SliderInt("##Zoom", &zoom_percent, 0, 100, "%d", zoom_slider_flags);
+                ImGui::SliderInt("##Zoom", &zoom_percent, zoom_percent_min, zoom_percent_max, "", zoom_slider_flags);
                 if (zoom_percent != old_zoom_percent)
                 {
                     old_zoom_percent = zoom_percent;
@@ -168,9 +177,11 @@ public:
             {
                 int old_diff_thresh = diff_thresh;
                 ImGui::PushItemWidth(256);
-                ImGui::Text("Tolerance");
+                char text[20] = {0};
+                sprintf(text, "Tolerance: %d", diff_thresh);
+                ImGui::Text("%s", text);
                 ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
-                ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "%d", tolerance_slider_flags);
+                ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
                 if (diff_thresh != old_diff_thresh)
                 {
                     compare_condition_updated = true;
@@ -190,7 +201,7 @@ public:
             ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5, ImGui::GetWindowHeight()), false);
             if (show_diff_image)
             {
-                ShowImage("Diff Image", &show_diff_image, diff_image);
+                ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
             }
             ImGui::EndChild();
         }
@@ -212,7 +223,7 @@ private:
     void UI_ChooseImageFile();
     void LoadImage(RichImage& image);
     void ComputeDiffImage();
-    void ShowImage(const char* windowName, bool *open, const RichImage& image);
+    void ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio = 0.f);
 
     void StatusbarUI();
 
@@ -227,6 +238,8 @@ private:
     bool show_diff_image = false;
     int diff_thresh = 1;
     int zoom_percent = 46;
+    int zoom_percent_min = 10;
+    int zoom_percent_max = 1000;
 
     const float statusbarSize = 50;
 };
@@ -253,12 +266,12 @@ void MyApp::myUpdateMouseWheel()
     // Reset the locked window if we move the mouse or after the timer elapses
     if (cur_window != NULL)
     {
-        std::string window_name = cur_window->Name;
-        if (window_name.length() < 5 || window_name.find("Image") == std::string::npos)
-        {
-            return;
-        }
-        //printf("!! cur_window->Name: %s\n", cur_window->Name);
+        // std::string window_name = cur_window->Name;
+        // if (window_name.length() < 5 || window_name.find("Image") == std::string::npos)
+        // {
+        //     return;
+        // }
+        // printf("!! cur_window->Name: %s\n", cur_window->Name);
         
         g.WheelingWindowTimer -= g.IO.DeltaTime;
         if (ImGui::IsMousePosValid() && ImLengthSqr(g.IO.MousePos - g.WheelingWindowRefMousePos) > g.IO.MouseDragThreshold * g.IO.MouseDragThreshold)
@@ -282,17 +295,20 @@ void MyApp::myUpdateMouseWheel()
     if (wheel_y != 0.0f)
     {
         StartLockWheelingWindow(window);
-        const float new_font_scale = ImClamp(window->FontWindowScale + g.IO.MouseWheel * 0.10f, 0.50f, 2.50f);
-        const float scale = new_font_scale / window->FontWindowScale;
-        window->FontWindowScale = new_font_scale;
-        if (window == window->RootWindow)
+        // const float new_font_scale = ImClamp(window->FontWindowScale + g.IO.MouseWheel * 0.10f, 0.50f, 2.50f);
+        // const float scale = new_font_scale / window->FontWindowScale;
+        
+        
+        zoom_percent = zoom_percent + g.IO.MouseWheel * 0.40f;
+        if (zoom_percent > zoom_percent_max)
         {
-            const ImVec2 offset = window->Size * (1.0f - scale) * (g.IO.MousePos - window->Pos) / window->Size;
-            ImGui::SetWindowPos(window, window->Pos + offset, 0);
-            window->Size = ImFloor(window->Size * scale);
-            window->SizeFull = ImFloor(window->SizeFull * scale);
+            zoom_percent = zoom_percent_max;
         }
-        // TODO: Zoom the image/texture in the current window
+        else if (zoom_percent < zoom_percent_min)
+        {
+            zoom_percent = zoom_percent_min;
+        }
+
         return;
     }
 }
@@ -320,15 +336,15 @@ void MyApp::StatusbarUI()
     ImGui::PopStyleColor();
 }
 
-void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image)
+void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio)
 {
     if (*open)
     {
         GLuint texture = image.get_texture();
         //ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(INFINITY, INFINITY));
 
-        ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
-        ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
+        // ImVec2 p_min = ImGui::GetCursorScreenPos(); // actual position
+        // ImVec2 p_max = ImVec2(ImGui::GetContentRegionAvail().x + p_min.x, ImGui::GetContentRegionAvail().y  + p_min.y);
 
         //ImGui::BeginChild("Image1Content", ImVec2(0, 0), true);
         //ImGui::Begin("Image1Content", NULL);
@@ -338,8 +354,18 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
         //
         ImVec2 actual_image_size(image.mat.size().width, image.mat.size().height);
         ImVec2 rendered_texture_size = actual_image_size * (zoom_percent * 1.0 / 100);
-        ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
-        
+        if (align_to_right_ratio >= 0 && align_to_right_ratio <= 1)
+        {
+            ImVec2 win_size = ImGui::GetCurrentWindow()->Size;
+            ImVec2 offset((win_size.x - rendered_texture_size.x) * align_to_right_ratio, 0);
+            ImVec2 p_min = ImGui::GetCursorScreenPos() + offset;
+            ImVec2 p_max = p_min + rendered_texture_size;
+            ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+        }
+        else
+        {
+            ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
+        }
     }
 }
 
