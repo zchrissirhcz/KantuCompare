@@ -8,7 +8,9 @@ Click "Load" buttons to load images. Once both two input images loaded, the diff
 - Change `Tolerance` slider to get different compare result.
 - Change `Zoom` slider or use mouse wheel to scale current image.
 
-![](snapshots/snapshot_2022-06-12.png)
+![](images/snapshots/snapshot_2022-06-12.png)
+
+Example input images and snapshots can be found in [images](https://github.com/zchrissirhcz/image-compare/tree/main/images) directory.
 
 ## How to build
 **Required dependencies**
@@ -42,19 +44,28 @@ git clone https://github.com/zchrissirhcz/small-compare
 # open the project with VSCode
 cd small-compare
 code .
-# edit CMakeLists.txt if you using different paths of dependencies
+# edit CMakeLists.txt if you are using different paths of dependencies
 ```
 
 **configure && build && run**
 ```bash
 cd build
-./linux-x64.sh    # for Linux / macOS
-#.\vs2022-x64.cmd # for Windows with Visual Studio 2022
-./ImageCompare    # start the application
+
+# for Linux / macOS
+./linux-x64.sh
+cd linux-x64
+./ImageCompare
+cd ..
+
+# for Windows
+.\vs2022-build.cmd
+cd vs2022-build
+.\Debug\ImageCompare
+cd ..
 ```
 
 ## Remarks
-The initial implementation is based on Qt, and is not updated anymore, for the sake of license and law (for example, on the company's computer, a lawyer's letter is received when the QtCreator development environment is installed).
+The initial implementation was based on Qt, and is not updated anymore, for the sake of license and law (for example, on the company's computer, a lawyer's letter is received when the QtCreator development environment is installed).
 
 You can switch to the [Qt branch](https://github.com/zchrissirhcz/small-compare/tree/qt) to view the source code.
 
