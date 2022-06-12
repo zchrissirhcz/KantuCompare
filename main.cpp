@@ -13,8 +13,6 @@
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
 
-#include "my_widgets.hpp"
-
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
@@ -29,7 +27,7 @@ public:
     void StartUp()
     {
         // Title
-        glfwSetWindowTitle(window, u8"Simple Image Compare Tool");
+        glfwSetWindowTitle(window, u8"Image Compare");
         glfwSetWindowSize(window, 960, 640);
 
         // Style
@@ -64,26 +62,29 @@ public:
 
     void Update()
     {
-        myUpdateMouseWheel();
+        //ImGui::ShowDemoWindow();
 
-        const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        ImGuiIO& io = ImGui::GetIO();
-        ImVec2 display_size = io.DisplaySize;
-        ImVec2 mvp_size = main_viewport->Size;
-        int min_len = std::min(mvp_size.x, mvp_size.y) / 2;
-        ImVec2 win_size(min_len, min_len);
-        ImGuiCond_ cond = ImGuiCond_FirstUseEver;
-        ImGuiWindowFlags flags = 0; //ImGuiWindowFlags_NoTitleBar;
+        myUpdateMouseWheel(); // not working now.
 
-        const char* image_path1 = NULL;
+        static bool use_work_area = true;
+        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
 
-        ImGui::SetNextWindowPos(ImVec2(mvp_size.x/5, 0), cond);
-        ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Meta1", NULL, flags);
+        // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
+        // Based on your use case you may want one of the other.
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
+        ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
+
+        // ImGuiIO& io = ImGui::GetIO();
+        // ImVec2 display_size(io.DisplaySize.x, io.DisplaySize.y);
+        // ImGui::SetNextWindowSize(display_size);
+
+        ImGui::Begin("Testing menu", NULL, flags);
+        
+        ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 1 / 10), true);
         {
-            float x = ImGui::GetCursorPosX();
-            ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
-            if (ImGui::Button("Load1"))
+            ImGui::BeginChild("##leftpath", ImVec2(ImGui::GetWindowWidth() / 2, ImGui::GetWindowHeight()), false);
+            if (ImGui::Button("Load##1"))
             {
                 LoadImage(imageLeft);
                 compare_condition_updated = true;
@@ -92,31 +93,18 @@ public:
             {
                 std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageLeft.get_name(), imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
                 ImGui::SameLine();
-                ImGui::SetCursorPosX(x); // align back to the left
+                //ImGui::SetCursorPosX(x); // align back to the left
 
                 ImGui::Text("%s", text.c_str());
             }
-        }
-        ImGui::End();
+            ImGui::EndChild();
 
+            ImGui::SameLine();
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+            ImGui::SameLine();
 
-        ImGui::Begin("Image1", NULL, flags);
-        {
-            if (!imageLeft.mat.empty())
-            {
-                std::string winname = std::string("Image1 - ") + imageLeft.get_name();
-                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
-            }
-        }
-        ImGui::End();
-
-        ImGui::SetNextWindowPos(ImVec2(mvp_size.x/2, 0), cond);
-        ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Meta2", NULL, flags);
-        {
-            float x = ImGui::GetCursorPosX();
-            ImGui::SameLine(ImGui::GetWindowWidth()-50); // align to the right
-            if (ImGui::Button("Load"))
+            ImGui::BeginChild("##rightpath", ImVec2(ImGui::GetWindowWidth() / 2, ImGui::GetWindowHeight()), false);
+            if (ImGui::Button("Load##2"))
             {
                 LoadImage(imageRight);
                 compare_condition_updated = true;
@@ -125,57 +113,99 @@ public:
             {
                 std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
                 ImGui::SameLine();
-                ImGui::SetCursorPosX(x); // align back to the left
+                //ImGui::SetCursorPosX(x); // align back to the left
 
                 ImGui::Text("%s", text.c_str());
             }
+            ImGui::EndChild();
         }
-        ImGui::End();
+        ImGui::EndChild();
 
-
-        ImGui::Begin("Image2", NULL, flags);
+        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 4 / 10), true);
         {
+            ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth()/2, ImGui::GetWindowHeight()), false);
+            if (!imageLeft.mat.empty())
+            {
+                std::string winname = std::string("Image1 - ") + imageLeft.get_name();
+                ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft);
+            }
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+            ImGui::SameLine();
+
+            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth()/2, ImGui::GetWindowHeight()), false);
             if (!imageRight.mat.empty())
             {
                 std::string winname = std::string("Image2 - ") + imageRight.get_name();
                 ShowImage(winname.c_str(), imageRight.get_open(), imageRight);
             }
+            ImGui::EndChild();
         }
-        ImGui::End();
+        ImGui::EndChild();
 
-        ImGui::SetNextWindowPos(ImVec2(mvp_size.x*4/5, mvp_size.y/2), cond);
-        ImGui::SetNextWindowSize(win_size, cond);
-        ImGui::Begin("Meta3", NULL, flags);
+        //ImGui::SameLine();
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+        //ImGui::SameLine();
+
+        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() * 4 / 10), false);
         {
-            int old_diff_thresh = diff_thresh;
-            ImGuiSliderFlags slider_flags = ImGuiSliderFlags_NoInput;
-            // slider will always be 256 pixel wide
-            ImGui::PushItemWidth(256);
-            //ImGui::NewLine();
-            ImGui::Text("Tolerance");
-            ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "%d", slider_flags);
-            //ImGui::VSliderInt("Tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
-            //scp::VSliderInt("tolerance", ImVec2(30, win_size.y*0.9), &diff_thresh, 0, 255);
-            //ImGui::SameLine();
-            if (diff_thresh != old_diff_thresh)
+            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/5, ImGui::GetWindowHeight()), false);
+            // zoom
             {
-                compare_condition_updated = true;
-                old_diff_thresh = diff_thresh;
+                int old_zoom_percent = zoom_percent;
+                ImGui::PushItemWidth(200);
+                ImGui::Text("Zoom");
+                ImGuiSliderFlags zoom_slider_flags = ImGuiSliderFlags_NoInput;
+                ImGui::SliderInt("##Zoom", &zoom_percent, 0, 100, "%d", zoom_slider_flags);
+                if (zoom_percent != old_zoom_percent)
+                {
+                    old_zoom_percent = zoom_percent;
+                }
+            }
+            // tolerance
+            {
+                int old_diff_thresh = diff_thresh;
+                ImGui::PushItemWidth(256);
+                ImGui::Text("Tolerance");
+                ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
+                ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "%d", tolerance_slider_flags);
+                if (diff_thresh != old_diff_thresh)
+                {
+                    compare_condition_updated = true;
+                    old_diff_thresh = diff_thresh;
+                }
+            }
+            {
+                ImGui::Text("Pixel Detail(TODO)");
             }
             ComputeDiffImage();
-        }
-        ImGui::End();
+            ImGui::EndChild();
 
-        ImGui::Begin("DiffImage", NULL, flags);
-        {
+            ImGui::SameLine();
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+            ImGui::SameLine();
+
+            ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5, ImGui::GetWindowHeight()), false);
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image);
             }
+            ImGui::EndChild();
         }
-        ImGui::End();
+        ImGui::EndChild();
 
-        StatusbarUI();
+        //ImGui::SameLine();
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+        //ImGui::SameLine();
+
+        ImGui::BeginChild("##StatusBarRegion", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() / 10), false);
+        ImGui::Text("Important status(TODO)");
+        ImGui::EndChild();
+        //StatusbarUI();
+
+        ImGui::End();
     }
 
 private:
@@ -196,6 +226,7 @@ private:
     bool compare_condition_updated = false;
     bool show_diff_image = false;
     int diff_thresh = 1;
+    int zoom_percent = 46;
 
     const float statusbarSize = 50;
 };
@@ -301,11 +332,13 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
 
         //ImGui::BeginChild("Image1Content", ImVec2(0, 0), true);
         //ImGui::Begin("Image1Content", NULL);
-        ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
+        //ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
         //ImGui::EndChild();
         //ImGui::End();
         //
-        //ImGui::Image((void*)(uintptr_t)texture, ImVec2(image.mat.size().width, image.mat.size().height));
+        ImVec2 actual_image_size(image.mat.size().width, image.mat.size().height);
+        ImVec2 rendered_texture_size = actual_image_size * (zoom_percent * 1.0 / 100);
+        ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
         
     }
 }
