@@ -11,9 +11,11 @@ set(CMAKE_BUILD_TYPE Debug)
 sleek_add_flags("-fstandalone-debug")
 
 # imgui: using the latest source code
-set(IMGUI_DIR "$ENV{HOME}/work/github/imgui")
+#set(IMGUI_DIR "$ENV{HOME}/work/github/imgui")
+# using the docking branch
+set(IMGUI_DIR "$ENV{HOME}/work/github/imgui-docking")
 #set(IMGUI_DIR "$ENV{HOME}/work/imgui-docking")
-#add_definitions(-DIMGUI_WITH_DOCKING)
+add_definitions(-DIMGUI_WITH_DOCKING)
 include_directories(
   ${IMGUI_DIR}
   ${IMGUI_DIR}/backends
@@ -50,8 +52,6 @@ add_executable(ImageCompare
   tinyfiledialogs.c
   image_compare_core.hpp
   image_compare_core.cpp
-  my_widgets.hpp
-  my_widgets.cpp
 )
 target_link_libraries(ImageCompare
   glfw
