@@ -14,6 +14,7 @@
 #include "tinyfiledialogs.h"
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
+#include "imgInspect.h"
 
 class MyApp : public App<MyApp>
 {
@@ -207,7 +208,7 @@ public:
                     }
                 }
                 {
-                    ImGui::Text("Pixel Detail(TODO)");
+                    ImGui::Checkbox("Inspect Pixels", &inspect_pixels);
                 }
             }
             ImGui::EndChild();
@@ -237,6 +238,23 @@ public:
                         window->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
                     }
                     ImGui::PopClipRect();
+                }
+
+                {
+                    ImGuiIO& io = ImGui::GetIO();
+
+                    ImRect rc = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+                    ImVec2 mouseUVCoord = (io.MousePos - rc.Min) / rc.GetSize();
+                    mouseUVCoord.y = 1.f - mouseUVCoord.y;
+                    if (inspect_pixels && mouseUVCoord.x >= 0.f && mouseUVCoord.y >= 0.f)
+                    {
+                        int width = diff_image.mat.size().width;
+                        int height = diff_image.mat.size().height;
+
+                        //imageInspect(width, height, pickerImage.GetBits(), mouseUVCoord, displayedTextureSize);
+                        ImVec2 displayedTextureSize(8, 8);
+                        ImageInspect::inspect(width, height, diff_image.mat.data, mouseUVCoord, displayedTextureSize);
+                    }
                 }
             }
             ImGui::EndChild();
@@ -276,6 +294,7 @@ private:
     int zoom_percent = 46;
     int zoom_percent_min = 10;
     int zoom_percent_max = 1000;
+    bool inspect_pixels = false;
 
     const float statusbarSize = 50;
 };
