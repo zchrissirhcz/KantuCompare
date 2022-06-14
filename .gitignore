@@ -45,3 +45,6 @@ build/log.txt
 
 # Dear ImGui config file
 **/imgui.ini
+
+# build output
+output/**

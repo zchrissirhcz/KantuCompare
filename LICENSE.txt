@@ -32,3 +32,9 @@ Copyright (c) 2014-2022 Omar Cornut, MIT License
 2. tinyfiledialogs
 - tinyfiledialogs.h, v3.8.8 [Apr 22, 2021] zlib licence
 - tinyfiledialogs.h, v3.8.8 [Apr 22, 2021] zlib licence
+
+3. OpenCV
+OpenCV 4.x branch with Apache License 2.0
+
+4. imgInspect.h
+Copyright(c) 2019 Cedric Guillemet, MIT License
