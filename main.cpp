@@ -210,6 +210,21 @@ public:
                 {
                     ImGui::Checkbox("Inspect Pixels", &inspect_pixels);
                 }
+                {
+                    if (ImGui::Button("Reload Input Images"))
+                    {
+                        if (!imageLeft.mat.empty())
+                        {
+                            imageLeft.reload();
+                            compare_condition_updated = true;
+                        }
+                        if (!imageRight.mat.empty())
+                        {
+                            imageRight.reload();
+                            compare_condition_updated = true;
+                        }
+                    }
+                }
             }
             ImGui::EndChild();
 

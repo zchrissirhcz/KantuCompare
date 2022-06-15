@@ -78,6 +78,14 @@ public:
         set_name(filepath);
         filesize = imk::get_file_size(filepath);
     }
+
+    void reload()
+    {
+        if (name.length() > 0)
+        {
+            loadFromFile(name.c_str());
+        }
+    }
     
     void load_mat(cv::Mat& frame)
     {
