@@ -8,6 +8,6 @@ void getDiffImage(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int t
 
 cv::Mat loadImage(const std::string& image_path);
 
-int get_file_size(const std::string filename);
+int get_file_size(const std::string& filename);
 
 }

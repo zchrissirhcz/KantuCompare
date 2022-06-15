@@ -3,7 +3,7 @@
 
 #include <filesystem>
 
-int imk::get_file_size(const std::string filepath)
+int imk::get_file_size(const std::string& filepath)
 {
     std::filesystem::path p{filepath};
     return std::filesystem::file_size(p);

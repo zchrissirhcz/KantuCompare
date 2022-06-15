@@ -27,14 +27,21 @@ SOFTWARE.
 Licenses for the dependencies
 ------------------------------
 1. Dear ImGui
+https://github.com/ocornut/imgui
 Copyright (c) 2014-2022 Omar Cornut, MIT License
 
 2. tinyfiledialogs
+https://sourceforge.net/projects/tinyfiledialogs
 - tinyfiledialogs.h, v3.8.8 [Apr 22, 2021] zlib licence
 - tinyfiledialogs.h, v3.8.8 [Apr 22, 2021] zlib licence
 
 3. OpenCV
+https://github.com/opencv/opencv
 OpenCV 4.x branch with Apache License 2.0
 
 4. imgInspect.h
+https://github.com/CedricGuillemet/imgInspect
 Copyright(c) 2019 Cedric Guillemet, MIT License
+
+5. Str.h
+https://github.com/ocornut/str

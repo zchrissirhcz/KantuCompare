@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stddef.h>
 
-#include <string>
+//#include <string>
+#define STR_IMPLEMENTATION
+#include "Str.h"
 #include <vector>
 
 #include "imgui.h"
@@ -108,7 +110,8 @@ public:
 
                 //ImGui::Text("%s", text.c_str());
                 showText(imageLeft.get_name(), "1");
-                std::string meta_info = cv::format("W=%d,H=%d; %d bytes", imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
+                Str256 meta_info;
+                meta_info.setf("W=%d,H=%d; %d bytes", imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
                 showText(meta_info.c_str(), "2");
             }
             ImGui::EndChild();
@@ -125,13 +128,15 @@ public:
             }
             if (!imageRight.mat.empty())
             {
-                std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
+                Str256 text;
+                text.setf("%s\nW=%d,H=%d; %d bytes", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
                 ImGui::SameLine();
                 //ImGui::SetCursorPosX(x); // align back to the left
 
                 //ImGui::Text("%s", text.c_str());
                 showText(imageRight.get_name(), "3");
-                std::string meta_info = cv::format("W=%d,H=%d; %d bytes", imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
+                Str256 meta_info;
+                meta_info.setf("W=%d,H=%d; %d bytes", imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
                 showText(meta_info.c_str(), "4");
             }
             ImGui::EndChild();
@@ -151,7 +156,9 @@ public:
             ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
             if (!imageLeft.mat.empty())
             {
-                std::string winname = std::string("Image1 - ") + imageLeft.get_name();
+                //std::string winname = std::string("Image1 - ") + imageLeft.get_name();
+                Str256 winname;
+                winname.setf("Image1 - %s", imageLeft.get_name());
                 ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft, 1.0f);
             }
             ImGui::EndChild();
@@ -163,7 +170,9 @@ public:
             ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
             if (!imageRight.mat.empty())
             {
-                std::string winname = std::string("Image2 - ") + imageRight.get_name();
+                //std::string winname = std::string("Image2 - ") + imageRight.get_name();
+                Str256 winname;
+                winname.setf("Image2 - %s", imageLeft.get_name());
                 ShowImage(winname.c_str(), imageRight.get_open(), imageRight, 0.0f);
             }
             ImGui::EndChild();
@@ -463,7 +472,9 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
             ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
         }
 
-        std::string label = cv::format("image##%d", texture);
+        //std::string label = cv::format("image##%d", texture);
+        Str256 label;
+        label.setf("image##%d", texture);
         ImGui::BeginChild(label.c_str(), image_window_size, clamped_by_window, ImGuiWindowFlags_HorizontalScrollbar);
         {
             ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
