@@ -167,7 +167,7 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
+            ImGui::BeginChild("Image2", ImVec2(0, window_content_height), false);
             if (!imageRight.mat.empty())
             {
                 //std::string winname = std::string("Image2 - ") + imageRight.get_name();
@@ -185,7 +185,7 @@ public:
 
         ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 5 / 10), false);
         {
-            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/4, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/4, ImGui::GetWindowHeight()-20), false);
             {
                 // zoom
                 {
@@ -243,7 +243,7 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5 - 50, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("###RightImage", ImVec2(0, ImGui::GetWindowHeight()-20), false);
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
