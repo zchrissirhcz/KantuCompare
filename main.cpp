@@ -218,6 +218,12 @@ public:
                     }
                 }
                 {
+                    if (is_exactly_same)
+                        ImGui::Text("Exactly Same: Yes");
+                    else
+                        ImGui::Text("Exactly Same: No");
+                }
+                {
                     ImGui::Checkbox("Inspect Pixels", &inspect_pixels);
                 }
                 {
@@ -320,6 +326,7 @@ private:
     int zoom_percent_min = 10;
     int zoom_percent_max = 1000;
     bool inspect_pixels = false;
+    bool is_exactly_same = false;
 
     const float statusbarSize = 50;
 };
@@ -484,7 +491,7 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
     }
 }
 
-static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh)
+static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh, bool& is_exactly_same)
 {
     if (image_left.channels() != 4 || image_right.channels() != 4)
     {
@@ -499,14 +506,17 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
     {
         diff.create(256, 256, CV_8UC3);
         diff = cv::Scalar(128, 128, 128);
+        is_exactly_same = true;
     }
     else if (image_left.empty())
     {
         diff = image_right.clone();
+        is_exactly_same = false;
     }
     else if (image_left.empty())
     {
         diff = image_left.clone();
+        is_exactly_same = false;
     }
     else
     {
@@ -592,12 +602,14 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
                     diff_image_compare.ptr(i, j)[3] = 255;
                 }
             }
+            is_exactly_same = true;
         }
         else
         {
             cv::Scalar above_color(0, 0, 255-50);
             cv::Scalar below_color(255-50, 0, 0);
             imk::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
+            is_exactly_same = false;
         }
 
         diff = image_compare.clone();
@@ -619,7 +631,7 @@ void MyApp::ComputeDiffImage()
         cv::Mat diff_mat;
         if (!imageLeft.mat.empty() && !imageRight.mat.empty())
         {
-            diff_mat = compare_two_mat(imageLeft.mat, imageRight.mat, diff_thresh);
+            diff_mat = compare_two_mat(imageLeft.mat, imageRight.mat, diff_thresh, is_exactly_same);
         }
         else
         {
