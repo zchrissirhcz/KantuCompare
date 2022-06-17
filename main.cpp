@@ -315,7 +315,7 @@ private:
 private:
     bool window_open = true;
     bool Check = true;
-    const char* filepath = NULL;
+    Str256 filepath;
     RichImage imageLeft;
     RichImage imageRight;
     RichImage diff_image;
@@ -649,7 +649,6 @@ void MyApp::ComputeDiffImage()
     }
 }
 
-static Str256 path;
 int MyApp::UI_ChooseImageFile()
 {
 #if 0
@@ -673,7 +672,7 @@ int MyApp::UI_ChooseImageFile()
     else
     {
         printf("file choosed: %s\n", lTheOpenFileName);
-        filepath = lTheOpenFileName;
+        filepath.setf("%s", lTheOpenFileName);
     }
     return 0;
 #else
@@ -699,8 +698,7 @@ int MyApp::UI_ChooseImageFile()
         std::cout << "Selected files:";
         std::cout << f.result()[0] << std::endl;
 
-        path.setf("%s", f.result()[0].c_str());
-        filepath = path.c_str();
+        filepath.setf("%s", f.result()[0].c_str());
     }
 
     return 0;
@@ -710,9 +708,9 @@ int MyApp::UI_ChooseImageFile()
 void MyApp::LoadImage(RichImage& image)
 {
     UI_ChooseImageFile();
-    if (filepath)
+    if (filepath.c_str())
     {
-        image.loadFromFile(filepath);
+        image.loadFromFile(filepath.c_str());
     }
     filepath = NULL;
 }
