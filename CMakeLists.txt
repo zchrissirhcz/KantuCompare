@@ -21,8 +21,6 @@ add_executable(ImageCompare
   ${IMGUI_DIR}/imgui_tables.cpp
   ${IMGUI_DIR}/imgui_widgets.cpp
   ${IMGUI_DIR}/imgui_demo.cpp
-  tinyfiledialogs.h
-  tinyfiledialogs.c
   image_compare_core.hpp
   image_compare_core.cpp
 )
@@ -30,6 +28,7 @@ target_link_libraries(ImageCompare
   glfw
   ${OPENGL_LIBRARIES}
   ${OpenCV_LIBS}
+  tinyfiledialogs
 )
 
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")

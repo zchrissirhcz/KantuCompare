@@ -34,13 +34,35 @@ include_directories(
 #   mirror: https://gitee.com/mirrors/glfw
 #----------------------------------------------------------------------
 # find_package(glfw3 REQUIRED)
-set(GLFW_DIR "$ENV{HOME}/work/github/glfw") # Set this to point to an up-to-date GLFW repo
+#set(GLFW_DIR "$ENV{HOME}/work/github/glfw") # Set this to point to an up-to-date GLFW repo
+set(GLFW_DIR "$ENV{HOME}/.sled/work_repos/glfw/master")
 option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" OFF)
 option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
 add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR}/glfw EXCLUDE_FROM_ALL)
+
+
+#----------------------------------------------------------------------
+# portable-file-dialogs
+#----------------------------------------------------------------------
+set(tinyfiledialogs_DIR "$ENV{HOME}/.sled/work_repos/tinyfiledialogs/master")
+add_library(tinyfiledialogs STATIC
+  ${tinyfiledialogs_DIR}/tinyfiledialogs.h
+  ${tinyfiledialogs_DIR}/tinyfiledialogs.c
+)
+target_include_directories(tinyfiledialogs
+  PUBLIC
+    ${tinyfiledialogs_DIR}
+)
+
+
+#----------------------------------------------------------------------
+# portable-file-dialogs
+#----------------------------------------------------------------------
+set(portable_file_dialogs_DIR "$ENV{HOME}/.sled/work_repos/portable-file-dialogs/master")
+add_subdirectory(${portable_file_dialogs_DIR} ${CMAKE_BINARY_DIR}/portable_file_dialogs)
 
 
 #----------------------------------------------------------------------
