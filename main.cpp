@@ -13,7 +13,8 @@
 #include "imgui_internal.h"
 
 #include "app_design.hpp"
-#include "tinyfiledialogs.h"
+//#include "tinyfiledialogs.h"
+#include "portable-file-dialogs.h"
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
 #include "imgInspect.h"
@@ -298,7 +299,7 @@ public:
     }
 
 private:
-    void UI_ChooseImageFile();
+    int UI_ChooseImageFile();
     void LoadImage(RichImage& image);
     void ComputeDiffImage();
     void ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio = 0.f);
@@ -636,8 +637,10 @@ void MyApp::ComputeDiffImage()
     }
 }
 
-void MyApp::UI_ChooseImageFile()
+static Str256 path;
+int MyApp::UI_ChooseImageFile()
 {
+#if 0
     char const* lFilterPatterns[3] = { "*.jpg", "*.png", "*.jpeg" };
     const char* lTheOpenFileName = tinyfd_openFileDialog(
                         "let us read the password back",
@@ -660,6 +663,36 @@ void MyApp::UI_ChooseImageFile()
         printf("file choosed: %s\n", lTheOpenFileName);
         filepath = lTheOpenFileName;
     }
+    return 0;
+#else
+
+    // Check that a backend is available
+    if (!pfd::settings::available())
+    {
+        std::cout << "Portable File Dialogs are not available on this platform.\n";
+        return 1;
+    }
+
+    // Set verbosity to true
+    pfd::settings::verbose(true);
+
+    // File open
+    auto f = pfd::open_file("Choose image file", pfd::path::home(),
+                            { "Image Files (.jpg .png .jpeg .bmp)", "*.jpg *.png *.jpeg *.bmp",
+                              "All Files", "*" }//,
+                            //pfd::opt::multiselect
+                            );
+    if (f.result().size() > 0)
+    {
+        std::cout << "Selected files:";
+        std::cout << f.result()[0] << std::endl;
+
+        path.setf("%s", f.result()[0].c_str());
+        filepath = path.c_str();
+    }
+
+    return 0;
+#endif
 }
 
 void MyApp::LoadImage(RichImage& image)
@@ -672,7 +705,7 @@ void MyApp::LoadImage(RichImage& image)
     filepath = NULL;
 }
 
-int main( int argc, char** argv )
+int main(int argc, char** argv)
 {
     MyApp app;
     app.Run();

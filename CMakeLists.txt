@@ -28,7 +28,8 @@ target_link_libraries(ImageCompare
   glfw
   ${OPENGL_LIBRARIES}
   ${OpenCV_LIBS}
-  tinyfiledialogs
+  #tinyfiledialogs
+  portable_file_dialogs
 )
 
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
