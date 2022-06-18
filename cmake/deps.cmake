@@ -45,17 +45,17 @@ add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR}/glfw EXCLUDE_FROM_ALL)
 
 
 #----------------------------------------------------------------------
-# portable-file-dialogs
+# tinyfiledialogs
 #----------------------------------------------------------------------
-set(tinyfiledialogs_DIR "$ENV{HOME}/.sled/work_repos/tinyfiledialogs/master")
-add_library(tinyfiledialogs STATIC
-  ${tinyfiledialogs_DIR}/tinyfiledialogs.h
-  ${tinyfiledialogs_DIR}/tinyfiledialogs.c
-)
-target_include_directories(tinyfiledialogs
-  PUBLIC
-    ${tinyfiledialogs_DIR}
-)
+# set(tinyfiledialogs_DIR "$ENV{HOME}/.sled/work_repos/tinyfiledialogs/master")
+# add_library(tinyfiledialogs STATIC
+#   ${tinyfiledialogs_DIR}/tinyfiledialogs.h
+#   ${tinyfiledialogs_DIR}/tinyfiledialogs.c
+# )
+# target_include_directories(tinyfiledialogs
+#   PUBLIC
+#     ${tinyfiledialogs_DIR}
+# )
 
 
 #----------------------------------------------------------------------

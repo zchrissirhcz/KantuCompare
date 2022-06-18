@@ -4,6 +4,7 @@
         {
             "name": "googletest",
             "url": "https://github.com/google/googletest",
+            "license": "BSD-3-Clause license",
             "version": "release-1.11.0",
             "cmake_args": {
                 "configure":
@@ -17,21 +18,25 @@
         {
             "name": "portable-file-dialogs",
             "url": "https://github.com/samhocevar/portable-file-dialogs",
+            "license": "WTFPL license",
             "version": "master"
         },
         {
             "name": "tinyfiledialogs",
             "url": "http://git.code.sf.net/p/tinyfiledialogs/code",
+            "license": "Zlib license",
             "version": "master"
         },
         {
             "name": "glfw",
             "url": "https://github.com/glfw/glfw",
+            "license": "Zlib license",
             "version": "master"
         },
         {
             "name": "opencv",
             "url": "https://gitee.com/mirrors/opencv",
+            "license": "Apache License 2.0",
             "version": "4.5.5",
             "cmake_args": {
                 "configure":

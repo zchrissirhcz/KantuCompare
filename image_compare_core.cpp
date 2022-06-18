@@ -1,11 +1,13 @@
 #include "image_compare_core.hpp"
 
 
-#include <filesystem>
 
-int imk::get_file_size(const std::string& filepath)
+#include <filesystem>
+#include "Str.h"
+
+int imk::get_file_size(const Str256& filepath)
 {
-    std::filesystem::path p{filepath};
+    std::filesystem::path p{filepath.c_str()};
     return std::filesystem::file_size(p);
 }
 

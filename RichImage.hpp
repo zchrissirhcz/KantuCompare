@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include "image_compare_core.hpp"
+#include "Str.h"
 
 static GLuint getTextureFromImage(const cv::Mat& image)
 {
@@ -57,9 +58,10 @@ public:
 public:
     RichImage(): texture(0), open(false) {}
 
-    void loadFromFile(const char* filepath)
+    void loadFromFile(const Str256& filepath)
     {
-        cv::Mat mat = cv::imread(filepath, cv::IMREAD_UNCHANGED); 
+        cv::Mat mat = cv::imread(filepath.c_str(), cv::IMREAD_UNCHANGED); 
+        if (mat.empty()) return;
         switch (mat.channels())
         {
         case 1:
@@ -145,9 +147,9 @@ public:
         return &open;
     }
 
-    void set_name(const char* _name)
+    void set_name(const Str256& _name)
     {
-        name = _name;
+        name = _name.c_str();
     }
 
     //then GetName

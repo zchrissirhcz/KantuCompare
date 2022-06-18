@@ -5,11 +5,12 @@ project(image_compare)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include("sleek.cmake")
+include("cmake/sleek.cmake")
 set(CMAKE_BUILD_TYPE Debug)
-sleek_add_flags("-fstandalone-debug")
+#sleek_add_flags("-fstandalone-debug")
 
-include("deps.cmake")
+include("cmake/deps.cmake")
+#include("cmake/asan.cmake")
 
 add_executable(ImageCompare
   main.cpp

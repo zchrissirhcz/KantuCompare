@@ -2,8 +2,6 @@
 #include <stddef.h>
 
 //#include <string>
-#define STR_IMPLEMENTATION
-#include "Str.h"
 #include <vector>
 
 #include "imgui.h"
@@ -18,6 +16,9 @@
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
 #include "imgInspect.h"
+
+#define STR_IMPLEMENTATION
+#include "Str.h"
 
 class MyApp : public App<MyApp>
 {
@@ -190,32 +191,21 @@ public:
             {
                 // zoom
                 {
-                    int old_zoom_percent = zoom_percent;
                     ImGui::PushItemWidth(200);
                     char text[20] = {0};
                     sprintf(text, "Zoom: %d%%", zoom_percent);
                     ImGui::Text("%s", text);
                     ImGuiSliderFlags zoom_slider_flags = ImGuiSliderFlags_NoInput;
                     ImGui::SliderInt("##Zoom", &zoom_percent, zoom_percent_min, zoom_percent_max, "", zoom_slider_flags);
-                    if (zoom_percent != old_zoom_percent)
-                    {
-                        old_zoom_percent = zoom_percent;
-                    }
                 }
                 // tolerance
                 {
-                    int old_diff_thresh = diff_thresh;
                     ImGui::PushItemWidth(256);
                     char text[20] = {0};
                     sprintf(text, "Tolerance: %d", diff_thresh);
                     ImGui::Text("%s", text);
                     ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
-                    ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
-                    if (diff_thresh != old_diff_thresh)
-                    {
-                        compare_condition_updated = true;
-                        old_diff_thresh = diff_thresh;
-                    }
+                    compare_condition_updated = ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
                 }
                 {
                     if (is_exactly_same)
@@ -710,7 +700,7 @@ void MyApp::LoadImage(RichImage& image)
     UI_ChooseImageFile();
     if (filepath.c_str())
     {
-        image.loadFromFile(filepath.c_str());
+        image.loadFromFile(filepath);
     }
     filepath = NULL;
 }
