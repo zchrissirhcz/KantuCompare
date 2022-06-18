@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 
-#include <string>
+//#include <string>
 #include <vector>
 
 #include "imgui.h"
@@ -11,10 +11,14 @@
 #include "imgui_internal.h"
 
 #include "app_design.hpp"
-#include "tinyfiledialogs.h"
+//#include "tinyfiledialogs.h"
+#include "portable-file-dialogs.h"
 #include "RichImage.hpp"
 #include "image_compare_core.hpp"
 #include "imgInspect.h"
+
+#define STR_IMPLEMENTATION
+#include "Str.h"
 
 class MyApp : public App<MyApp>
 {
@@ -108,7 +112,8 @@ public:
 
                 //ImGui::Text("%s", text.c_str());
                 showText(imageLeft.get_name(), "1");
-                std::string meta_info = cv::format("W=%d,H=%d; %d bytes", imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
+                Str256 meta_info;
+                meta_info.setf("W=%d,H=%d; %d bytes", imageLeft.mat.size().width, imageLeft.mat.size().height, imageLeft.filesize);
                 showText(meta_info.c_str(), "2");
             }
             ImGui::EndChild();
@@ -125,13 +130,15 @@ public:
             }
             if (!imageRight.mat.empty())
             {
-                std::string text = cv::format("%s\nW=%d,H=%d; %d bytes", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
+                Str256 text;
+                text.setf("%s\nW=%d,H=%d; %d bytes", imageRight.get_name(), imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
                 ImGui::SameLine();
                 //ImGui::SetCursorPosX(x); // align back to the left
 
                 //ImGui::Text("%s", text.c_str());
                 showText(imageRight.get_name(), "3");
-                std::string meta_info = cv::format("W=%d,H=%d; %d bytes", imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
+                Str256 meta_info;
+                meta_info.setf("W=%d,H=%d; %d bytes", imageRight.mat.size().width, imageRight.mat.size().height, imageRight.filesize);
                 showText(meta_info.c_str(), "4");
             }
             ImGui::EndChild();
@@ -151,7 +158,9 @@ public:
             ImGui::BeginChild("Image1", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
             if (!imageLeft.mat.empty())
             {
-                std::string winname = std::string("Image1 - ") + imageLeft.get_name();
+                //std::string winname = std::string("Image1 - ") + imageLeft.get_name();
+                Str256 winname;
+                winname.setf("Image1 - %s", imageLeft.get_name());
                 ShowImage(winname.c_str(), imageLeft.get_open(), imageLeft, 1.0f);
             }
             ImGui::EndChild();
@@ -160,10 +169,12 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("Image2", ImVec2(ImGui::GetWindowWidth() / 2 - 10, window_content_height), false);
+            ImGui::BeginChild("Image2", ImVec2(0, window_content_height), false);
             if (!imageRight.mat.empty())
             {
-                std::string winname = std::string("Image2 - ") + imageRight.get_name();
+                //std::string winname = std::string("Image2 - ") + imageRight.get_name();
+                Str256 winname;
+                winname.setf("Image2 - %s", imageLeft.get_name());
                 ShowImage(winname.c_str(), imageRight.get_open(), imageRight, 0.0f);
             }
             ImGui::EndChild();
@@ -176,36 +187,31 @@ public:
 
         ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 5 / 10), false);
         {
-            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/4, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/4, ImGui::GetWindowHeight()-20), false);
             {
                 // zoom
                 {
-                    int old_zoom_percent = zoom_percent;
                     ImGui::PushItemWidth(200);
                     char text[20] = {0};
                     sprintf(text, "Zoom: %d%%", zoom_percent);
                     ImGui::Text("%s", text);
                     ImGuiSliderFlags zoom_slider_flags = ImGuiSliderFlags_NoInput;
                     ImGui::SliderInt("##Zoom", &zoom_percent, zoom_percent_min, zoom_percent_max, "", zoom_slider_flags);
-                    if (zoom_percent != old_zoom_percent)
-                    {
-                        old_zoom_percent = zoom_percent;
-                    }
                 }
                 // tolerance
                 {
-                    int old_diff_thresh = diff_thresh;
                     ImGui::PushItemWidth(256);
                     char text[20] = {0};
                     sprintf(text, "Tolerance: %d", diff_thresh);
                     ImGui::Text("%s", text);
                     ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
-                    ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
-                    if (diff_thresh != old_diff_thresh)
-                    {
-                        compare_condition_updated = true;
-                        old_diff_thresh = diff_thresh;
-                    }
+                    compare_condition_updated |= ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
+                }
+                {
+                    if (is_exactly_same)
+                        ImGui::Text("Exactly Same: Yes");
+                    else
+                        ImGui::Text("Exactly Same: No");
                 }
                 {
                     ImGui::Checkbox("Inspect Pixels", &inspect_pixels);
@@ -234,7 +240,7 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("###RightImage", ImVec2(ImGui::GetWindowWidth() * 4 / 5 - 50, ImGui::GetWindowHeight()), false);
+            ImGui::BeginChild("###RightImage", ImVec2(0, ImGui::GetWindowHeight()-20), false);
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
@@ -289,7 +295,7 @@ public:
     }
 
 private:
-    void UI_ChooseImageFile();
+    int UI_ChooseImageFile();
     void LoadImage(RichImage& image);
     void ComputeDiffImage();
     void ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio = 0.f);
@@ -299,7 +305,7 @@ private:
 private:
     bool window_open = true;
     bool Check = true;
-    const char* filepath = NULL;
+    Str256 filepath;
     RichImage imageLeft;
     RichImage imageRight;
     RichImage diff_image;
@@ -310,6 +316,7 @@ private:
     int zoom_percent_min = 10;
     int zoom_percent_max = 1000;
     bool inspect_pixels = false;
+    bool is_exactly_same = false;
 
     const float statusbarSize = 50;
 };
@@ -453,7 +460,7 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
             else
                 offset.x = (win_size.x - rendered_texture_size.x) * align_to_right_ratio;
             ImVec2 p_min = ImGui::GetCursorScreenPos() + offset;
-            ImVec2 p_max = p_min + rendered_texture_size;
+            //ImVec2 p_max = p_min + rendered_texture_size;
             //ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
             ImGui::SetNextWindowPos(p_min);
         }
@@ -463,7 +470,9 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
             ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
         }
 
-        std::string label = cv::format("image##%d", texture);
+        //std::string label = cv::format("image##%d", texture);
+        Str256 label;
+        label.setf("image##%d", texture);
         ImGui::BeginChild(label.c_str(), image_window_size, clamped_by_window, ImGuiWindowFlags_HorizontalScrollbar);
         {
             ImGui::Image((void*)(uintptr_t)texture, rendered_texture_size);
@@ -472,7 +481,7 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
     }
 }
 
-static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh)
+static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh, bool& is_exactly_same)
 {
     if (image_left.channels() != 4 || image_right.channels() != 4)
     {
@@ -487,14 +496,17 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
     {
         diff.create(256, 256, CV_8UC3);
         diff = cv::Scalar(128, 128, 128);
+        is_exactly_same = true;
     }
     else if (image_left.empty())
     {
         diff = image_right.clone();
+        is_exactly_same = false;
     }
     else if (image_left.empty())
     {
         diff = image_left.clone();
+        is_exactly_same = false;
     }
     else
     {
@@ -580,12 +592,14 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
                     diff_image_compare.ptr(i, j)[3] = 255;
                 }
             }
+            is_exactly_same = true;
         }
         else
         {
             cv::Scalar above_color(0, 0, 255-50);
             cv::Scalar below_color(255-50, 0, 0);
             imk::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
+            is_exactly_same = false;
         }
 
         diff = image_compare.clone();
@@ -607,7 +621,7 @@ void MyApp::ComputeDiffImage()
         cv::Mat diff_mat;
         if (!imageLeft.mat.empty() && !imageRight.mat.empty())
         {
-            diff_mat = compare_two_mat(imageLeft.mat, imageRight.mat, diff_thresh);
+            diff_mat = compare_two_mat(imageLeft.mat, imageRight.mat, diff_thresh, is_exactly_same);
         }
         else
         {
@@ -625,8 +639,9 @@ void MyApp::ComputeDiffImage()
     }
 }
 
-void MyApp::UI_ChooseImageFile()
+int MyApp::UI_ChooseImageFile()
 {
+#if 0
     char const* lFilterPatterns[3] = { "*.jpg", "*.png", "*.jpeg" };
     const char* lTheOpenFileName = tinyfd_openFileDialog(
                         "let us read the password back",
@@ -647,21 +662,50 @@ void MyApp::UI_ChooseImageFile()
     else
     {
         printf("file choosed: %s\n", lTheOpenFileName);
-        filepath = lTheOpenFileName;
+        filepath.setf("%s", lTheOpenFileName);
     }
+    return 0;
+#else
+
+    // Check that a backend is available
+    if (!pfd::settings::available())
+    {
+        std::cout << "Portable File Dialogs are not available on this platform.\n";
+        return 1;
+    }
+
+    // Set verbosity to true
+    pfd::settings::verbose(true);
+
+    // File open
+    auto f = pfd::open_file("Choose image file", pfd::path::home(),
+                            { "Image Files (.jpg .png .jpeg .bmp)", "*.jpg *.png *.jpeg *.bmp",
+                              "All Files", "*" }//,
+                            //pfd::opt::multiselect
+                            );
+    if (f.result().size() > 0)
+    {
+        std::cout << "Selected files:";
+        std::cout << f.result()[0] << std::endl;
+
+        filepath.setf("%s", f.result()[0].c_str());
+    }
+
+    return 0;
+#endif
 }
 
 void MyApp::LoadImage(RichImage& image)
 {
     UI_ChooseImageFile();
-    if (filepath)
+    if (filepath.c_str())
     {
         image.loadFromFile(filepath);
     }
     filepath = NULL;
 }
 
-int main( int argc, char** argv )
+int main(int argc, char** argv)
 {
     MyApp app;
     app.Run();

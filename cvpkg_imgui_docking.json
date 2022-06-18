@@ -1,0 +1,11 @@
+{
+    "version": "0.1.0",
+    "packages": [
+        {
+            "name": "imgui",
+            "url": "https://github.com/ocornut/imgui",
+            "license": "Copyright (c) 2014-2022 Omar Cornut, MIT License",
+            "version": "docking"
+        }
+    ]
+}
