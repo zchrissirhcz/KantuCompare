@@ -5,7 +5,8 @@
 #   sudo apt install libopencv-dev # ubuntu
 #   brew install opencv # mac
 #----------------------------------------------------------------------
-set(OpenCV_DIR "$ENV{HOME}/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
+#set(OpenCV_DIR "$ENV{HOME}/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
+set(OpenCV_DIR "$ENV{HOME}/.sled/artifacts/opencv/4.5.5/lib/cmake/opencv4")
 find_package(OpenCV REQUIRED)
 
 
@@ -17,7 +18,7 @@ find_package(OpenCV REQUIRED)
 #----------------------------------------------------------------------
 #set(IMGUI_DIR "$ENV{HOME}/work/github/imgui")
 # using the docking branch
-set(IMGUI_DIR "$ENV{HOME}/work/github/imgui-docking")
+set(IMGUI_DIR "$ENV{HOME}/.sled/work_repos/imgui/docking")
 #set(IMGUI_DIR "$ENV{HOME}/work/imgui-docking")
 add_definitions(-DIMGUI_WITH_DOCKING)
 include_directories(

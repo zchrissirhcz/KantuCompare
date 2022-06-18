@@ -1,43 +1,56 @@
 {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "packages": [
         {
-            "name": "googletest",
-            "url": "https://github.com/google/googletest",
-            "license": "BSD-3-Clause license",
-            "version": "release-1.11.0",
-            "cmake_args": {
-                "configure":
-                [
-                    "-DCMAKE_BUILD_TYPE=Release",
-                    "-DBUILD_GMOCK=OFF",
-                    "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-                ]
+            "name": "imgui",
+            "url": "https://github.com/ocornut/imgui",
+            "license": "Copyright (c) 2014-2022 Omar Cornut, MIT License",
+            "version":
+            {
+                "branch": "docking"
+            },
+            "mirror":
+            {
+                "use": true,
+                "url": "https://gitee.com/mirrors/imgui"
             }
         },
         {
             "name": "portable-file-dialogs",
             "url": "https://github.com/samhocevar/portable-file-dialogs",
             "license": "WTFPL license",
-            "version": "master"
-        },
-        {
-            "name": "tinyfiledialogs",
-            "url": "http://git.code.sf.net/p/tinyfiledialogs/code",
-            "license": "Zlib license",
-            "version": "master"
+            "version":
+            {
+                "branch": "master"
+            }
         },
         {
             "name": "glfw",
             "url": "https://github.com/glfw/glfw",
             "license": "Zlib license",
-            "version": "master"
+            "version":
+            {
+                "branch": "master"
+            },
+            "mirror":
+            {
+                "use": true,
+                "url": "https://gitee.com/mirrors/glfw"
+            }
         },
         {
             "name": "opencv",
-            "url": "https://gitee.com/mirrors/opencv",
+            "url": "https://github.com/opencv/opencv",
             "license": "Apache License 2.0",
-            "version": "4.5.5",
+            "version":
+            {
+                "tag": "4.5.5"
+            },
+            "mirror":
+            {
+                "use": true,
+                "url": "https://gitee.com/mirrors/opencv"
+            },
             "cmake_args": {
                 "configure":
                 [

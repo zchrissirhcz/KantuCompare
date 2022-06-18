@@ -14,6 +14,7 @@ See [images](https://github.com/zchrissirhcz/image-compare/tree/main/images) dir
 ```bash
 git clone https://github.com/zchrissirhcz/image-compare
 cd image-compare
+sled cvpkg # resolve dependencies; you may just edit cmake/deps.cmake
 cmake -S . -B output -GNinja && cmake --build output
 ./output/ImageCompare
 ```
