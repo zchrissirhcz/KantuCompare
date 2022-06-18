@@ -7,10 +7,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include("cmake/sleek.cmake")
 set(CMAKE_BUILD_TYPE Debug)
-#sleek_add_flags("-fstandalone-debug")
+sleek_add_flags("-fstandalone-debug")
 
 include("cmake/deps.cmake")
 #include("cmake/asan.cmake")
+#include("cmake/tsan.cmake")
 
 add_executable(ImageCompare
   main.cpp
