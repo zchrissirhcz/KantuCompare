@@ -460,7 +460,7 @@ void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image
             else
                 offset.x = (win_size.x - rendered_texture_size.x) * align_to_right_ratio;
             ImVec2 p_min = ImGui::GetCursorScreenPos() + offset;
-            ImVec2 p_max = p_min + rendered_texture_size;
+            //ImVec2 p_max = p_min + rendered_texture_size;
             //ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)texture, p_min, p_max);
             ImGui::SetNextWindowPos(p_min);
         }
