@@ -205,7 +205,7 @@ public:
                     sprintf(text, "Tolerance: %d", diff_thresh);
                     ImGui::Text("%s", text);
                     ImGuiSliderFlags tolerance_slider_flags = ImGuiSliderFlags_NoInput;
-                    compare_condition_updated = ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
+                    compare_condition_updated |= ImGui::SliderInt("##Tolerance", &diff_thresh, 0, 255, "", tolerance_slider_flags);
                 }
                 {
                     if (is_exactly_same)
