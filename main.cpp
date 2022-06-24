@@ -244,19 +244,19 @@ public:
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
-                ImGuiWindow* window = ImGui::GetCurrentWindow();
-                if (window->ScrollbarX || window->ScrollbarY)
+                ImGuiWindow* win = ImGui::GetCurrentWindow();
+                if (win->ScrollbarX || win->ScrollbarY)
                 {
-                    ImGui::PushClipRect(window->OuterRectClipped.Min, window->OuterRectClipped.Max, false);
-                    if (window->ScrollbarX)
+                    ImGui::PushClipRect(win->OuterRectClipped.Min, win->OuterRectClipped.Max, false);
+                    if (win->ScrollbarX)
                     {
-                        ImRect r = ImGui::GetWindowScrollbarRect(window, ImGuiAxis_X);
-                        window->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
+                        ImRect r = ImGui::GetWindowScrollbarRect(win, ImGuiAxis_X);
+                        win->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
                     }
-                    if (window->ScrollbarY)
+                    if (win->ScrollbarY)
                     {
-                        ImRect r = ImGui::GetWindowScrollbarRect(window, ImGuiAxis_Y);
-                        window->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
+                        ImRect r = ImGui::GetWindowScrollbarRect(win, ImGuiAxis_Y);
+                        win->DrawList->AddRect(r.Min, r.Max, IM_COL32(255, 0, 0, 255));
                     }
                     ImGui::PopClipRect();
                 }
@@ -498,7 +498,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         diff = cv::Scalar(128, 128, 128);
         is_exactly_same = true;
     }
-    else if (image_left.empty())
+    else if (image_right.empty())
     {
         diff = image_right.clone();
         is_exactly_same = false;

@@ -5,6 +5,8 @@ project(image_compare)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(USE_PVS "Use PVS-Studio for analysis?" OFF)
+
 include("cmake/sleek.cmake")
 set(CMAKE_BUILD_TYPE Debug)
 sleek_add_flags("-fstandalone-debug")
@@ -39,3 +41,12 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 endif()
 
 message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+
+if(USE_PVS)
+  include(cmake/PVS-Studio.cmake)
+  pvs_studio_add_target(TARGET example2.analyze ALL
+                        OUTPUT FORMAT errorfile
+                        RECURSIVE ANALYZE ImageCompare
+                        MODE GA:1,2
+                        LOG target.err)
+endif()
