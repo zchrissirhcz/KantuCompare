@@ -40,13 +40,11 @@ GLuint imcmp::getTextureFromImage(const cv::Mat& image)
     return image_texture;
 }
 
-
-
 namespace imcmp {
 
 void RichImage::loadFromFile(const Str256& filepath)
 {
-    //cv::Mat mat = cv::imread(filepath.c_str(), cv::IMREAD_UNCHANGED); 
+    //cv::Mat mat = cv::imread(filepath.c_str(), cv::IMREAD_UNCHANGED);
     std::string imagepath = filepath.c_str();
     cv::Mat mat = loadImage(imagepath);
     if (mat.empty()) return;
@@ -107,15 +105,15 @@ void RichImage::update_mat(cv::Mat& frame, bool change_color_order)
         clear();
         mat.release(); // maybe this is redundant
         load_mat(frame);
-    } 
-    
+    }
+
     if (change_color_order)
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
 
     // image must have same size
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame.cols, frame.rows, GL_RGB,
-            GL_UNSIGNED_BYTE, frame.ptr());
+                    GL_UNSIGNED_BYTE, frame.ptr());
 }
 
 // clear texture and realease all memory associated with it

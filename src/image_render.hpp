@@ -16,9 +16,12 @@ public:
     bool open;
     std::string name;
     int filesize;
-    
+
 public:
-    RichImage(): texture(0), open(false) {}
+    RichImage()
+        : texture(0), open(false)
+    {
+    }
 
     void loadFromFile(const Str256& filepath);
     void reload();
@@ -32,6 +35,5 @@ public:
     //then GetName
     const char* get_name();
 };
-
 
 } // namespace imcmp

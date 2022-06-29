@@ -13,7 +13,7 @@ static void help(const char* exe_name)
 
 int main(int argc, char** argv)
 {
-    if (argc!=2)
+    if (argc != 2)
     {
         help(argv[0]);
         return 1;

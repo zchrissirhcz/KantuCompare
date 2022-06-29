@@ -1,4 +1,4 @@
-        #include <stdio.h>
+#include <stdio.h>
 #include <stddef.h>
 
 //#include <string>
@@ -34,12 +34,12 @@ public:
     void StartUp()
     {
         // Title
-        glfwSetWindowTitle(window, u8"Image Compare");
+        glfwSetWindowTitle(window, u8 "Image Compare");
         glfwSetWindowSize(window, 960, 640);
 
         // Style
         ImGui::StyleColorsDark();
-        ImGuiStyle &style = ImGui::GetStyle();
+        ImGuiStyle& style = ImGui::GetStyle();
         // style.WindowRounding = 8.f;
         // style.ChildRounding = 6.f;
         // style.FrameRounding = 6.f;
@@ -64,7 +64,6 @@ public:
 #endif
 
         //io.FontAllowUserScaling = true;
-
     }
 
     void showText(const char* text, const char* inputId)
@@ -98,7 +97,7 @@ public:
         // ImGui::SetNextWindowSize(display_size);
 
         ImGui::Begin("Testing menu", NULL, flags);
-        
+
         ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 1 / 10), true, ImGuiWindowFlags_NoScrollbar);
         {
             ImGui::BeginChild("##leftpath", ImVec2(ImGui::GetWindowWidth() / 2 - 10, ImGui::GetWindowHeight()), false);
@@ -109,7 +108,6 @@ public:
             }
             if (!imageLeft.mat.empty())
             {
-                
                 ImGui::SameLine();
                 //ImGui::SetCursorPosX(x); // align back to the left
 
@@ -148,7 +146,7 @@ public:
         }
         ImGui::EndChild();
 
-        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 4 / 10), true);
+        ImGui::BeginChild("##InputImagesRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 4 / 10), true);
         {
             ImVec2 vMin = ImGui::GetWindowContentRegionMin();
             ImVec2 vMax = ImGui::GetWindowContentRegionMax();
@@ -188,9 +186,9 @@ public:
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
         //ImGui::SameLine();
 
-        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth()-50, ImGui::GetWindowHeight() * 5 / 10), false);
+        ImGui::BeginChild("##CompareResultRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 5 / 10), false);
         {
-            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth()/4, ImGui::GetWindowHeight()-20), false);
+            ImGui::BeginChild("###ConfigRegion", ImVec2(ImGui::GetWindowWidth() / 4, ImGui::GetWindowHeight() - 20), false);
             {
                 // zoom
                 {
@@ -243,7 +241,7 @@ public:
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
             ImGui::SameLine();
 
-            ImGui::BeginChild("###RightImage", ImVec2(0, ImGui::GetWindowHeight()-20), false);
+            ImGui::BeginChild("###RightImage", ImVec2(0, ImGui::GetWindowHeight() - 20), false);
             if (show_diff_image)
             {
                 ShowImage("Diff Image", &show_diff_image, diff_image, 0.3f);
@@ -301,7 +299,7 @@ private:
     int UI_ChooseImageFile();
     void LoadImage(RichImage& image);
     void ComputeDiffImage();
-    void ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio = 0.f);
+    void ShowImage(const char* windowName, bool* open, const RichImage& image, float align_to_right_ratio = 0.f);
 
     void StatusbarUI();
 
@@ -324,7 +322,7 @@ private:
     const float statusbarSize = 50;
 };
 
-static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER    = 2.00f;    // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain time, unless mouse moved.
+static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER = 2.00f; // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain time, unless mouse moved.
 
 static void StartLockWheelingWindow(ImGuiWindow* window)
 {
@@ -352,7 +350,7 @@ void MyApp::myUpdateMouseWheel()
         //     return;
         // }
         // printf("!! cur_window->Name: %s\n", cur_window->Name);
-        
+
         g.WheelingWindowTimer -= g.IO.DeltaTime;
         if (ImGui::IsMousePosValid() && ImLengthSqr(g.IO.MousePos - g.WheelingWindowRefMousePos) > g.IO.MouseDragThreshold * g.IO.MouseDragThreshold)
             g.WheelingWindowTimer = 0.0f;
@@ -375,7 +373,7 @@ void MyApp::myUpdateMouseWheel()
     if (wheel_y != 0.0f)
     {
         StartLockWheelingWindow(window);
-        
+
         zoom_percent = zoom_percent + g.IO.MouseWheel * 5;
         if (zoom_percent > zoom_percent_max)
         {
@@ -397,13 +395,12 @@ void MyApp::StatusbarUI()
     ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, statusbarSize));
     //ImGui::SetNextWindowViewport(viewport->ID);
     ImGuiWindowFlags window_flags = 0
-        //| ImGuiWindowFlags_NoDocking
-        | ImGuiWindowFlags_NoTitleBar
-        | ImGuiWindowFlags_NoResize
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoSavedSettings
-        ;
+                                    //| ImGuiWindowFlags_NoDocking
+                                    | ImGuiWindowFlags_NoTitleBar
+                                    | ImGuiWindowFlags_NoResize
+                                    | ImGuiWindowFlags_NoMove
+                                    | ImGuiWindowFlags_NoScrollbar
+                                    | ImGuiWindowFlags_NoSavedSettings;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
     ImGui::Begin("STATUSBAR", NULL, window_flags);
@@ -413,7 +410,7 @@ void MyApp::StatusbarUI()
     ImGui::PopStyleColor();
 }
 
-void MyApp::ShowImage(const char* windowName, bool *open, const RichImage& image, float align_to_right_ratio)
+void MyApp::ShowImage(const char* windowName, bool* open, const RichImage& image, float align_to_right_ratio)
 {
     if (*open)
     {
@@ -560,7 +557,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
             diff_image_right = image_right(rect);
             diff_image_compare = image_compare(rect);
         }
-        else  // size equal
+        else // size equal
         {
             diff_image_left = image_left;
             diff_image_right = image_right;
@@ -599,19 +596,18 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
         else
         {
-            cv::Scalar above_color(0, 0, 255-50);
-            cv::Scalar below_color(255-50, 0, 0);
+            cv::Scalar above_color(0, 0, 255 - 50);
+            cv::Scalar below_color(255 - 50, 0, 0);
             imcmp::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
             is_exactly_same = false;
         }
 
         diff = image_compare.clone();
         printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n",
-            (int)pixel_diff.val[0],
-            (int)pixel_diff.val[1],
-            (int)pixel_diff.val[2],
-            toleranceThresh
-        );
+               (int)pixel_diff.val[0],
+               (int)pixel_diff.val[1],
+               (int)pixel_diff.val[2],
+               toleranceThresh);
     }
 
     return diff;
@@ -656,10 +652,10 @@ int MyApp::UI_ChooseImageFile()
 
     // File open
     auto f = pfd::open_file("Choose image file", pfd::path::home(),
-                            { "Image Files (.jpg .png .jpeg .bmp .nv21 .nv12 .rgb24 .bgr24)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12 *.rgb24 *.bgr24",
-                              "All Files", "*" }//,
+                            {"Image Files (.jpg .png .jpeg .bmp .nv21 .nv12 .rgb24 .bgr24)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12 *.rgb24 *.bgr24",
+                             "All Files", "*"} //,
                             //pfd::opt::multiselect
-                            );
+    );
     if (f.result().size() > 0)
     {
         std::cout << "Selected files:";
