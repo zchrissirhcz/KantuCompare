@@ -5,8 +5,11 @@
 ## Usage
 Click "Load" buttons to load images. Once both two input images loaded, the diff image is computed and displayed.
 
+- Supported image extensions:
+    - `.jpg`, `.jpeg`, `.bmp`, `.png`
+    - `.nv21`, `.nv12`, `.i420`, `.gray`, `.rgb24`, `.bgr24`, `.rgba32`, `.bgra32`
 - Change `Tolerance` slider to get different compare result.
-- Change `Zoom` slider or use mouse wheel to scale current image.
+- Change `Zoom` slider or use mouse wheel to scale images.
 
 See [images](https://github.com/zchrissirhcz/image-compare/tree/main/images) directory for testing images.
 
@@ -28,4 +31,3 @@ The [initial trial](https://github.com/zchrissirhcz/small-compare/tree/qt) was b
 - https://github.com/shangchiwu/advanced-image-processor
 - https://www.youtube.com/watch?v=OYQp0GuoByM
 - https://github.com/Smorodov/imgui_image_viewer
-- https://github.com/CedricGuillemet/imgInspect

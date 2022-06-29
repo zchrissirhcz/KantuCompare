@@ -5,10 +5,10 @@
 namespace {
 using namespace imcmp;
 
-class FileMetaInfo
+class FileInfo
 {
 public:
-    FileMetaInfo()
+    FileInfo()
     {
         height = -1;
         width = -1;
@@ -26,18 +26,14 @@ public:
     std::string err_msg;
 };
 
-cv::Mat read_image(const FileMetaInfo& meta_info)
+cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
 {
     cv::Mat image;
-    if (meta_info.ext == "bmp" || meta_info.ext == "jpg" || meta_info.ext == ".jpeg" || meta_info.ext == "png")
+    if (file_info.ext == "nv21" || file_info.ext == "nv12" || file_info.ext == "i420")
     {
-        image = cv::imread(meta_info.filename, cv::IMREAD_UNCHANGED);
-    }
-    else if (meta_info.ext == "nv21" || meta_info.ext == "nv12")
-    {
-        int height = meta_info.height;
-        int width = meta_info.width;
-        FILE* fin = fopen(meta_info.filename.c_str(), "rb");
+        int height = file_info.height;
+        int width = file_info.width;
+        FILE* fin = fopen(file_info.filename.c_str(), "rb");
         int buf_size = height * width * 3 / 2;
 
         cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
@@ -50,40 +46,76 @@ cv::Mat read_image(const FileMetaInfo& meta_info)
         size.width = width;
         image = cv::Mat(size, CV_8UC3);
 
-        if (meta_info.ext == "nv21") // nv21 => bgr
+        if (file_info.ext == "nv21") // nv21 => bgr
         {
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV21);
         }
-        else if (meta_info.ext == "nv12") // nv12 => bgr
+        else if (file_info.ext == "nv12") // nv12 => bgr
         {
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV12);
         }
+        else if (file_info.ext == "i420")
+        {
+            cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_I420);
+        }
     }
-    else if (meta_info.ext == "bgr24" || meta_info.ext == "rgb24")
+    else if (file_info.ext == "bgr24" || file_info.ext == "rgb24" || file_info.ext == "rgba32" || file_info.ext == "bgra32" || file_info.ext == "gray")
     {
-        int height = meta_info.height;
-        int width = meta_info.width;
-        FILE* fin = fopen(meta_info.filename.c_str(), "rb");
-        int buf_size = height * width * 3;
+        int channels = 1; // "gray"
+        if (file_info.ext == "bgr24" || file_info.ext == "rgb24")
+        {
+            channels = 3;
+        }
+        else if (file_info.ext == "rgba32" || file_info.ext == "bgra32")
+        {
+            channels = 4;
+        }
+
+        int height = file_info.height;
+        int width = file_info.width;
+        FILE* fin = fopen(file_info.filename.c_str(), "rb");
+        int buf_size = height * width * channels;
         cv::Size size;
         size.height = height;
         size.width = width;
-        image = cv::Mat(size, CV_8UC3);
+        image = cv::Mat(size, CV_8UC(channels));
         fread(image.data, buf_size, 1, fin);
         fclose(fin);
 
-        if (meta_info.ext == "rgb24") // bgr => rgb, inplace
+        if (file_info.ext == "rgb24") // bgr => rgb, inplace
         {
             cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
         }
+        else if (file_info.ext == "rgba32")
+        {
+            cv::cvtColor(image, image, cv::COLOR_RGBA2BGRA);
+        }
+    }
+    else
+    {
+        fprintf(stderr, "not supported format %s\n", file_info.ext.c_str());
     }
     return image;
 }
 
-FileMetaInfo get_meta_info(const std::string& filename)
+cv::Mat read_image(const FileInfo& file_info)
 {
-    FileMetaInfo meta_info;
-    meta_info.filename = filename;
+    cv::Mat image;
+    if (file_info.ext == "bmp" || file_info.ext == "jpg" || file_info.ext == ".jpeg" || file_info.ext == "png")
+    {
+        image = cv::imread(file_info.filename, cv::IMREAD_UNCHANGED);
+    }
+    else
+    {
+        image = load_fourcc_and_convert_to_mat(file_info);
+    }
+    return image;
+}
+
+FileInfo get_meta_info(const std::string& filename)
+{
+    FileInfo file_info;
+    file_info.filename = filename;
 
     do {
         /// validate filename format
@@ -94,8 +126,8 @@ FileMetaInfo get_meta_info(const std::string& filename)
         // len(ext) >= 3
         if (!(ext_pos > 0 && ext_pos <= filename.length() - 4))
         {
-            meta_info.valid = false;
-            meta_info.err_msg = "invalid image path format " + filename + " , required format is [head].[ext] , where len(head)>0 and len(ext)>=3";
+            file_info.valid = false;
+            file_info.err_msg = "invalid image path format " + filename + " , required format is [head].[ext] , where len(head)>0 and len(ext)>=3";
             break;
         }
 
@@ -111,8 +143,8 @@ FileMetaInfo get_meta_info(const std::string& filename)
                 ext[i] = tolower(ext[i]);
             }
         }
-        meta_info.head = head;
-        meta_info.ext = ext;
+        file_info.head = head;
+        file_info.ext = ext;
 
         /// validate filename's ext
         bool found = false;
@@ -126,11 +158,11 @@ FileMetaInfo get_meta_info(const std::string& filename)
         }
         if (!found)
         {
-            meta_info.valid = false;
-            meta_info.err_msg = "invalid filenames extension! Currently only supports these: (case insensitive) ";
+            file_info.valid = false;
+            file_info.err_msg = "invalid filenames extension! Currently only supports these: (case insensitive) ";
             for (int i = 0; i < valid_ext.size(); i++)
             {
-                meta_info.err_msg = meta_info.err_msg + " " + valid_ext[i];
+                file_info.err_msg = file_info.err_msg + " " + valid_ext[i];
             }
             break;
         }
@@ -152,8 +184,8 @@ FileMetaInfo get_meta_info(const std::string& filename)
         fprintf(stderr, "underline_pos = %d\n", underline_pos);
         if (underline_pos != -1 && underline_pos > static_cast<int>(head.length()) - 4)
         {
-            meta_info.valid = false;
-            meta_info.err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
+            file_info.valid = false;
+            file_info.err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
             break;
         }
 
@@ -171,8 +203,8 @@ FileMetaInfo get_meta_info(const std::string& filename)
         fprintf(stderr, "non_digit_cnt is %d\n", non_digit_cnt);
         if (non_digit_cnt != 1)
         {
-            meta_info.valid = false;
-            meta_info.err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
+            file_info.valid = false;
+            file_info.err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
             break;
         }
 
@@ -185,12 +217,12 @@ FileMetaInfo get_meta_info(const std::string& filename)
         {
             height = height * 10 + (dim_str[i] - '0');
         }
-        meta_info.height = height;
-        meta_info.width = width;
+        file_info.height = height;
+        file_info.width = width;
 
         int actual_size = imcmp::get_file_size(filename);
         int expected_size = -1;
-        if (ext == "nv21" || ext == "nv12")
+        if (ext == "nv21" || ext == "nv12" || ext == "i420")
         {
             expected_size = height * width * 3 / 2;
         }
@@ -198,26 +230,34 @@ FileMetaInfo get_meta_info(const std::string& filename)
         {
             expected_size = height * width * 3;
         }
+        else if (ext == "rgba32" || ext == "bgra32")
+        {
+            expected_size = height * width * 4;
+        }
+        else if (ext == "gray")
+        {
+            expected_size = height * width;
+        }
 
         if (expected_size != actual_size)
         {
-            meta_info.valid = false;
-            meta_info.err_msg = "invalid file size, filename described different that actual";
+            file_info.valid = false;
+            file_info.err_msg = "invalid file size, filename described different that actual";
             break;
         }
 
-        if (ext == "nv21" || ext == "nv12")
+        if (ext == "nv21" || ext == "nv12" || ext == "i420")
         {
             if (height % 2 != 0 || width % 2 != 0)
             {
-                meta_info.valid = false;
-                meta_info.err_msg = "file dimension invalid. both height and width should be even number";
+                file_info.valid = false;
+                file_info.err_msg = "file dimension invalid. both height and width should be even number";
                 break;
             }
         }
     } while (0);
 
-    return meta_info;
+    return file_info;
 }
 
 } // namespace
@@ -237,16 +277,16 @@ cv::Mat imcmp::load_image(const std::string& image_path)
         return cv::Mat(100, 100, CV_8UC3);
     }
 
-    FileMetaInfo meta_info = get_meta_info(image_path);
-    if (!meta_info.valid)
+    FileInfo file_info = get_meta_info(image_path);
+    if (!file_info.valid)
     {
-        fprintf(stderr, "%s\n", meta_info.err_msg.c_str());
+        fprintf(stderr, "%s\n", file_info.err_msg.c_str());
         return cv::Mat(100, 100, CV_8UC3);
     }
     else
     {
         printf("reading file %s\n", image_path.c_str());
-        cv::Mat image = read_image(meta_info);
+        cv::Mat image = read_image(file_info);
         return image;
     }
 }
