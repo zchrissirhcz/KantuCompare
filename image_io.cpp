@@ -1,93 +1,9 @@
-#include "image_compare_core.hpp"
-
-
-
+#include "image_io.hpp"
 #include <filesystem>
-#include "Str.h"
+#include <vector>
 
-int imk::get_file_size(const Str256& filepath)
-{
-    std::filesystem::path p{filepath.c_str()};
-    return std::filesystem::file_size(p);
-}
-
-void imk::getDiffImage(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
-{
-    CV_Assert(src1.rows == src2.rows && src1.cols == src2.cols);
-    CV_Assert(src1.channels() == src2.channels());
-    CV_Assert(thresh >= 0);
-
-    const int channels = src1.channels();
-    
-    cv::absdiff(src1, src2, diff);
-    for (int i = 0; i < diff.rows; i++)
-    {
-        for (int j = 0; j < diff.cols; j++)
-        {
-            uchar* diff_pixel = diff.ptr(i, j);
-            const uchar* src_pixel = src1.ptr(i, j);
-            bool bigger = false;
-            int diff_sum = 0;
-            for (int k = 0; k < channels; k++)
-            {
-                diff_sum += diff_pixel[k];
-                if (diff_pixel[k] > thresh)
-                {
-                    bigger = true;
-                    break;
-                }
-            }
-            if (diff_sum == 0)
-            {
-                float R2Y = 0.299;
-                float G2Y = 0.587;
-                float B2Y = 0.114;
-                
-                int B = src_pixel[0];
-                int G = src_pixel[1];
-                int R = src_pixel[2];
-
-                int Gray = R2Y * R + G2Y * G + B2Y * B;
-
-                diff_pixel[0] = Gray;
-                diff_pixel[1] = Gray;
-                diff_pixel[2] = Gray;
-                diff_pixel[3] = 255;
-            }
-            else
-            {
-                if (bigger)
-                {
-                    diff_pixel[0] = above.val[0];
-                    diff_pixel[1] = above.val[1];
-                    diff_pixel[2] = above.val[2];
-                    diff_pixel[3] = 255;
-                }
-                else
-                {
-                    diff_pixel[0] = below.val[0];
-                    diff_pixel[1] = below.val[1];
-                    diff_pixel[2] = below.val[2];
-                    diff_pixel[3] = 255;
-                }
-            }
-        }
-    }
-}
-
-std::vector<std::string> get_valid_ext()
-{
-    static std::vector<std::string> valid_ext = {
-        "jpg",
-        "png",
-        "bmp",
-        "nv21",
-        "nv12",
-        "rgb24",
-        "bgr24"
-    };
-    return valid_ext;
-}
+namespace {
+using namespace imcmp;
 
 class FileMetaInfo
 {
@@ -110,7 +26,77 @@ public:
     std::string err_msg;
 };
 
-FileMetaInfo get_meat_info(const std::string& filename)
+
+std::vector<std::string> get_valid_ext()
+{
+    static std::vector<std::string> valid_ext = {
+        "jpg",
+        "png",
+        "bmp",
+        "nv21",
+        "nv12",
+        "rgb24",
+        "bgr24"
+    };
+    return valid_ext;
+}
+
+cv::Mat read_image(const FileMetaInfo& meta_info)
+{
+    cv::Mat image;
+    if (meta_info.ext=="bmp" || meta_info.ext=="jpg" || meta_info.ext=="png")
+    {
+        image = cv::imread(meta_info.filename, cv::IMREAD_UNCHANGED);
+    }
+    else if (meta_info.ext=="nv21" || meta_info.ext=="nv12")
+    {
+        int height = meta_info.height;
+        int width = meta_info.width;
+        FILE* fin = fopen(meta_info.filename.c_str(), "rb");
+        int buf_size = height * width * 3 / 2;
+
+        cv::Mat yuv420sp_mat(height*3/2, width, CV_8UC1);
+        uchar* yuv_buf = yuv420sp_mat.data;
+        fread(yuv_buf, buf_size, 1, fin);
+        fclose(fin);
+
+        cv::Size size;
+        size.height = height;
+        size.width = width;
+        image = cv::Mat(size, CV_8UC3);
+
+
+        if (meta_info.ext=="nv21") // nv21 => bgr
+        {
+            cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV21);
+        }
+        else if (meta_info.ext=="nv12") // nv12 => bgr
+        {
+            cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV12);
+        }
+    }
+    else if (meta_info.ext=="bgr24" || meta_info.ext=="rgb24")
+    {
+        int height = meta_info.height;
+        int width = meta_info.width;
+        FILE* fin = fopen(meta_info.filename.c_str(), "rb");
+        int buf_size = height * width * 3;
+        cv::Size size;
+        size.height = height;
+        size.width = width;
+        image = cv::Mat(size, CV_8UC3);
+        fread(image.data, buf_size, 1, fin);
+        fclose(fin);
+
+        if (meta_info.ext=="rgb24") // bgr => rgb, inplace
+        {
+            cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+        }
+    }
+    return image;
+}
+
+FileMetaInfo get_meta_info(const std::string& filename)
 {
     FileMetaInfo meta_info;
     meta_info.filename = filename;
@@ -218,7 +204,7 @@ FileMetaInfo get_meat_info(const std::string& filename)
         meta_info.height = height;
         meta_info.width = width;
 
-        int actual_size = imk::get_file_size(filename);
+        int actual_size = imcmp::get_file_size(filename);
         int expected_size = -1;
         if (ext=="nv21" || ext=="nv12")
         {
@@ -250,72 +236,53 @@ FileMetaInfo get_meat_info(const std::string& filename)
     return meta_info;
 }
 
-cv::Mat read_image(const FileMetaInfo& meta_info)
+} // namespace
+
+int imcmp::get_file_size(const Str256 &filepath)
 {
-    cv::Mat image;
-    if (meta_info.ext=="bmp" || meta_info.ext=="jpg" || meta_info.ext=="png")
-    {
-        image = cv::imread(meta_info.filename);
-    }
-    else if (meta_info.ext=="nv21" || meta_info.ext=="nv12")
-    {
-        int height = meta_info.height;
-        int width = meta_info.width;
-        FILE* fin = fopen(meta_info.filename.c_str(), "rb");
-        int buf_size = height * width * 3 / 2;
-
-        cv::Mat yuv420sp_mat(height*3/2, width, CV_8UC1);
-        uchar* yuv_buf = yuv420sp_mat.data;
-        fread(yuv_buf, buf_size, 1, fin);
-        fclose(fin);
-
-        cv::Size size;
-        size.height = height;
-        size.width = width;
-        image = cv::Mat(size, CV_8UC3);
-
-
-        if (meta_info.ext=="nv21") // nv21 => bgr
-        {
-            cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV21);
-        }
-        else if (meta_info.ext=="nv12") // nv12 => bgr
-        {
-            cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV12);
-        }
-    }
-    else if (meta_info.ext=="bgr24" || meta_info.ext=="rgb24")
-    {
-        int height = meta_info.height;
-        int width = meta_info.width;
-        FILE* fin = fopen(meta_info.filename.c_str(), "rb");
-        int buf_size = height * width * 3;
-        cv::Size size;
-        size.height = height;
-        size.width = width;
-        image = cv::Mat(size, CV_8UC3);
-        fread(image.data, buf_size, 1, fin);
-        fclose(fin);
-
-        if (meta_info.ext=="rgb24") // bgr => rgb, inplace
-        {
-            cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
-        }
-    }
-    return image;
+    std::filesystem::path p{filepath.c_str()};
+    return std::filesystem::file_size(p);
 }
 
-
-
-cv::Mat imk::loadImage(const std::string& image_path)
+cv::Mat imcmp::loadImage(const std::string& image_path)
 {
-    FileMetaInfo meta_info = get_meat_info(image_path);
+    /// check if file exist or not
+    if (!imcmp::file_exist(image_path))
+    {
+        fprintf(stderr, "file %s does not exist\n", image_path.c_str());
+        return cv::Mat(100, 100, CV_8UC3);
+    }
+
+    FileMetaInfo meta_info = get_meta_info(image_path);
     if (!meta_info.valid)
     {
         fprintf(stderr, "%s\n", meta_info.err_msg.c_str());
         return cv::Mat(100, 100, CV_8UC3);
     } else {
+        printf("reading file %s\n", image_path.c_str());
         cv::Mat image = read_image(meta_info);
         return image;
     }
+}
+
+/// @brief check if file exist
+/// @retval true file exist
+/// @retval false file not exist
+bool imcmp::file_exist(const char* filename)
+{
+    FILE* fp = fopen(filename, "r");
+    if(fp==NULL)
+    {
+        return false;
+    }
+    else
+    {
+        fclose(fp);
+        return true;
+    }
+}
+
+bool imcmp::file_exist(const std::string& filename)
+{
+    return file_exist(filename.c_str());
 }

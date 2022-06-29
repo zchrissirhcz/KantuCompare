@@ -7,6 +7,7 @@
 #----------------------------------------------------------------------
 #set(OpenCV_DIR "$ENV{HOME}/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
 set(OpenCV_DIR "$ENV{HOME}/.sled/artifacts/opencv/4.5.5/lib/cmake/opencv4")
+message(STATUS "OpenCV_DIR: ${OpenCV_DIR}")
 find_package(OpenCV REQUIRED)
 
 

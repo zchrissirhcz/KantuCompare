@@ -1,4 +1,4 @@
-#include <stdio.h>
+        #include <stdio.h>
 #include <stddef.h>
 
 //#include <string>
@@ -13,12 +13,15 @@
 #include "app_design.hpp"
 //#include "tinyfiledialogs.h"
 #include "portable-file-dialogs.h"
-#include "RichImage.hpp"
-#include "image_compare_core.hpp"
+
+#include "image_compare.hpp"
+#include "image_render.hpp"
 #include "imgInspect.h"
 
 #define STR_IMPLEMENTATION
 #include "Str.h"
+
+using namespace imcmp;
 
 class MyApp : public App<MyApp>
 {
@@ -598,7 +601,7 @@ static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         {
             cv::Scalar above_color(0, 0, 255-50);
             cv::Scalar below_color(255-50, 0, 0);
-            imk::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
+            imcmp::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
             is_exactly_same = false;
         }
 
@@ -679,7 +682,7 @@ int MyApp::UI_ChooseImageFile()
 
     // File open
     auto f = pfd::open_file("Choose image file", pfd::path::home(),
-                            { "Image Files (.jpg .png .jpeg .bmp)", "*.jpg *.png *.jpeg *.bmp",
+                            { "Image Files (.jpg .png .jpeg .bmp .nv21 .nv12)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12",
                               "All Files", "*" }//,
                             //pfd::opt::multiselect
                             );
