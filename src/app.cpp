@@ -4,6 +4,7 @@
 //#include <string>
 #include <vector>
 
+#include "image_io.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -11,7 +12,6 @@
 #include "imgui_internal.h"
 
 #include "app_design.hpp"
-//#include "tinyfiledialogs.h"
 #include "portable-file-dialogs.h"
 
 #include "image_compare.hpp"
@@ -34,7 +34,7 @@ public:
     void StartUp()
     {
         // Title
-        glfwSetWindowTitle(window, u8 "Image Compare");
+        glfwSetWindowTitle(window, u8"Image Compare");
         glfwSetWindowSize(window, 960, 640);
 
         // Style
@@ -64,6 +64,8 @@ public:
 #endif
 
         //io.FontAllowUserScaling = true;
+
+        InitFileFilters();
     }
 
     void showText(const char* text, const char* inputId)
@@ -302,6 +304,7 @@ private:
     void ShowImage(const char* windowName, bool* open, const RichImage& image, float align_to_right_ratio = 0.f);
 
     void StatusbarUI();
+    void InitFileFilters();
 
 private:
     bool window_open = true;
@@ -320,6 +323,9 @@ private:
     bool is_exactly_same = false;
 
     const float statusbarSize = 50;
+
+    std::string filter_msg1 = "Image Files (";
+    std::string filter_msg2 = "";
 };
 
 static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER = 2.00f; // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain time, unless mouse moved.
@@ -410,6 +416,27 @@ void MyApp::StatusbarUI()
     ImGui::PopStyleColor();
 }
 
+void MyApp::InitFileFilters()
+{
+    filter_msg1 = "Image Files (";
+    filter_msg2 = "";
+    std::vector<std::string> exts = imcmp::get_supported_image_file_exts();
+    for (int i = 0; i < exts.size(); i++)
+    {
+        if (i > 0)
+        {
+            filter_msg1 += " ." + exts[i];
+            filter_msg2 += " *." + exts[i];
+        }
+        else
+        {
+            filter_msg1 += "." + exts[i];
+            filter_msg2 += "*." + exts[i];
+        }
+    }
+    filter_msg1 += ")";
+}
+
 void MyApp::ShowImage(const char* windowName, bool* open, const RichImage& image, float align_to_right_ratio)
 {
     if (*open)
@@ -481,138 +508,6 @@ void MyApp::ShowImage(const char* windowName, bool* open, const RichImage& image
     }
 }
 
-static cv::Mat compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh, bool& is_exactly_same)
-{
-    if (image_left.channels() != 4 || image_right.channels() != 4)
-    {
-        fprintf(stderr, "only support BGRA image for comparision\n");
-        return cv::Mat();
-    }
-    const int channels = 4;
-
-    // TODO: support 1, 2, 4 channel image comparison
-    cv::Mat diff;
-    if (image_left.empty() && image_right.empty())
-    {
-        diff.create(256, 256, CV_8UC3);
-        diff = cv::Scalar(128, 128, 128);
-        is_exactly_same = true;
-    }
-    else if (image_right.empty())
-    {
-        diff = image_right.clone();
-        is_exactly_same = false;
-    }
-    else if (image_left.empty())
-    {
-        diff = image_left.clone();
-        is_exactly_same = false;
-    }
-    else
-    {
-        cv::Scalar pixel_diff;
-        cv::Mat diff_image_left;
-        cv::Mat diff_image_right;
-        cv::Mat diff_image_compare;
-
-        cv::Mat image_compare;
-        if (image_left.size() != image_right.size())
-        {
-            cv::Size big_size;
-            big_size.height = std::max(image_left.size().height, image_right.size().height);
-            big_size.width = std::max(image_left.size().width, image_right.size().width);
-
-            cv::Mat image_left_big(big_size, image_left.type(), cv::Scalar(0));
-            cv::Mat image_right_big(big_size, image_right.type(), cv::Scalar(0));
-            for (int i = 0; i < image_left.rows; i++)
-            {
-                for (int j = 0; j < image_left.cols; j++)
-                {
-                    for (int k = 0; k < channels; k++)
-                    {
-                        image_left_big.ptr(i, j)[k] = image_left.ptr(i, j)[k];
-                    }
-                }
-            }
-
-            for (int i = 0; i < image_right.rows; i++)
-            {
-                for (int j = 0; j < image_right.cols; j++)
-                {
-                    for (int k = 0; k < channels; k++)
-                    {
-                        image_right_big.ptr(i, j)[k] = image_right.ptr(i, j)[k];
-                    }
-                }
-            }
-
-            // TODO: fix the transparency(alpha) for diff region in diff region(the intersection) and non-diff region(the union minus the intersection)
-            cv::addWeighted(image_left_big, 1.0, image_right_big, 1.0, 0.0, image_compare);
-
-            const int roi_width = std::min(image_left.size().width, image_right.size().width);
-            const int roi_height = std::min(image_left.size().height, image_right.size().height);
-            cv::Rect rect(0, 0, roi_width, roi_height);
-
-            diff_image_left = image_left(rect);
-            diff_image_right = image_right(rect);
-            diff_image_compare = image_compare(rect);
-        }
-        else // size equal
-        {
-            diff_image_left = image_left;
-            diff_image_right = image_right;
-            image_compare.create(image_left.size(), image_left.type());
-            diff_image_compare = image_compare;
-        }
-
-        cv::absdiff(diff_image_left, diff_image_right, diff_image_compare);
-        pixel_diff = cv::sum(diff_image_compare);
-        int sum = pixel_diff.val[0] + pixel_diff.val[1] + pixel_diff.val[2] + pixel_diff.val[3];
-        //cv::setNumThreads(1);
-
-        if (sum == 0)
-        {
-            // if the left and right image is differnt size, but same in the overlaped region, we compute the gray image, but assign to RGB pixels
-            cv::Size diff_size = diff_image_compare.size();
-            for (int i = 0; i < diff_size.height; i++)
-            {
-                for (int j = 0; j < diff_size.width; j++)
-                {
-                    float R2Y = 0.299;
-                    float G2Y = 0.587;
-                    float B2Y = 0.114;
-                    int B = diff_image_left.ptr(i, j)[0];
-                    int G = diff_image_left.ptr(i, j)[1];
-                    int R = diff_image_left.ptr(i, j)[2];
-                    int gray = cv::saturate_cast<uchar>(R2Y * R + G2Y * G + B2Y * B);
-
-                    diff_image_compare.ptr(i, j)[0] = gray;
-                    diff_image_compare.ptr(i, j)[1] = gray;
-                    diff_image_compare.ptr(i, j)[2] = gray;
-                    diff_image_compare.ptr(i, j)[3] = 255;
-                }
-            }
-            is_exactly_same = true;
-        }
-        else
-        {
-            cv::Scalar above_color(0, 0, 255 - 50);
-            cv::Scalar below_color(255 - 50, 0, 0);
-            imcmp::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
-            is_exactly_same = false;
-        }
-
-        diff = image_compare.clone();
-        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n",
-               (int)pixel_diff.val[0],
-               (int)pixel_diff.val[1],
-               (int)pixel_diff.val[2],
-               toleranceThresh);
-    }
-
-    return diff;
-}
-
 void MyApp::ComputeDiffImage()
 {
     if ((!imageLeft.mat.empty() && !imageRight.mat.empty() && compare_condition_updated))
@@ -650,10 +545,10 @@ int MyApp::UI_ChooseImageFile()
     // Set verbosity to true
     pfd::settings::verbose(true);
 
-    // File open
+    // NOTE: file extension filter not working on macOSX
     auto f = pfd::open_file("Choose image file", pfd::path::home(),
-                            {"Image Files (.jpg .png .jpeg .bmp .nv21 .nv12 .rgb24 .bgr24)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12 *.rgb24 *.bgr24",
-                             "All Files", "*"} //,
+                            //{"Image Files (.jpg .png .jpeg .bmp .nv21 .nv12 .rgb24 .bgr24)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12 *.rgb24 *.bgr24",
+                            {filter_msg1, filter_msg2, "All Files", "*"}
                             //pfd::opt::multiselect
     );
     if (f.result().size() > 0)
@@ -671,7 +566,7 @@ void MyApp::LoadImage(RichImage& image)
     UI_ChooseImageFile();
     if (filepath.c_str())
     {
-        image.loadFromFile(filepath);
+        image.load_from_file(filepath);
     }
     filepath = NULL;
 }

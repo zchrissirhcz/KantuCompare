@@ -42,11 +42,11 @@ GLuint imcmp::getTextureFromImage(const cv::Mat& image)
 
 namespace imcmp {
 
-void RichImage::loadFromFile(const Str256& filepath)
+void RichImage::load_from_file(const Str256& filepath)
 {
     //cv::Mat mat = cv::imread(filepath.c_str(), cv::IMREAD_UNCHANGED);
     std::string imagepath = filepath.c_str();
-    cv::Mat mat = loadImage(imagepath);
+    cv::Mat mat = load_image(imagepath);
     if (mat.empty()) return;
     switch (mat.channels())
     {
@@ -71,7 +71,7 @@ void RichImage::reload()
 {
     if (name.length() > 0)
     {
-        loadFromFile(name.c_str());
+        load_from_file(name.c_str());
     }
 }
 

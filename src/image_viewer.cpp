@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     std::string filename = argv[1];
 
-    cv::Mat image = imcmp::loadImage(filename);
+    cv::Mat image = imcmp::load_image(filename);
     std::string win_name = filename;
     cv::namedWindow(win_name, cv::WINDOW_NORMAL);
     cv::resizeWindow(win_name, cv::Size{600, 800});

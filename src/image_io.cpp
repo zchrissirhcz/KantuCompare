@@ -26,24 +26,6 @@ public:
     std::string err_msg;
 };
 
-std::vector<std::string> get_valid_image_file_ext()
-{
-    static std::vector<std::string> valid_ext = {
-        "jpg",
-        "jpeg",
-        "png",
-        "bmp",
-        "nv21",
-        "nv12",
-        "rgb24",
-        "bgr24",
-
-        "gray",
-        "i420",
-        "rgba32"};
-    return valid_ext;
-}
-
 cv::Mat read_image(const FileMetaInfo& meta_info)
 {
     cv::Mat image;
@@ -134,7 +116,7 @@ FileMetaInfo get_meta_info(const std::string& filename)
 
         /// validate filename's ext
         bool found = false;
-        std::vector<std::string> valid_ext = get_valid_image_file_ext();
+        std::vector<std::string> valid_ext = get_supported_image_file_exts();
         for (int i = 0; i < valid_ext.size(); i++)
         {
             if (valid_ext[i] == ext)
@@ -246,7 +228,7 @@ int imcmp::get_file_size(const Str256& filepath)
     return std::filesystem::file_size(p);
 }
 
-cv::Mat imcmp::loadImage(const std::string& image_path)
+cv::Mat imcmp::load_image(const std::string& image_path)
 {
     /// check if file exist or not
     if (!imcmp::file_exist(image_path))
@@ -289,4 +271,22 @@ bool imcmp::file_exist(const char* filename)
 bool imcmp::file_exist(const std::string& filename)
 {
     return file_exist(filename.c_str());
+}
+
+std::vector<std::string> imcmp::get_supported_image_file_exts()
+{
+    static std::vector<std::string> exts = {
+        "jpg",
+        "jpeg",
+        "png",
+        "bmp",
+        "nv21",
+        "nv12",
+        "rgb24",
+        "bgr24",
+
+        "gray",
+        "i420",
+        "rgba32"};
+    return exts;
 }

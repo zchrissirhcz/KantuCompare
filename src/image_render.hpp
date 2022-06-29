@@ -23,7 +23,7 @@ public:
     {
     }
 
-    void loadFromFile(const Str256& filepath);
+    void load_from_file(const Str256& filepath);
     void reload();
     void load_mat(cv::Mat& frame);
     void update_mat(cv::Mat& frame, bool change_color_order = false);

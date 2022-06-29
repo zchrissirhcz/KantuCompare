@@ -9,7 +9,8 @@ int get_file_size(const Str256& filepath);
 bool file_exist(const char* filename);
 bool file_exist(const std::string& filename);
 
-// support .jpg/.png/.bmp,  .nv21/.nv12/.rgb24/.bgr24
-cv::Mat loadImage(const std::string& image_path);
+std::vector<std::string> get_supported_image_file_exts();
+cv::Mat load_image(const std::string& image_path);
+
 
 } // namespace imcmp
