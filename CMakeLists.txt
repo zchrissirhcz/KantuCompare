@@ -5,61 +5,21 @@ project(image_compare)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(USE_PVS "Use PVS-Studio for analysis?" OFF)
+option(IMCMP_USE_PVS "Use PVS-Studio for analysis?" OFF)
+option(IMCMP_TESTING "Build unit test?" ON)
 
+include("cmake/output_dir.cmake")
 include("cmake/sleek.cmake")
-set(CMAKE_BUILD_TYPE Debug)
-sleek_add_flags("-fstandalone-debug")
-
 include("cmake/deps.cmake")
 #include("cmake/asan.cmake")
 #include("cmake/tsan.cmake")
 
-add_library(image_io
-  image_io.hpp
-  image_io.cpp
-)
-target_link_libraries(image_io PUBLIC ${OpenCV_LIBS})
+set(CMAKE_BUILD_TYPE Debug)
+sleek_add_flags("-fstandalone-debug")
 
-add_executable(ImageCompare
-  app.cpp
-  ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
-  ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
-  ${IMGUI_DIR}/imgui.cpp
-  ${IMGUI_DIR}/imgui_draw.cpp
-  ${IMGUI_DIR}/imgui_tables.cpp
-  ${IMGUI_DIR}/imgui_widgets.cpp
-  ${IMGUI_DIR}/imgui_demo.cpp
-  image_compare.hpp
-  image_compare.cpp
-  image_render.hpp
-  image_render.cpp
-)
-target_link_libraries(ImageCompare
-  glfw
-  ${OPENGL_LIBRARIES}
-  image_io
-  ${OpenCV_LIBS}
-  #tinyfiledialogs
-  portable_file_dialogs
-)
-
-if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-  add_definitions(-DGL_SILENCE_DEPRECATION)
+if(IMCMP_TESTING)
+  enable_testing()
 endif()
 
-message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
-
-if(USE_PVS)
-  include(cmake/PVS-Studio.cmake)
-  pvs_studio_add_target(TARGET example2.analyze ALL
-                        OUTPUT FORMAT errorfile
-                        RECURSIVE ANALYZE ImageCompare
-                        MODE GA:1,2
-                        LOG target.err)
-endif()
-
-add_executable(image_viewer
-  image_viewer.cpp
-)
-target_link_libraries(image_viewer image_io)
+add_subdirectory(src)
+add_subdirectory(tests)

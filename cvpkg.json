@@ -39,6 +39,27 @@
             }
         },
         {
+            "name": "googletest",
+            "url": "https://github.com/google/googletest",
+            "version": 
+            {
+                "tag": "release-1.11.0"
+            },
+            "mirror":
+            {
+                "use": false,
+                "url": "https://gitee.com/mirrors/googletest"
+            },
+            "cmake_args": {
+                "configure":
+                [
+                    "-DCMAKE_BUILD_TYPE=Release",
+                    "-DBUILD_GMOCK=OFF",
+                    "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+                ]
+            }
+        },
+        {
             "name": "opencv",
             "url": "https://github.com/opencv/opencv",
             "license": "Apache License 2.0",

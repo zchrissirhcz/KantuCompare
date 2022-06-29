@@ -47,20 +47,6 @@ add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR}/glfw EXCLUDE_FROM_ALL)
 
 
 #----------------------------------------------------------------------
-# tinyfiledialogs
-#----------------------------------------------------------------------
-# set(tinyfiledialogs_DIR "$ENV{HOME}/.sled/work_repos/tinyfiledialogs/master")
-# add_library(tinyfiledialogs STATIC
-#   ${tinyfiledialogs_DIR}/tinyfiledialogs.h
-#   ${tinyfiledialogs_DIR}/tinyfiledialogs.c
-# )
-# target_include_directories(tinyfiledialogs
-#   PUBLIC
-#     ${tinyfiledialogs_DIR}
-# )
-
-
-#----------------------------------------------------------------------
 # portable-file-dialogs
 #----------------------------------------------------------------------
 set(portable_file_dialogs_DIR "$ENV{HOME}/.sled/work_repos/portable-file-dialogs/master")
@@ -74,3 +60,12 @@ add_subdirectory(${portable_file_dialogs_DIR} ${CMAKE_BINARY_DIR}/portable_file_
 #----------------------------------------------------------------------
 find_package(OpenGL REQUIRED)
 
+
+#----------------------------------------------------------------------
+# Googletest
+#----------------------------------------------------------------------
+if(IMCMP_TESTING)
+  set(GTest_DIR "$ENV{HOME}/.sled/artifacts/googletest/release-1.11.0/lib/cmake/GTest/")
+  message(STATUS "GTest_DIR: ${GTest_DIR}")
+  find_package(GTest REQUIRED)
+endif()

@@ -644,32 +644,6 @@ void MyApp::ComputeDiffImage()
 
 int MyApp::UI_ChooseImageFile()
 {
-#if 0
-    char const* lFilterPatterns[3] = { "*.jpg", "*.png", "*.jpeg" };
-    const char* lTheOpenFileName = tinyfd_openFileDialog(
-                        "let us read the password back",
-                        "",
-                        3,
-                        lFilterPatterns,
-                        NULL,
-                        0);
-    if (!lTheOpenFileName)
-    {
-        tinyfd_messageBox(
-                "Error",
-                "Open file name is NULL",
-                "ok",
-                "error",
-                1);
-    }
-    else
-    {
-        printf("file choosed: %s\n", lTheOpenFileName);
-        filepath.setf("%s", lTheOpenFileName);
-    }
-    return 0;
-#else
-
     // Check that a backend is available
     if (!pfd::settings::available())
     {
@@ -682,7 +656,7 @@ int MyApp::UI_ChooseImageFile()
 
     // File open
     auto f = pfd::open_file("Choose image file", pfd::path::home(),
-                            { "Image Files (.jpg .png .jpeg .bmp .nv21 .nv12)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12",
+                            { "Image Files (.jpg .png .jpeg .bmp .nv21 .nv12 .rgb24 .bgr24)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12 *.rgb24 *.bgr24",
                               "All Files", "*" }//,
                             //pfd::opt::multiselect
                             );
@@ -693,9 +667,7 @@ int MyApp::UI_ChooseImageFile()
 
         filepath.setf("%s", f.result()[0].c_str());
     }
-
     return 0;
-#endif
 }
 
 void MyApp::LoadImage(RichImage& image)
