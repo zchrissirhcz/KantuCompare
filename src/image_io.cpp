@@ -1,5 +1,6 @@
 #include "image_io.hpp"
 #include <filesystem>
+#include <opencv2/imgproc.hpp>
 #include <vector>
 
 namespace {
@@ -29,18 +30,12 @@ public:
 cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
 {
     cv::Mat image;
-    if (file_info.ext == "nv21" || file_info.ext == "nv12" || file_info.ext == "i420")
+    if (file_info.ext == "nv21" || file_info.ext == "nv12" || file_info.ext == "i420" || file_info.ext == "uyvy")
     {
         int height = file_info.height;
         int width = file_info.width;
         FILE* fin = fopen(file_info.filename.c_str(), "rb");
-        int buf_size = height * width * 3 / 2;
-
-        cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
-        uchar* yuv_buf = yuv420sp_mat.data;
-        fread(yuv_buf, buf_size, 1, fin);
-        fclose(fin);
-
+        
         cv::Size size;
         size.height = height;
         size.width = width;
@@ -48,15 +43,39 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
 
         if (file_info.ext == "nv21") // nv21 => bgr
         {
+            int buf_size = height * width * 3 / 2;
+            cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
+            uchar* yuv_buf = yuv420sp_mat.data;
+            fread(yuv_buf, buf_size, 1, fin);
+            fclose(fin);
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV21);
         }
         else if (file_info.ext == "nv12") // nv12 => bgr
         {
+            int buf_size = height * width * 3 / 2;
+            cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
+            uchar* yuv_buf = yuv420sp_mat.data;
+            fread(yuv_buf, buf_size, 1, fin);
+            fclose(fin);
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV12);
         }
         else if (file_info.ext == "i420")
         {
+            int buf_size = height * width * 3 / 2;
+            cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
+            uchar* yuv_buf = yuv420sp_mat.data;
+            fread(yuv_buf, buf_size, 1, fin);
+            fclose(fin);
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_I420);
+        }
+        else if (file_info.ext == "uyvy")
+        {
+            int buf_size = height * width * 2;
+            cv::Mat yuv422_mat(height, width, CV_8UC2);
+            uchar* yuv_buf = yuv422_mat.data;
+            fread(yuv_buf, buf_size, 1, fin);
+            fclose(fin);
+            cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_UYVY);
         }
     }
     else if (file_info.ext == "bgr24" || file_info.ext == "rgb24" || file_info.ext == "rgba32" || file_info.ext == "bgra32" || file_info.ext == "gray")
@@ -159,7 +178,7 @@ FileInfo get_meta_info(const std::string& filename)
         if (!found)
         {
             file_info.valid = false;
-            file_info.err_msg = "invalid filenames extension! Currently only supports these: (case insensitive) ";
+            file_info.err_msg = "invalid filename extension! Currently only supports these: (case insensitive) ";
             for (int i = 0; i < valid_ext.size(); i++)
             {
                 file_info.err_msg = file_info.err_msg + " " + valid_ext[i];
@@ -238,6 +257,10 @@ FileInfo get_meta_info(const std::string& filename)
         {
             expected_size = height * width;
         }
+        else if (ext == "uyvy")
+        {
+            expected_size = height * width * 2;
+        }
 
         if (expected_size != actual_size)
         {
@@ -246,7 +269,7 @@ FileInfo get_meta_info(const std::string& filename)
             break;
         }
 
-        if (ext == "nv21" || ext == "nv12" || ext == "i420")
+        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "uyvy")
         {
             if (height % 2 != 0 || width % 2 != 0)
             {
@@ -320,13 +343,17 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "jpeg",
         "png",
         "bmp",
-        "nv21",
-        "nv12",
+
         "rgb24",
         "bgr24",
-
+        "rgba32",
+        "bgra32",
         "gray",
+
+        "nv21",
+        "nv12",
         "i420",
-        "rgba32"};
+        "uyvy"
+    };
     return exts;
 }
