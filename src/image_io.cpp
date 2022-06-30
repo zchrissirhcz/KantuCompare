@@ -108,7 +108,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_YVYU);
         }
     }
-    else if (ext == "bgr24" || ext == "rgb24" || ext == "rgba32" || ext == "bgra32" || ext == "gray")
+    else if (ext == "bgr24" || ext == "rgb24" || ext == "rgba32" || ext == "bgra32" || ext == "gray" || ext == "grey")
     {
         int channels = 1; // "gray"
         if (file_info.ext == "bgr24" || file_info.ext == "rgb24")
@@ -283,7 +283,7 @@ FileInfo get_meta_info(const std::string& filename)
         {
             expected_size = height * width * 4;
         }
-        else if (ext == "gray")
+        else if (ext == "gray" || ext == "grey")
         {
             expected_size = height * width;
         }
@@ -379,6 +379,7 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "rgba32",
         "bgra32",
         "gray",
+        "grey",
 
         "nv21", // yuv420sp
         "nv12",
@@ -408,7 +409,6 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "yvu",
         "uvy",
         "vuy",
-        "grey"
     };
 
     // YUVviewer supported:
