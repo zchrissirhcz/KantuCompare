@@ -20,7 +20,8 @@ public:
     }
     std::string filename;
     std::string head;
-    std::string ext;
+    std::string raw_ext; // same as file
+    std::string ext; // converted to lowercase, then mapping to identical one
     int height;
     int width;
     bool valid;
@@ -108,7 +109,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_YVYU);
         }
     }
-    else if (ext == "bgr24" || ext == "rgb24" || ext == "rgba32" || ext == "bgra32" || ext == "gray" || ext == "grey")
+    else if (ext == "bgr24" || ext == "rgb24" || ext == "rgba32" || ext == "bgra32" || ext == "gray")
     {
         int channels = 1; // "gray"
         if (file_info.ext == "bgr24" || file_info.ext == "rgb24")
@@ -181,15 +182,41 @@ FileInfo get_meta_info(const std::string& filename)
         }
 
         /// split filename's head and ext
-        std::string ext = filename.substr(ext_pos + 1);
+        std::string raw_ext = filename.substr(ext_pos + 1);
+        file_info.raw_ext = raw_ext;
+
         int last_slash_pos = filename.find_last_of('/');
         std::string head = filename.substr(last_slash_pos + 1, ext_pos - last_slash_pos - 1);
-        //std::cout << head << "." << ext << std::endl;
+        //std::cout << head << "." << raw_ext << std::endl;
+
+        std::string ext = raw_ext;
         for (int i = 0; i < ext.size(); i++)
         {
             if (isalpha(ext[i]))
             {
                 ext[i] = tolower(ext[i]);
+            }
+        }
+        // convert raw extension (lowercase) to identical extention
+        bool do_opencv_identical_ext_mapping = true;
+        if (do_opencv_identical_ext_mapping)
+        {
+            if (ext == "yuv" || ext == "iyuv")
+            {
+                ext = "i420";
+            }
+            else if (ext == "y422" || ext == "uynv")
+            {
+                ext = "uyvy";
+            }
+        }
+
+        bool do_yuvviewer_identical_ext_mapping = true;
+        if (do_yuvviewer_identical_ext_mapping)
+        {
+            if (ext == "grey")
+            {
+                ext = "gray";
             }
         }
         file_info.head = head;
@@ -283,7 +310,7 @@ FileInfo get_meta_info(const std::string& filename)
         {
             expected_size = height * width * 4;
         }
-        else if (ext == "gray" || ext == "grey")
+        else if (ext == "gray")
         {
             expected_size = height * width;
         }
@@ -378,19 +405,24 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "bgr24",
         "rgba32",
         "bgra32",
-        "gray",
-        "grey",
+        "gray", "grey",
 
         "nv21", // yuv420sp
         "nv12",
-        "i420", // iyuv
-        "uyvy", // y422, uynv
+        "i420", 
+            "iyuv", // opencv
+            "yuv",  // yuvviewer
 
-        "yuyv",  // yunv, yuy2
+        "uyvy",
+            "y422", // opencv
+            "uynv", // opencv
+
+        "yuyv",
+            "yunv", // opencv
+            "yuy2", // opencv
+
         "yv12",  // yuv420p
         "yvyu",
-
-        // to be supported
 
         // not supported yet
         "i444",
@@ -398,14 +430,12 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "uyvy2",
         "vyuy",
         "vyuy2",
-        
         "yuyv2",
         "i422h",
         "yv16h",
         "i422v",
         "yv16v",
         "lpi422h",
-        "yuv",
         "yvu",
         "uvy",
         "vuy",
