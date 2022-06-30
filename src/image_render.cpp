@@ -4,6 +4,9 @@
 GLuint imcmp::getTextureFromImage(const cv::Mat& image)
 {
     cv::Mat im0 = image;
+#if _MSC_VER
+    im0 = image.clone();
+#endif
 
     // Create a OpenGL texture identifier
     GLuint image_texture;
@@ -13,29 +16,52 @@ GLuint imcmp::getTextureFromImage(const cv::Mat& image)
     // Setup filtering parameters for display
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#if !_MSC_VER
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-
+#endif
     // Upload pixels into texture
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
 
     const int channels = image.channels();
-    switch (channels)
+    GLint internalformat = 0;
+    GLenum format = 0;
+    bool valid_format = true;
+    if (channels == 4)
     {
-    case 4:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, im0.size().width, im0.size().height, 0, GL_BGRA, GL_UNSIGNED_BYTE, im0.data);
-        break;
-    case 3:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, im0.size().width, im0.size().height, 0, GL_BGR, GL_UNSIGNED_BYTE, im0.data);
-        break;
-    case 1:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, im0.size().width, im0.size().height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, im0.data);
-        break;
-    default:
+        internalformat = GL_RGBA;
+#if _MSC_VER
+        format = GL_RGBA;
+        cvtColor(im0, im0, cv::COLOR_BGRA2RGBA);
+#else
+        format = GL_BGRA;
+#endif
+    }
+    else if (channels == 3)
+    {
+        internalformat = GL_RGB;
+#if _MSC_VER
+        format = GL_RGB;
+        cvtColor(im0, im0, cv::COLOR_BGR2RGB);
+#else
+        format = GL_BGR;
+#endif
+    }
+    else if (channels == 1)
+    {
+        internalformat = GL_LUMINANCE;
+        format = GL_LUMINANCE;
+    }
+    else
+    {
+        valid_format = false;
         fprintf(stderr, "only support 1, 3, 4 channels\n");
     }
+
+    if (valid_format)
+        glTexImage2D(GL_TEXTURE_2D, 0, internalformat, im0.size().width, im0.size().height, 0, format, GL_UNSIGNED_BYTE, im0.data);
 
     return image_texture;
 }

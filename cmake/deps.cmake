@@ -1,3 +1,7 @@
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  set(ENV{HOME} "C:/Users/$ENV{USERNAME}")
+endif()
+
 #----------------------------------------------------------------------
 # OpenCV
 #----------------------------------------------------------------------
@@ -5,8 +9,12 @@
 #   sudo apt install libopencv-dev # ubuntu
 #   brew install opencv # mac
 #----------------------------------------------------------------------
-#set(OpenCV_DIR "$ENV{HOME}/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
-set(OpenCV_DIR "$ENV{HOME}/.sled/artifacts/opencv/4.5.5/lib/cmake/opencv4")
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  set(OpenCV_DIR "$ENV{ARTIFACTS_DIR}/opencv/windows/4.5.5")
+else()
+  #set(OpenCV_DIR "$ENV{HOME}/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
+  set(OpenCV_DIR "$ENV{HOME}/.sled/artifacts/opencv/4.5.5/lib/cmake/opencv4")
+endif()
 message(STATUS "OpenCV_DIR: ${OpenCV_DIR}")
 find_package(OpenCV REQUIRED)
 
