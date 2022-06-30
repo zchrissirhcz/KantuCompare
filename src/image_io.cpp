@@ -30,7 +30,7 @@ public:
 cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
 {
     cv::Mat image;
-    if (file_info.ext == "nv21" || file_info.ext == "nv12" || file_info.ext == "i420" || file_info.ext == "uyvy")
+    if (file_info.ext == "nv21" || file_info.ext == "nv12" || file_info.ext == "i420" || file_info.ext == "uyvy" || file_info.ext == "yuyv")
     {
         int height = file_info.height;
         int width = file_info.width;
@@ -76,6 +76,15 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fread(yuv_buf, buf_size, 1, fin);
             fclose(fin);
             cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_UYVY);
+        }
+        else if (file_info.ext == "yuyv")
+        {
+            int buf_size = height * width * 2;
+            cv::Mat yuv422_mat(height, width, CV_8UC2);
+            uchar* yuv_buf = yuv422_mat.data;
+            fread(yuv_buf, buf_size, 1, fin);
+            fclose(fin);
+            cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_YUYV);
         }
     }
     else if (file_info.ext == "bgr24" || file_info.ext == "rgb24" || file_info.ext == "rgba32" || file_info.ext == "bgra32" || file_info.ext == "gray")
@@ -257,7 +266,7 @@ FileInfo get_meta_info(const std::string& filename)
         {
             expected_size = height * width;
         }
-        else if (ext == "uyvy")
+        else if (ext == "uyvy" || ext == "yuyv")
         {
             expected_size = height * width * 2;
         }
@@ -269,7 +278,7 @@ FileInfo get_meta_info(const std::string& filename)
             break;
         }
 
-        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "uyvy")
+        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "uyvy" || ext == "yuyv")
         {
             if (height % 2 != 0 || width % 2 != 0)
             {
@@ -350,10 +359,38 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "bgra32",
         "gray",
 
-        "nv21",
+        "nv21", // yuv420sp
         "nv12",
-        "i420",
-        "uyvy"
+        "i420", // iyuv
+        "uyvy", // y422, uynv
+
+        // to be supported
+        "yuyv",  // yunv, yuy2
+        "yv12",  // yuv420p
+        "yvyu",
+
+        // not supported yet
+        "i444",
+        "yv24",
+        "uyvy2",
+        "vyuy",
+        "vyuy2",
+        
+        "yuyv2",
+        "i422h",
+        "yv16h",
+        "i422v",
+        "yv16v",
+        "lpi422h",
+        "yuv",
+        "yvu",
+        "uvy",
+        "vuy",
+        "grey"
     };
+
+    // YUVviewer supported:
+    // I444, YV24, NV12, NV21, I420, YV12, UYVY, UYVY2, VYUY, VYUY2, YUYV, YUYV2, YVYU, YVYU2, I422H, YV16H, I422V, YV16V, LPI422H, YUV, YVU, UVY, VUY, Gray, Grey
+
     return exts;
 }
