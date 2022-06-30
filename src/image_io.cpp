@@ -30,8 +30,9 @@ public:
 cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
 {
     cv::Mat image;
-    if (file_info.ext == "nv21" || file_info.ext == "nv12" || file_info.ext == "i420" || file_info.ext == "yv12" // 3/2
-        || file_info.ext == "uyvy" || file_info.ext == "yuyv" // 2
+    const std::string& ext = file_info.ext;
+    if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "yv12" // 3/2
+        || ext == "uyvy" || ext == "yuyv" || ext == "yvyu" // 2
         )
     {
         int height = file_info.height;
@@ -43,7 +44,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
         size.width = width;
         image = cv::Mat(size, CV_8UC3);
 
-        if (file_info.ext == "nv21") // nv21 => bgr
+        if (ext == "nv21") // nv21 => bgr
         {
             int buf_size = height * width * 3 / 2;
             cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
@@ -52,7 +53,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fclose(fin);
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV21);
         }
-        else if (file_info.ext == "nv12") // nv12 => bgr
+        else if (ext == "nv12") // nv12 => bgr
         {
             int buf_size = height * width * 3 / 2;
             cv::Mat yuv420sp_mat(height * 3 / 2, width, CV_8UC1);
@@ -61,7 +62,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fclose(fin);
             cv::cvtColor(yuv420sp_mat, image, cv::COLOR_YUV2BGR_NV12);
         }
-        else if (file_info.ext == "i420")
+        else if (ext == "i420")
         {
             int buf_size = height * width * 3 / 2;
             cv::Mat mat(height * 3 / 2, width, CV_8UC1);
@@ -70,7 +71,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fclose(fin);
             cv::cvtColor(mat, image, cv::COLOR_YUV2BGR_I420);
         }
-        else if (file_info.ext == "yv12")
+        else if (ext == "yv12")
         {
             int buf_size = height * width * 3 / 2;
             cv::Mat yuv420p_mat(height * 3 / 2, width, CV_8UC1);
@@ -79,7 +80,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fclose(fin);
             cv::cvtColor(yuv420p_mat, image, cv::COLOR_YUV2BGR_YV12);
         }
-        else if (file_info.ext == "uyvy")
+        else if (ext == "uyvy")
         {
             int buf_size = height * width * 2;
             cv::Mat yuv422_mat(height, width, CV_8UC2);
@@ -88,7 +89,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fclose(fin);
             cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_UYVY);
         }
-        else if (file_info.ext == "yuyv")
+        else if (ext == "yuyv")
         {
             int buf_size = height * width * 2;
             cv::Mat yuv422_mat(height, width, CV_8UC2);
@@ -97,8 +98,17 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
             fclose(fin);
             cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_YUYV);
         }
+        else if (ext == "yvyu")
+        {
+            int buf_size = height * width * 2;
+            cv::Mat yuv422_mat(height, width, CV_8UC2);
+            uchar* yuv_buf = yuv422_mat.data;
+            fread(yuv_buf, buf_size, 1, fin);
+            fclose(fin);
+            cv::cvtColor(yuv422_mat, image, cv::COLOR_YUV2BGR_YVYU);
+        }
     }
-    else if (file_info.ext == "bgr24" || file_info.ext == "rgb24" || file_info.ext == "rgba32" || file_info.ext == "bgra32" || file_info.ext == "gray")
+    else if (ext == "bgr24" || ext == "rgb24" || ext == "rgba32" || ext == "bgra32" || ext == "gray")
     {
         int channels = 1; // "gray"
         if (file_info.ext == "bgr24" || file_info.ext == "rgb24")
@@ -277,7 +287,7 @@ FileInfo get_meta_info(const std::string& filename)
         {
             expected_size = height * width;
         }
-        else if (ext == "uyvy" || ext == "yuyv")
+        else if (ext == "uyvy" || ext == "yuyv" || ext == "yvyu")
         {
             expected_size = height * width * 2;
         }
@@ -289,7 +299,7 @@ FileInfo get_meta_info(const std::string& filename)
             break;
         }
 
-        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "uyvy" || ext == "yuyv" || ext == "yv12")
+        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "uyvy" || ext == "yuyv" || ext == "yv12" || ext == "yvyu")
         {
             if (height % 2 != 0 || width % 2 != 0)
             {
@@ -376,10 +386,10 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
         "uyvy", // y422, uynv
 
         "yuyv",  // yunv, yuy2
-
-        // to be supported
         "yv12",  // yuv420p
         "yvyu",
+
+        // to be supported
 
         // not supported yet
         "i444",
