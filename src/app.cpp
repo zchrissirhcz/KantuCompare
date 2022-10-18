@@ -544,10 +544,18 @@ int MyApp::UI_ChooseImageFile()
     // Set verbosity to true
     pfd::settings::verbose(true);
 
+#if __APPLE__
+    std::string default_image_directory = "/Users/zz/data";
+#elif __linux__
+    std::string default_image_directory = "/home/zz/data";
+#elif _MSC_VER
+    std::string default_image_directory = "D:/data";
+#endif
+
     // NOTE: file extension filter not working on macOSX
     auto f = pfd::open_file("Choose image file", 
                             //pfd::path::home(),
-                            "/home/zz/work/plain/asvl",
+                            default_image_directory,
                             
                             //{"Image Files (.jpg .png .jpeg .bmp .nv21 .nv12 .rgb24 .bgr24)", "*.jpg *.png *.jpeg *.bmp *.nv21 *.nv12 *.rgb24 *.bgr24",
                             {filter_msg1, filter_msg2, "All Files", "*"}
