@@ -7,8 +7,8 @@ cd %BUILD_DIR%
 cmake ../.. -G "Visual Studio 17 2022" -A x64 -DIMCMP_TESTING=OFF
 
 @REM build
-cmake --build . --config Debug
-cmake --build . --config Release
+@REM cmake --build . --config Debug
+@REM cmake --build . --config Release
 
 @REM install
 @REM --prefix xxx is optional

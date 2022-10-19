@@ -10,7 +10,8 @@ endif()
 #   brew install opencv # mac
 #----------------------------------------------------------------------
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  set(OpenCV_DIR "$ENV{ARTIFACTS_DIR}/opencv/windows/4.5.5")
+  #set(OpenCV_DIR "$ENV{ARTIFACTS_DIR}/opencv/windows/4.5.5")
+  set(OpenCV_DIR "D:/artifacts/opencv/windows/OpenCV-4.6.0-vs2015-x64-static")
 else()
   #set(OpenCV_DIR "$ENV{HOME}/artifacts/opencv/4.5.5/mac-arm64/lib/cmake/opencv4")
   set(OpenCV_DIR "$ENV{HOME}/.sled/artifacts/opencv/4.5.5/lib/cmake/opencv4")
