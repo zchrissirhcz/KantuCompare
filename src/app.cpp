@@ -547,7 +547,7 @@ int MyApp::UI_ChooseImageFile()
 #if __APPLE__
     std::string default_image_directory = "/Users/zz/data";
 #elif __linux__
-    std::string default_image_directory = "/home/zz/data";
+    std::string default_image_directory = "/home/zz/data2";
 #elif _MSC_VER
     std::string default_image_directory = "D:/data";
 #endif
