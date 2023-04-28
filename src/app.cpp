@@ -549,7 +549,7 @@ int MyApp::UI_ChooseImageFile()
 #elif __linux__
     std::string default_image_directory = "/home/zz/data2";
 #elif _MSC_VER
-    std::string default_image_directory = "D:/data";
+    std::string default_image_directory = "C:/Users";
 #endif
 
     // NOTE: file extension filter not working on macOSX
@@ -574,7 +574,7 @@ int MyApp::UI_ChooseImageFile()
 void MyApp::LoadImage(RichImage& image)
 {
     UI_ChooseImageFile();
-    if (filepath.c_str())
+    if (filepath.length() > 0)
     {
         image.load_from_file(filepath);
     }

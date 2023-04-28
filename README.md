@@ -15,11 +15,18 @@ See [images](https://github.com/zchrissirhcz/image-compare/tree/main/images) dir
 
 ## Build
 ```bash
+# clone repo
 git clone https://github.com/zchrissirhcz/image-compare
 cd image-compare
-sled cvpkg # resolve dependencies; you may just edit cmake/deps.cmake
-cmake -S . -B output -GNinja && cmake --build output
-./output/ImageCompare
+
+# clone, build and install denependcies
+pip install -r requirements.txt
+python sled_clone_repos.py
+
+# build ImageCompare
+cd build
+./vs2022-x64.cmd # for Windows
+./linux-x64.sh   # for Linux/MacOSX
 ```
 
 ## Remarks
