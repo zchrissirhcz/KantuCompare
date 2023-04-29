@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
-#include "Str.h"
+#include "str/Str.h"
 
 namespace kantu {
 

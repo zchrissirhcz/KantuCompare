@@ -1,4 +1,8 @@
 #include "kantu/compare.hpp"
+#include "kantu/log.hpp"
+#include "mlcc/fmt1.h"
+
+using namespace Shadow;
 
 void kantu::get_diff_image(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
 {
@@ -68,7 +72,7 @@ cv::Mat kantu::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
 {
     if (image_left.channels() != 4 || image_right.channels() != 4)
     {
-        fprintf(stderr, "only support BGRA image for comparision\n");
+        LOG(ERROR) << "only support BGRA image for comparision" << std::endl;
         return cv::Mat();
     }
     const int channels = 4;
@@ -186,7 +190,7 @@ cv::Mat kantu::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
 
         diff = image_compare.clone();
-        printf("Compare get pixel diff: (%d, %d, %d) with thresh %d\n",
+        LOG(INFO) << fmt1::format("Compare get pixel diff: ({:d}, {:d}, {:d}) with thresh {:d}\n",
                (int)pixel_diff.val[0],
                (int)pixel_diff.val[1],
                (int)pixel_diff.val[2],

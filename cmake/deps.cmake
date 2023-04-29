@@ -86,7 +86,7 @@ message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
 add_library(str INTERFACE
   ${CMAKE_SOURCE_DIR}/deps/str/Str.h
 )
-target_include_directories(str INTERFACE ${CMAKE_SOURCE_DIR}/deps/str)
+target_include_directories(str INTERFACE ${CMAKE_SOURCE_DIR}/deps)
 
 
 #----------------------------------------------------------------------
@@ -101,3 +101,12 @@ if(KANTU_TESTING)
   message(STATUS "GTest_DIR: ${GTest_DIR}")
   find_package(GTest REQUIRED)
 endif()
+
+
+#----------------------------------------------------------------------
+# MLCC
+#----------------------------------------------------------------------
+add_library(mlcc INTERFACE
+  ${CMAKE_SOURCE_DIR}/deps/mlcc/fmt1.h
+)
+target_include_directories(mlcc INTERFACE ${CMAKE_SOURCE_DIR}/deps)

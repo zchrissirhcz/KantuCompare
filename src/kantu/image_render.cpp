@@ -1,5 +1,9 @@
 #include "kantu/image_render.hpp"
 #include "kantu/image_io.hpp"
+#include "kantu/log.hpp"
+#include "mlcc/fmt1.h"
+
+using namespace Shadow;
 
 GLuint kantu::get_texture_from_image(const cv::Mat& image)
 {
@@ -57,7 +61,7 @@ GLuint kantu::get_texture_from_image(const cv::Mat& image)
     else
     {
         valid_format = false;
-        fprintf(stderr, "only support 1, 3, 4 channels\n");
+        LOG(ERROR) << "only support 1, 3, 4 channels\n";
     }
 
     if (valid_format)
@@ -86,7 +90,7 @@ void RichImage::load_from_file(const Str256& filepath)
         // NOP
         break;
     default:
-        printf("only support 1, 3, 4 channels\n"); // TODO: fix me. consider encapsulate cv::imread(), support 2 channels.
+        LOG(ERROR) << "only support 1, 3, 4 channels\n"; // TODO: fix me. consider encapsulate cv::imread(), support 2 channels.
     }
     load_mat(mat);
     set_name(filepath);

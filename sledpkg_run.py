@@ -89,6 +89,11 @@ def prepare_opencv():
         pkg.cmake_install()
 
 
+def prepare_mlcc():
+    pkg = sp.SledPackage('mlcc')
+    pkg.clone_repo('https://github.com/scarsty/mlcc', commit_id='c61dacb')
+
+
 if __name__ == '__main__':
     prepare_imgui()
     preprare_portable_file_dialogs()
@@ -96,3 +101,4 @@ if __name__ == '__main__':
     prepare_str()
     prepare_gtest()
     prepare_opencv()
+    prepare_mlcc()

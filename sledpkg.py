@@ -1,7 +1,7 @@
 # sledpkg:  Semi-precise package manager
 # Author:   Zhuo Zhang <imzhuo#foxmail.com>
 # Created:  2023.04.28 00:00:00
-# Modified: 2023.04.29 21:59:00
+# Modified: 2023.04.30 00:03:00
 
 import git
 from git import RemoteProgress
@@ -54,7 +54,7 @@ class SledPackage(object):
         self.name = name
         self.src_dir = None
 
-    def clone_repo(self, git_url, branch=None, tag=None, mirror_url=None, depth=1, save_dir='deps'):
+    def clone_repo(self, git_url, branch=None, tag=None, commit_id=None, mirror_url=None, shallow=True, save_dir='deps'):
         if (mirror_url is not None):
             git_url = mirror_url
         repo_name = git_url.split('/')[-1]
@@ -64,24 +64,42 @@ class SledPackage(object):
         self.install_dir = to_path + "/install" # the default one. you may override this
         self.build_type = "Release"
 
+        if (commit_id is not None):
+            shallow = False
+
+        kwargs = dict()
+
         print("[git clone] {:s}".format(git_url))
         print("  - to_path:", to_path)
         print("  - branch:", str(branch))
         print("  - tag:", str(tag))
-        print("  - depth:", depth)
+        print("  - commit_id:", commit_id)
+        if (shallow):
+            print("  - shallow: True (depth=1)")
+            kwargs['depth'] = 1
+        else:
+            print("  - shallow: False (full clone)")
+
+        if ((branch is not None) and (tag is not None)):
+            print("  Error: confusion. you can't specify both branch and tag.")
+            return
+
         to_path_dot_git = to_path + "/.git"
         if (os.path.exists(to_path_dot_git)):
             print("  Warning: directory {:s} already exist, skip git clone".format(to_path_dot_git))
             return
-        if ((branch is None) and (tag is None)):
-            git.Repo.clone_from(git_url, to_path = to_path, depth = depth, progress=CloneProgress())
-        elif ((branch is not None) and (tag is not None)):
-            print("  Error: confusion. you can't specify both branch and tag.")
-            return
-        else:
-            if (tag is not None):
-                branch = tag
-            git.Repo.clone_from(git_url, to_path = to_path, branch=branch, depth = depth, progress=CloneProgress())
+        
+        if (branch is not None):
+            kwargs['branch'] = branch
+        elif (tag is not None):
+            kwargs['branch'] = tag
+        
+        repo = git.Repo.clone_from(git_url, to_path = to_path, progress=CloneProgress(), **kwargs)
+
+        if (commit_id is not None):
+            commit = repo.commit(commit_id)
+            repo.head.reference = commit
+            repo.head.reset(index=True, working_tree=True)
 
     def cmake_configure(self, cmake_configure_args=[]):
         print("[configure] {:s}".format(self.name))

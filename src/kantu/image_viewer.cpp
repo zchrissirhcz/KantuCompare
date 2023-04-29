@@ -6,9 +6,14 @@
 #endif
 #include "kantu/image_io.hpp"
 
+#include "kantu/log.hpp"
+#include "mlcc/fmt1.h"
+
+using namespace Shadow;
+
 static void help(const char* exe_name)
 {
-    printf("Usage: %s image_path\n", exe_name);
+    LOG(INFO) << fmt1::format("Usage: {:s} image_path\n", exe_name);
 }
 
 int main(int argc, char** argv)

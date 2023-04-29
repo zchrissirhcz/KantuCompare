@@ -2,7 +2,7 @@
 
 #include "kantu/image.hpp"
 #include <string>
-#include "Str.h"
+#include "str/Str.h"
 
 namespace kantu {
 

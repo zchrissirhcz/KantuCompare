@@ -19,8 +19,11 @@
 #include "kantu/image_inspect.h"
 
 #define STR_IMPLEMENTATION
-#include "Str.h"
+#include "str/Str.h"
 using namespace kantu;
+
+#include "kantu/log.hpp"
+#include "mlcc/fmt1.h"
 
 class MyApp : public App<MyApp>
 {
@@ -551,7 +554,7 @@ int MyApp::UI_ChooseImageFile()
 #else
     const char* home_dir = getenv("HOME");
     std::string default_image_directory = home_dir;
-    printf("[DEBUG] default_image_directory: %s\n", default_image_directory.c_str());
+    LOG(INFO) << fmt1::format("[DEBUG] default_image_directory: {:s}\n", default_image_directory.c_str());
 #endif
 
     // NOTE: file extension filter not working on macOSX

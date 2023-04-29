@@ -21,7 +21,7 @@ See [images](https://github.com/zchrissirhcz/KantuCompare/tree/main/images) dire
 https://github.com/zchrissirhcz/KantuCompare
 cd KantuCompare
 
-# clone, build and install denependcies
+# clone, build and install dependencies
 # you may use the provided python script for dependencies preparation
 pip install -r requirements.txt
 python sledpkg_run.py
@@ -34,7 +34,7 @@ cd build
 
 # start the app
 cd linux-x64
-./KantuCompare
+./KantuCompareApp
 ```
 
 ## Remarks

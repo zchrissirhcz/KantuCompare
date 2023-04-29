@@ -1,15 +1,19 @@
 #include "kantu/transform_format.hpp"
+#include "kantu/log.hpp"
+#include "mlcc/fmt1.h"
+
+using namespace Shadow;
 
 void kantu::chw_to_hwc(const cv::Mat& src, cv::Mat& dst)
 {
     if (src.depth() != CV_8U)
     {
-        fprintf(stderr, "error: src's depth() should be CV_8U\n");
+        LOG(ERROR) << "error: src's depth() should be CV_8U\n";
         return;
     }
     if (src.channels() != 3)
     {
-        fprintf(stderr, "error: currently only support 3 channel\n");
+        LOG(ERROR) << "error: currently only support 3 channel\n";
         return;
     }
     dst.create(src.size(), src.type());
@@ -111,7 +115,7 @@ void kantu::i444_to_rgb(uint8_t* i444, uint8_t* rgb, int height, int width)
     const int w = width;
     const int h = height;
 
-    printf("!! calling %s\n", __FUNCTION__);
+    LOG(INFO) << fmt1::format("!! calling {:s}\n", __FUNCTION__);
 
     for (int i = 0; i < height; i++)
     {

@@ -4,9 +4,12 @@
 #include <filesystem>
 #include <opencv2/imgproc.hpp>
 #include <vector>
+#include "mlcc/fmt1.h"
+#include "log.hpp"
 
 namespace {
 using namespace kantu;
+using namespace Shadow;
 
 cv::Mat load_fourcc_and_convert_to_mat(const ImageFileInfo& file_info)
 {
@@ -142,7 +145,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const ImageFileInfo& file_info)
     }
     else
     {
-        fprintf(stderr, "not supported format %s\n", file_info.lower_ext.c_str());
+        LOG(ERROR) << fmt1::format("not supported format {:s}\n", file_info.lower_ext.c_str());
     }
     return image;
 }
@@ -244,7 +247,7 @@ ImageFileInfo::ImageFileInfo(const std::string& _filename)
         // len(height)>0
         // find and validate `_`
         int underline_pos = head.find_last_of('_');
-        fprintf(stderr, "underline_pos = %d\n", underline_pos);
+        LOG(INFO) << fmt1::format("underline_pos = {:d}\n", underline_pos);
         if (underline_pos != -1 && underline_pos > static_cast<int>(head.length()) - 4)
         {
             this->err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
@@ -262,7 +265,7 @@ ImageFileInfo::ImageFileInfo(const std::string& _filename)
                 non_digit_pos = i;
             }
         }
-        fprintf(stderr, "non_digit_cnt is %d\n", non_digit_cnt);
+        LOG(INFO) << (fmt1::format("non_digit_cnt is {:d}\n", non_digit_cnt));
         if (non_digit_cnt != 1)
         {
             this->err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
@@ -321,12 +324,12 @@ ImageFileInfo::ImageFileInfo(const std::string& _filename)
         {
             expected_size = height * width * 3;
         }
-        fprintf(stderr, "ext is %s\n", lower_ext.c_str());
+        LOG(INFO) << fmt1::format("ext is {:s}\n", lower_ext.c_str());
 
         if (expected_size != actual_size)
         {
             this->err_msg = "invalid file size, filename described different that actual";
-            fprintf(stderr, "expected_size: %d, actual_size: %d\n", expected_size, actual_size);
+            LOG(ERROR) << fmt1::format("expected_size: {:d}, actual_size: {:d}\n", expected_size, actual_size);
             break;
         }
 
@@ -355,7 +358,7 @@ cv::Mat kantu::load_image(const std::string& image_path)
     /// check if file exist or not
     if (!kantu::file_exist(image_path))
     {
-        fprintf(stderr, "file %s does not exist\n", image_path.c_str());
+        LOG(ERROR) << fmt1::format("file {:s} does not exist\n", image_path.c_str());
         cv::Mat image(100, 100, CV_8UC3, cv::Scalar(0, 0, 0));
         return image;
     }
@@ -364,12 +367,12 @@ cv::Mat kantu::load_image(const std::string& image_path)
     bool valid = file_info.valid;
     if (!valid)
     {
-        fprintf(stderr, "%s\n", file_info.err_msg.c_str());
+        LOG(ERROR) << fmt1::format("{:s}\n", file_info.err_msg.c_str());
         return cv::Mat(100, 100, CV_8UC3);
     }
     else
     {
-        printf("reading file %s\n", image_path.c_str());
+        LOG(INFO) << fmt1::format("reading file {:s}\n", image_path.c_str());
         cv::Mat image = read_image(file_info);
         return image;
     }
