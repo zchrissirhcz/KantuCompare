@@ -16,4 +16,4 @@ execute_process(
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/images ${CMAKE_BINARY_DIR}
 )
 
-kantu_add_test(image_compare kantu_image_compare kantu_image_io)
+kantu_add_test(image_compare kantu_compare)

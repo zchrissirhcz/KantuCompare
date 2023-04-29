@@ -1,25 +1,24 @@
-add_library(kantu_image_format STATIC
-  image_format.hpp
-  image_format.cpp
-)
-target_include_directories(kantu_image_format PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(kantu_image_format PUBLIC ${OpenCV_LIBS})
-
-add_library(kantu_image_io STATIC
+# image file loading, format transform, string utilities
+add_library(kantu_basic STATIC
+  transform_format.hpp
+  transform_format.cpp
   image_io.hpp
   image_io.cpp
+  string.hpp
+  string.cpp
 )
-target_include_directories(kantu_image_io PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(kantu_image_io PUBLIC kantu_image_format str)
+target_include_directories(kantu_basic PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(kantu_basic PUBLIC ${OpenCV_LIBS} str)
 
-add_library(kantu_image_compare STATIC
-  image_compare.hpp
-  image_compare.cpp
+# compare RGB/Gray images
+add_library(kantu_compare STATIC
+  compare.hpp
+  compare.cpp
 )
-target_include_directories(kantu_image_compare PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(kantu_image_compare PUBLIC ${OpenCV_LIBS})
+target_link_libraries(kantu_compare PUBLIC kantu_basic)
 
-add_executable(KantuCompare
+# render result and show
+add_executable(KantuCompareApp
   app.cpp
   image_render.hpp
   image_render.cpp
@@ -32,12 +31,10 @@ add_executable(KantuCompare
   ${IMGUI_DIR}/imgui_widgets.cpp
   ${IMGUI_DIR}/imgui_demo.cpp
 )
-target_link_libraries(KantuCompare
+target_link_libraries(KantuCompareApp
   glfw
   ${OPENGL_LIBRARIES}
-  kantu_image_compare
-  kantu_image_io
-  ${OpenCV_LIBS}
+  kantu_compare
   portable_file_dialogs
 )
 
@@ -55,7 +52,8 @@ if(KANTU_USE_PVS)
   )
 endif()
 
+# fast debugging with cv::imshow
 add_executable(kantu_image_viewer
   image_viewer.cpp
 )
-target_link_libraries(kantu_image_viewer kantu_image_io)
+target_link_libraries(kantu_image_viewer kantu_basic)

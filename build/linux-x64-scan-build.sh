@@ -1,10 +1,6 @@
 #!/bin/bash
 
-SCAN_BUILD=scan-build-14
+SCAN_BUILD=scan-build-15
 BUILD_DIR=linux-x64-scan-build
-mkdir -p $BUILD_DIR
-cd $BUILD_DIR
-
-$SCAN_BUILD cmake ../.. -DCMAKE_BUILD_TYPE=Debugs #-GNinja
-$SCAN_BUILD cmake --build . -j4
-cd ..
+$SCAN_BUILD cmake -S .. -B $BUILD_DIR -DCMAKE_BUILD_TYPE=Debugs #-GNinja
+$SCAN_BUILD cmake --build $BUILD_DIR -j4

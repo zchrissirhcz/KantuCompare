@@ -13,13 +13,13 @@ Click "Load" buttons to load images. Once both two input images loaded, the diff
 - Change `Tolerance` slider to get different compare result.
 - Change `Zoom` slider or use mouse wheel to scale images.
 
-See [images](https://github.com/zchrissirhcz/image-compare/tree/main/images) directory for testing images.
+See [images](https://github.com/zchrissirhcz/KantuCompare/tree/main/images) directory for testing images.
 
 ## Build
 ```bash
 # clone repo
-git clone https://github.com/zchrissirhcz/image-compare
-cd image-compare
+https://github.com/zchrissirhcz/KantuCompare
+cd KantuCompare
 
 # clone, build and install denependcies
 # you may use the provided python script for dependencies preparation
@@ -31,10 +31,14 @@ python sledpkg_run.py
 cd build
 ./vs2022-x64.cmd # for Windows
 ./linux-x64.sh   # for Linux/MacOSX
+
+# start the app
+cd linux-x64
+./KantuCompare
 ```
 
 ## Remarks
-The [initial trial](https://github.com/zchrissirhcz/small-compare/tree/qt) was based on Qt but no longer maintained due to law issue.
+The [initial trial](https://github.com/zchrissirhcz/KantuCompare/tree/qt) was based on Qt.
 
 ## References
 - https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples

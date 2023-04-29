@@ -2,49 +2,56 @@ import sledpkg as sp
 import shutil
 import os
 
+
 def prepare_imgui():
     pkg = sp.SledPackage('imgui')
     #pkg.clone_repo('https://github.com/ocornut/imgui', 'docking', mirror_url='https://gitee.com/mirrors/imgui')
-    pkg.clone_repo('https://github.com/zchrissirhcz/imgui', 'docking-for-image-compare')
-    # pkg.cmake_configure()
-    # pkg.cmake_build()
-    # pkg.cmake_install()
+    #pkg.clone_repo('https://github.com/zchrissirhcz/imgui', 'docking-for-image-compare')
+    pkg.clone_repo('https://github.com/ocornut/imgui', tag='v1.89.5', mirror_url='https://gitee.com/mirrors/imgui')
+
 
 def preprare_portable_file_dialogs():
     pkg = sp.SledPackage('portable-file-dialogs')
     pkg.clone_repo('https://github.com/samhocevar/portable-file-dialogs', mirror_url='https://gitee.com/mirrors_samhocevar/portable-file-dialogs')
-    # pkg.cmake_configure()
-    # pkg.cmake_build()
-    # pkg.cmake_install()
+
 
 def prepare_glfw():
     pkg = sp.SledPackage('glfw')
-    pkg.clone_repo('https://github.com/glfw/glfw', mirror_url='https://gitee.com/mirrors/glfw')
-    # pkg.cmake_configure()
-    # pkg.cmake_build()
-    # pkg.cmake_install()
+    pkg.clone_repo('https://github.com/glfw/glfw', tag='3.3.8', mirror_url='https://gitee.com/mirrors/glfw')
+
 
 def prepare_str():
     pkg = sp.SledPackage('str')
     pkg.clone_repo('https://github.com/ocornut/str')
 
+
 def prepare_gtest():
     pkg = sp.SledPackage('gtest')
     pkg.clone_repo('https://github.com/google/googletest', tag='release-1.11.0', mirror_url='https://gitee.com/mirrors/googletest')
+    configure_args = [
+        "-DBUILD_GMOCK=OFF",
+    ]
+    if (sp.is_windows()):
+        configure_args.append("-Dgtest_force_shared_crt=ON")
+    else:
+        configure_args.append("-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
     pkg.cmake_configure(
-        [
-            "-DCMAKE_BUILD_TYPE=Release",
-            "-DBUILD_GMOCK=OFF",
-            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-        ]
+        configure_args
     )
-    pkg.cmake_build()
-    pkg.cmake_install()
+    if sp.is_windows():
+        pkg.cmake_build('Debug')
+        pkg.cmake_install('Debug')
+
+        pkg.cmake_build('Release')
+        pkg.cmake_install('Release')
+    else:
+        pkg.cmake_build()
+        pkg.cmake_install()
+
 
 def prepare_opencv():
     pkg = sp.SledPackage('opencv')
-    #pkg.clone_repo('https://github.com/opencv/opencv', tag='4.7.0', mirror_url='https://gitee.com/mirrors/opencv')
-    pkg.clone_repo('https://github.com/opencv/opencv', mirror_url='https://gitee.com/mirrors/opencv')
+    pkg.clone_repo('https://github.com/opencv/opencv', tag='4.7.0', mirror_url='https://gitee.com/mirrors/opencv')
     gapi_dir = pkg.src_dir + "/modules/gapi"
     if (os.path.exists(gapi_dir)):
         shutil.rmtree(gapi_dir)
@@ -80,6 +87,7 @@ def prepare_opencv():
     else:
         pkg.cmake_build()
         pkg.cmake_install()
+
 
 if __name__ == '__main__':
     prepare_imgui()

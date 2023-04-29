@@ -1,7 +1,7 @@
-# sledpkg:  a source-code-level dependency helper
+# sledpkg:  Semi-precise package manager
 # Author:   Zhuo Zhang <imzhuo#foxmail.com>
 # Created:  2023.04.28 00:00:00
-# Modified: 2023.04.28 11:50:00
+# Modified: 2023.04.29 21:59:00
 
 import git
 from git import RemoteProgress
@@ -41,6 +41,14 @@ class CloneProgress(RemoteProgress):
         if message:
             print(message)
 
+
+def ninja_available():
+    out = subprocess.getstatusoutput('ninja --version')
+    if (out[0] == 0):
+        return True
+    return False
+
+
 class SledPackage(object):
     def __init__(self, name):
         self.name = name
@@ -54,7 +62,7 @@ class SledPackage(object):
         self.src_dir = to_path
         self.build_dir = to_path + "/build"
         self.install_dir = to_path + "/install" # the default one. you may override this
-        self.build_type = "Debug"
+        self.build_type = "Release"
 
         print("[git clone] {:s}".format(git_url))
         print("  - to_path:", to_path)
@@ -68,7 +76,7 @@ class SledPackage(object):
         if ((branch is None) and (tag is None)):
             git.Repo.clone_from(git_url, to_path = to_path, depth = depth, progress=CloneProgress())
         elif ((branch is not None) and (tag is not None)):
-            print("Error: confusion. you can't specify both branch and tag.")
+            print("  Error: confusion. you can't specify both branch and tag.")
             return
         else:
             if (tag is not None):
@@ -96,6 +104,8 @@ class SledPackage(object):
             cmd += " -DCMAKE_BUILD_TYPE={:s}".format(self.build_type)
         if is_windows():
             cmd += ' -G "Visual Studio 17 2022" -A x64'
+        elif ninja_available():
+            cmd += ' -G Ninja'
 
         print("  cmake configure command is: {:s}".format(cmd))
         CommandRunner.run(cmd)

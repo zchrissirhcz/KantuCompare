@@ -1,4 +1,4 @@
-#include "kantu/image_format.hpp"
+#include "kantu/transform_format.hpp"
 
 void kantu::chw_to_hwc(const cv::Mat& src, cv::Mat& dst)
 {

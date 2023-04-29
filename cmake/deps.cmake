@@ -24,7 +24,6 @@ find_package(OpenCV REQUIRED)
 # git clone https://github.com/ocornut/imgui -b docking imgui-docking
 # mirror: https://gitee.com/mirrors/imgui
 #----------------------------------------------------------------------
-# using the docking branch
 if(EXISTS "${CMAKE_SOURCE_DIR}/deps/imgui")
   set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/deps/imgui")
 else()
@@ -32,7 +31,7 @@ else()
   #set(IMGUI_DIR "$ENV{HOME}/.sled/work_repos/imgui/docking")
   #set(IMGUI_DIR "$ENV{HOME}/work/imgui-docking")
 endif()
-add_definitions(-DIMGUI_WITH_DOCKING)
+#add_definitions(-DIMGUI_WITH_DOCKING)
 include_directories(
   ${IMGUI_DIR}
   ${IMGUI_DIR}/backends

@@ -4,8 +4,52 @@
 #define STR_IMPLEMENTATION 1
 #endif
 #include "kantu/image_io.hpp"
+#include "kantu/compare.hpp"
+#include "kantu/string.hpp"
 
-#include "kantu/image_compare.hpp"
+TEST(FilePath, t1)
+{
+    const std::string path = "C:\\Users\\zz\\data\\lena.png";
+    kantu::FilePath filepath(path);
+    EXPECT_EQ(filepath.path(), path);
+    EXPECT_EQ(filepath.directory(), "C:\\Users\\zz\\data");
+    EXPECT_EQ(filepath.filename(), "lena.png");
+    EXPECT_EQ(filepath.basename(), "lena");
+    EXPECT_EQ(filepath.ext(), "png");
+}
+
+TEST(FilePath, t2)
+{
+    const std::string path = "C:\\Users\\zz\\data\\lena";
+    kantu::FilePath filepath(path);
+    EXPECT_EQ(filepath.path(), path);
+    EXPECT_EQ(filepath.directory(), "C:\\Users\\zz\\data");
+    EXPECT_EQ(filepath.filename(), "lena");
+    EXPECT_EQ(filepath.basename(), "lena");
+    EXPECT_EQ(filepath.ext(), "");
+}
+
+TEST(FilePath, t3)
+{
+    const std::string path = "/home/zz/data/lena.png";
+    kantu::FilePath filepath(path);
+    EXPECT_EQ(filepath.path(), path);
+    EXPECT_EQ(filepath.directory(), "/home/zz/data");
+    EXPECT_EQ(filepath.filename(), "lena.png");
+    EXPECT_EQ(filepath.basename(), "lena");
+    EXPECT_EQ(filepath.ext(), "png");
+}
+
+TEST(FilePath, t4)
+{
+    const std::string path = "C:\\Users\\zz\\data/lena.png";
+    kantu::FilePath filepath(path);
+    EXPECT_EQ(filepath.path(), path);
+    EXPECT_EQ(filepath.directory(), "C:\\Users\\zz\\data");
+    EXPECT_EQ(filepath.filename(), "lena.png");
+    EXPECT_EQ(filepath.basename(), "lena");
+    EXPECT_EQ(filepath.ext(), "png");
+}
 
 TEST(ImageFileName, non_raw)
 {
@@ -21,7 +65,7 @@ TEST(ImageFileName, non_raw)
         kantu::ImageFileInfo fileinfo(image_path);
 
         EXPECT_EQ(fileinfo.valid, true);
-        EXPECT_EQ(fileinfo.filename, image_path);
+        EXPECT_EQ(fileinfo.filepath, image_path);
         EXPECT_EQ(fileinfo.head, head);
         EXPECT_EQ(fileinfo.ext, ext);
         EXPECT_EQ(fileinfo.lower_ext, lower_ext);
@@ -63,3 +107,9 @@ TEST(ImageFileName, head)
     EXPECT_EQ(fileinfo.head, "1920X1080");
 #endif
 }
+
+// 1. 文件名字 ImageFileName
+// 2. 文件内容 ImageFile
+// 3. 格式转换 TransformFormat
+// 4. 图像比对 CompareImage
+// 5. 渲染结果 RenderResult

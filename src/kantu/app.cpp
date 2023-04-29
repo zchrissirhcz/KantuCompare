@@ -5,16 +5,16 @@
 #include <vector>
 
 #include "image_io.hpp"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
 #include "app_design.hpp"
 #include "portable-file-dialogs.h"
 
-#include "kantu/image_compare.hpp"
+#include "kantu/compare.hpp"
 #include "kantu/image_render.hpp"
 #include "kantu/image_inspect.h"
 
@@ -336,7 +336,7 @@ static void StartLockWheelingWindow(ImGuiWindow* window)
         return;
     g.WheelingWindow = window;
     g.WheelingWindowRefMousePos = g.IO.MousePos;
-    g.WheelingWindowTimer = WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER;
+    g.WheelingWindowReleaseTimer = WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER;
 }
 
 // When with mouse wheel moving (vertically), and current window name contains 'Image', resize current window's size
@@ -356,26 +356,28 @@ void MyApp::myUpdateMouseWheel()
         // }
         // printf("!! cur_window->Name: %s\n", cur_window->Name);
 
-        g.WheelingWindowTimer -= g.IO.DeltaTime;
+        g.WheelingWindowReleaseTimer -= g.IO.DeltaTime;
         if (ImGui::IsMousePosValid() && ImLengthSqr(g.IO.MousePos - g.WheelingWindowRefMousePos) > g.IO.MouseDragThreshold * g.IO.MouseDragThreshold)
-            g.WheelingWindowTimer = 0.0f;
-        if (g.WheelingWindowTimer <= 0.0f)
+            g.WheelingWindowReleaseTimer = 0.0f;
+        if (g.WheelingWindowReleaseTimer <= 0.0f)
         {
             g.WheelingWindow = NULL;
-            g.WheelingWindowTimer = 0.0f;
+            g.WheelingWindowReleaseTimer = 0.0f;
         }
     }
 
-    float wheel_y = g.IO.MouseWheel;
-
-    if ((g.ActiveId != 0 && g.ActiveIdUsingMouseWheel) || (g.HoveredIdPreviousFrame != 0 && g.HoveredIdPreviousFrameUsingMouseWheel))
+    //float wheel_y = g.IO.MouseWheel;
+    ImVec2 wheel;
+    wheel.x = ImGui::TestKeyOwner(ImGuiKey_MouseWheelX, ImGuiKeyOwner_None) ? g.IO.MouseWheelH : 0.0f;
+    wheel.y = ImGui::TestKeyOwner(ImGuiKey_MouseWheelY, ImGuiKeyOwner_None) ? g.IO.MouseWheel : 0.0f;
+    if (wheel.x == 0.0f && wheel.y == 0.0f)
         return;
 
     ImGuiWindow* window = g.WheelingWindow ? g.WheelingWindow : g.HoveredWindow;
     if (!window || window->Collapsed)
         return;
 
-    if (wheel_y != 0.0f)
+    if (wheel.y != 0.0f)
     {
         StartLockWheelingWindow(window);
 
@@ -544,12 +546,12 @@ int MyApp::UI_ChooseImageFile()
     // Set verbosity to true
     pfd::settings::verbose(true);
 
-#if __APPLE__
-    std::string default_image_directory = "/Users/zz/data";
-#elif __linux__
-    std::string default_image_directory = "/home/zz/data2";
-#elif _MSC_VER
+#if _MSC_VER
     std::string default_image_directory = "C:/Users";
+#else
+    const char* home_dir = getenv("HOME");
+    std::string default_image_directory = home_dir;
+    printf("[DEBUG] default_image_directory: %s\n", default_image_directory.c_str());
 #endif
 
     // NOTE: file extension filter not working on macOSX

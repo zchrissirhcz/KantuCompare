@@ -1,4 +1,4 @@
-#include "kantu/image_compare.hpp"
+#include "kantu/compare.hpp"
 
 void kantu::get_diff_image(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
 {

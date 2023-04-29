@@ -15,7 +15,7 @@ public:
     ImageFileInfo(const std::string& filename);
 
 public:
-    std::string filename = "";
+    std::string filepath = "";
     std::string head = "";
     std::string ext = ""; // same as file
     std::string lower_ext; // converted to lowercase, then mapping to identical one
@@ -24,11 +24,6 @@ public:
     bool valid = false;
     std::string err_msg = "";
 };
-
-// string utilities
-std::string to_lower(const std::string& str);
-std::string& replace_all(std::string& src, const std::string& old_value, const std::string& new_value);
-
 
 Image loadImage(const std::string path);
 void saveImage(const std::string path, Image& image);

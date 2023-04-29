@@ -1,5 +1,6 @@
 #include "kantu/image_io.hpp"
-#include "kantu/image_format.hpp"
+#include "kantu/transform_format.hpp"
+#include "kantu/string.hpp"
 #include <filesystem>
 #include <opencv2/imgproc.hpp>
 #include <vector>
@@ -18,7 +19,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const ImageFileInfo& file_info)
     {
         int height = file_info.height;
         int width = file_info.width;
-        FILE* fin = fopen(file_info.filename.c_str(), "rb");
+        FILE* fin = fopen(file_info.filepath.c_str(), "rb");
         
         cv::Size size;
         size.height = height;
@@ -121,7 +122,7 @@ cv::Mat load_fourcc_and_convert_to_mat(const ImageFileInfo& file_info)
 
         int height = file_info.height;
         int width = file_info.width;
-        FILE* fin = fopen(file_info.filename.c_str(), "rb");
+        FILE* fin = fopen(file_info.filepath.c_str(), "rb");
         int buf_size = height * width * channels;
         cv::Size size;
         size.height = height;
@@ -151,7 +152,7 @@ cv::Mat read_image(const ImageFileInfo& file_info)
     cv::Mat image;
     if (file_info.lower_ext == "bmp" || file_info.lower_ext == "jpg" || file_info.lower_ext == ".jpeg" || file_info.lower_ext == "png")
     {
-        image = cv::imread(file_info.filename, cv::IMREAD_UNCHANGED);
+        image = cv::imread(file_info.filepath, cv::IMREAD_UNCHANGED);
     }
     else
     {
@@ -164,62 +165,21 @@ cv::Mat read_image(const ImageFileInfo& file_info)
 
 namespace kantu {
 
-std::string to_lower(const std::string& str)
-{
-    std::string lower_str = str;
-    for (int i = 0; i < str.size(); i++)
-    {
-        if (isalpha(str[i]))
-        {
-            lower_str[i] = tolower(str[i]);
-        }
-    }
-    return lower_str;
-}
-
-std::string& replace_all(std::string& src, const std::string& old_value, const std::string& new_value)
-{
-    for (std::string::size_type pos(0); pos != std::string::npos; pos += new_value.length())
-    {
-        if ((pos = src.find(old_value, pos)) != std::string::npos)
-        {
-            src.replace(pos, old_value.length(), new_value);
-        }
-        else
-        {
-            break;
-        }
-    }
-    return src;
-}
-
 ImageFileInfo::ImageFileInfo(const std::string& _filename)
 {
-    std::string raw_filename = _filename;
-    filename = replace_all(raw_filename, "\\", "/");
     do {
-        /// validate filename format
-        int ext_pos = filename.find_last_of(".");
-        // valid format:
-        // [head].[ext]
-        // len(head) > 0
-        // len(ext) >= 3
-        if (!(ext_pos > 0 && ext_pos <= filename.length() - 4))
+        FilePath path(_filename);
+        ext = path.ext();
+        if (ext.length() < 3)
         {
             valid = false;
-            err_msg = "invalid image path format " + filename + " , required format is [head].[ext] , where len(head)>0 and len(ext)>=3";
+            err_msg = "no valid ext found in filepath";
             break;
         }
 
-        /// split filename's head and ext
-        std::string ext = filename.substr(ext_pos + 1);
-        this->ext = ext;
-
-        int last_slash_pos = filename.find_last_of('/');
-        this->head = filename.substr(last_slash_pos + 1, ext_pos - last_slash_pos - 1);
-        //std::cout << head << "." << raw_ext << std::endl;
-
-        std::string lower_ext = to_lower(ext);
+        filepath = path.path();
+        head = path.basename();
+        lower_ext = to_lower(ext);
 
         // convert raw extension (lowercase) to identical extention
         bool do_opencv_identical_ext_mapping = true;
@@ -247,8 +207,6 @@ ImageFileInfo::ImageFileInfo(const std::string& _filename)
                 lower_ext = "i444";
             }
         }
-        this->head = head;
-        this->lower_ext = lower_ext;
 
         /// validate filename's ext
         bool found = false;
@@ -323,8 +281,22 @@ ImageFileInfo::ImageFileInfo(const std::string& _filename)
         this->height = height;
         this->width = width;
 
-        int actual_size = kantu::get_file_size(filename);
+        int actual_size = kantu::get_file_size(filepath);
         int expected_size = -1;
+        
+        // std::unordered_map<PixelFormat, PlaneInfo[4]> mp;
+        
+        // // nv21
+        // mp[PixelFormat::PIX_FMT_NV21][0] = PlaneInfo(height, width, 1);
+        // mp[PixelFormat::PIX_FMT_NV21][1] = PlaneInfo(height / 2, width / 2, 2);
+
+        // // nv12
+        // mp[PixelFormat::PIX_FMT_NV12][0] = PlaneInfo(height, width, 1);
+        // mp[PixelFormat::PIX_FMT_NV12][1] = PlaneInfo(height / 2, width / 2, 2);
+
+        // // i420
+
+
         if (lower_ext == "nv21" || lower_ext == "nv12" || lower_ext == "i420" || lower_ext == "yv12")
         {
             expected_size = height * width * 3 / 2;

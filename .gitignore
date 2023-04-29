@@ -49,5 +49,5 @@ build/log.txt
 # build output
 output/**
 
-# 3rd-party git repos
+# 3rd-party source, build and install files
 deps/*
