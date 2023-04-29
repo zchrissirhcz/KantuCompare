@@ -1,6 +1,6 @@
-#include "image_compare.hpp"
+#include "kantu/image_compare.hpp"
 
-void imcmp::getDiffImage(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
+void kantu::get_diff_image(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
 {
     CV_Assert(src1.rows == src2.rows && src1.cols == src2.cols);
     CV_Assert(src1.channels() == src2.channels());
@@ -64,7 +64,7 @@ void imcmp::getDiffImage(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff
     }
 }
 
-cv::Mat imcmp::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh, bool& is_exactly_same)
+cv::Mat kantu::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_right, int toleranceThresh, bool& is_exactly_same)
 {
     if (image_left.channels() != 4 || image_right.channels() != 4)
     {
@@ -181,7 +181,7 @@ cv::Mat imcmp::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         {
             cv::Scalar above_color(0, 0, 255 - 50);
             cv::Scalar below_color(255 - 50, 0, 0);
-            imcmp::getDiffImage(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
+            kantu::get_diff_image(diff_image_left, diff_image_right, diff_image_compare, toleranceThresh, below_color, above_color);
             is_exactly_same = false;
         }
 

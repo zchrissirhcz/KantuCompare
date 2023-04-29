@@ -1,7 +1,7 @@
-#include "image_render.hpp"
-#include "image_io.hpp"
+#include "kantu/image_render.hpp"
+#include "kantu/image_io.hpp"
 
-GLuint imcmp::getTextureFromImage(const cv::Mat& image)
+GLuint kantu::get_texture_from_image(const cv::Mat& image)
 {
     cv::Mat im0 = image;
 #if _MSC_VER
@@ -66,7 +66,7 @@ GLuint imcmp::getTextureFromImage(const cv::Mat& image)
     return image_texture;
 }
 
-namespace imcmp {
+namespace kantu {
 
 void RichImage::load_from_file(const Str256& filepath)
 {
@@ -90,7 +90,7 @@ void RichImage::load_from_file(const Str256& filepath)
     }
     load_mat(mat);
     set_name(filepath);
-    filesize = imcmp::get_file_size(filepath);
+    filesize = kantu::get_file_size(filepath);
 }
 
 void RichImage::reload()
@@ -110,7 +110,7 @@ void RichImage::load_mat(cv::Mat& frame)
     {
         open = true;
         mat = frame; // maybe i should copy that frame (clone it)
-        texture = getTextureFromImage(mat);
+        texture = get_texture_from_image(mat);
     }
     else
     {
@@ -118,7 +118,7 @@ void RichImage::load_mat(cv::Mat& frame)
         clear();
         open = true;
         mat = frame;
-        texture = getTextureFromImage(mat);
+        texture = get_texture_from_image(mat);
     }
 }
 
@@ -170,4 +170,4 @@ const char* RichImage::get_name()
     return name.c_str();
 }
 
-} // namespace imcmp
+} // namespace kantu

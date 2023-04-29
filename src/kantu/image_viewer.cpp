@@ -4,7 +4,7 @@
 #ifndef STR_IMPLEMENTATION
 #define STR_IMPLEMENTATION 1
 #endif
-#include "image_io.hpp"
+#include "kantu/image_io.hpp"
 
 static void help(const char* exe_name)
 {
@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     std::string filename = argv[1];
 
-    cv::Mat image = imcmp::load_image(filename);
+    cv::Mat image = kantu::load_image(filename);
     std::string win_name = filename;
     cv::namedWindow(win_name, cv::WINDOW_NORMAL);
     cv::resizeWindow(win_name, cv::Size{600, 800});

@@ -1,10 +1,14 @@
-#!/bin/bash
+# sledpkg:  a source-code-level dependency helper
+# Author:   Zhuo Zhang <imzhuo#foxmail.com>
+# Created:  2023.04.28 00:00:00
+# Modified: 2023.04.28 11:50:00
 
 import git
 from git import RemoteProgress
 import os
 import subprocess
 import platform
+
 
 def is_wsl():
     return 'microsoft-standard' in platform.uname().release
@@ -88,6 +92,8 @@ class SledPackage(object):
             cmd += " " + item
         if (not found_install_prefix):
             cmd += " -DCMAKE_INSTALL_PREFIX={:s}".format(self.install_dir)
+        if (not found_build_type):
+            cmd += " -DCMAKE_BUILD_TYPE={:s}".format(self.build_type)
         if is_windows():
             cmd += '-G "Visual Studio 17 2022" -A x64'
 
@@ -109,74 +115,3 @@ class SledPackage(object):
             return
         cmd = "cmake --install {:s} --config {:s}".format(self.build_dir, self.build_type)
         CommandRunner.run(cmd)
-
-
-def prepare_imgui():
-    pkg = SledPackage('imgui')
-    #pkg.clone_repo('https://github.com/ocornut/imgui', 'docking', mirror_url='https://gitee.com/mirrors/imgui')
-    pkg.clone_repo('https://github.com/zchrissirhcz/imgui', 'docking-for-image-compare')
-    # pkg.cmake_configure()
-    # pkg.cmake_build()
-    # pkg.cmake_install()
-
-def preprare_portable_file_dialogs():
-    pkg = SledPackage('portable-file-dialogs')
-    pkg.clone_repo('https://github.com/samhocevar/portable-file-dialogs')
-    # pkg.cmake_configure()
-    # pkg.cmake_build()
-    # pkg.cmake_install()
-
-def prepare_glfw():
-    pkg = SledPackage('glfw')
-    pkg.clone_repo('https://github.com/glfw/glfw', mirror_url='https://gitee.com/mirrors/glfw')
-    # pkg.cmake_configure()
-    # pkg.cmake_build()
-    # pkg.cmake_install()
-
-def prepare_gtest():
-    pkg = SledPackage('gtest')
-    pkg.clone_repo('https://github.com/google/googletest', tag='release-1.11.0', mirror_url='https://gitee.com/mirrors/googletest')
-    pkg.cmake_configure(
-        [
-            "-DCMAKE_BUILD_TYPE=Release",
-            "-DBUILD_GMOCK=OFF",
-            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-        ]
-    )
-    pkg.cmake_build()
-    pkg.cmake_install()
-
-def prepare_opencv():
-    pkg = SledPackage('opencv')
-    pkg.clone_repo('https://github.com/opencv/opencv', tag='4.7.0', mirror_url='https://gitee.com/mirrors/opencv')
-    pkg.cmake_configure(
-        [
-            "-D BUILD_SHARED_LIBS=OFF",
-            "-D OPENCV_GENERATE_PKGCONFIG=ON",
-            "-D BUILD_LIST=core,imgproc,highgui,gapi",
-            "-D BUILD_TESTS=OFF",
-            "-D BUILD_PERF_TESTS=OFF",
-            "-D WITH_CUDA=OFF",
-            "-D WITH_VTK=OFF",
-            "-D WITH_MATLAB=OFF",
-            "-D BUILD_DOCS=OFF",
-            "-D BUILD_opencv_python3=OFF",
-            "-D BUILD_opencv_python2=OFF",
-            "-D WITH_IPP=OFF",
-            "-D WITH_PROTOBUF=OFF",
-            "-D WITH_QUIRC=OFF",
-            "-D WITH_EIGEN=OFF",
-            "-D CV_DISABLE_OPTIMIZATION=OFF",
-            "-D OPENCV_DOWNLOAD_MIRROR_ID=gitcode",
-            "-D WITH_OPENCL=OFF",
-        ]
-    )
-    pkg.cmake_build()
-    pkg.cmake_install()
-
-if __name__ == '__main__':
-    prepare_imgui()
-    preprare_portable_file_dialogs()
-    prepare_glfw()
-    prepare_gtest()
-    prepare_opencv()

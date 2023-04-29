@@ -1,4 +1,6 @@
-# Image Compare: Pixel Difference Visualization
+# KantuCompare
+
+A GUI for image difference visualization.
 
 ![](images/snapshots/snapshot_2022-06-12.png)
 
@@ -20,10 +22,12 @@ git clone https://github.com/zchrissirhcz/image-compare
 cd image-compare
 
 # clone, build and install denependcies
+# you may use the provided python script for dependencies preparation
 pip install -r requirements.txt
-python sled_clone_repos.py
+python sledpkg_run.py
+# alternatively, go to cmake/deps.cmake and modify it
 
-# build ImageCompare
+# build KantuCompare
 cd build
 ./vs2022-x64.cmd # for Windows
 ./linux-x64.sh   # for Linux/MacOSX

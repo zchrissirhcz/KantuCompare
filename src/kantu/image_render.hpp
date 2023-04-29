@@ -4,9 +4,9 @@
 #include <opencv2/opencv.hpp>
 #include "Str.h"
 
-namespace imcmp {
+namespace kantu {
 
-GLuint getTextureFromImage(const cv::Mat& image);
+GLuint get_texture_from_image(const cv::Mat& image);
 
 class RichImage
 {
@@ -27,13 +27,11 @@ public:
     void reload();
     void load_mat(cv::Mat& frame);
     void update_mat(cv::Mat& frame, bool change_color_order = false);
-    // clear texture and realease all memory associated with it
-    void clear();
+    void clear(); // clear texture and realease all memory associated with it
     GLuint get_texture() const;
     bool* get_open();
     void set_name(const Str256& _name);
-    //then GetName
     const char* get_name();
 };
 
-} // namespace imcmp
+} // namespace kantu

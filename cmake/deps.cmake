@@ -74,12 +74,22 @@ add_subdirectory(${portable_file_dialogs_DIR} ${CMAKE_BINARY_DIR}/portable_file_
 # using the system bundled
 #----------------------------------------------------------------------
 find_package(OpenGL REQUIRED)
+message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+
+
+#----------------------------------------------------------------------
+# Str
+#----------------------------------------------------------------------
+add_library(str INTERFACE
+  ${CMAKE_SOURCE_DIR}/deps/str/Str.h
+)
+target_include_directories(str INTERFACE ${CMAKE_SOURCE_DIR}/deps/str)
 
 
 #----------------------------------------------------------------------
 # Googletest
 #----------------------------------------------------------------------
-if(IMCMP_TESTING)
+if(KANTU_TESTING)
   if(EXISTS "${CMAKE_SOURCE_DIR}/deps/googletest")
     set(GTest_DIR "${CMAKE_SOURCE_DIR}/deps/googletest/install/lib/cmake/GTest")
   else()

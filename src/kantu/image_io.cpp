@@ -1,37 +1,16 @@
-#include "image_io.hpp"
+#include "kantu/image_io.hpp"
+#include "kantu/image_format.hpp"
 #include <filesystem>
 #include <opencv2/imgproc.hpp>
 #include <vector>
 
 namespace {
-using namespace imcmp;
+using namespace kantu;
 
-class FileInfo
-{
-public:
-    FileInfo()
-    {
-        height = -1;
-        width = -1;
-        head = "";
-        ext = "";
-        valid = true;
-        err_msg = "";
-    }
-    std::string filename;
-    std::string head;
-    std::string raw_ext; // same as file
-    std::string ext; // converted to lowercase, then mapping to identical one
-    int height;
-    int width;
-    bool valid;
-    std::string err_msg;
-};
-
-cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
+cv::Mat load_fourcc_and_convert_to_mat(const ImageFileInfo& file_info)
 {
     cv::Mat image;
-    const std::string& ext = file_info.ext;
+    const std::string& ext = file_info.lower_ext;
     if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "yv12" // 3/2
         || ext == "uyvy" || ext == "yuyv" || ext == "yvyu" // 2
         || ext == "i444" // 3
@@ -131,11 +110,11 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
     else if (ext == "bgr24" || ext == "rgb24" || ext == "rgba32" || ext == "bgra32" || ext == "gray")
     {
         int channels = 1; // "gray"
-        if (file_info.ext == "bgr24" || file_info.ext == "rgb24")
+        if (file_info.lower_ext == "bgr24" || file_info.lower_ext == "rgb24")
         {
             channels = 3;
         }
-        else if (file_info.ext == "rgba32" || file_info.ext == "bgra32")
+        else if (file_info.lower_ext == "rgba32" || file_info.lower_ext == "bgra32")
         {
             channels = 4;
         }
@@ -151,26 +130,26 @@ cv::Mat load_fourcc_and_convert_to_mat(const FileInfo& file_info)
         fread(image.data, buf_size, 1, fin);
         fclose(fin);
 
-        if (file_info.ext == "rgb24") // bgr => rgb, inplace
+        if (file_info.lower_ext == "rgb24") // bgr => rgb, inplace
         {
             cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
         }
-        else if (file_info.ext == "rgba32")
+        else if (file_info.lower_ext == "rgba32")
         {
             cv::cvtColor(image, image, cv::COLOR_RGBA2BGRA);
         }
     }
     else
     {
-        fprintf(stderr, "not supported format %s\n", file_info.ext.c_str());
+        fprintf(stderr, "not supported format %s\n", file_info.lower_ext.c_str());
     }
     return image;
 }
 
-cv::Mat read_image(const FileInfo& file_info)
+cv::Mat read_image(const ImageFileInfo& file_info)
 {
     cv::Mat image;
-    if (file_info.ext == "bmp" || file_info.ext == "jpg" || file_info.ext == ".jpeg" || file_info.ext == "png")
+    if (file_info.lower_ext == "bmp" || file_info.lower_ext == "jpg" || file_info.lower_ext == ".jpeg" || file_info.lower_ext == "png")
     {
         image = cv::imread(file_info.filename, cv::IMREAD_UNCHANGED);
     }
@@ -181,10 +160,26 @@ cv::Mat read_image(const FileInfo& file_info)
     return image;
 }
 
-FileInfo get_meta_info(const std::string& filename)
+} // namespace
+
+namespace kantu {
+
+std::string to_lower(const std::string& str)
 {
-    FileInfo file_info;
-    file_info.filename = filename;
+    std::string lower_str = str;
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (isalpha(str[i]))
+        {
+            lower_str[i] = tolower(str[i]);
+        }
+    }
+    return lower_str;
+}
+
+ImageFileInfo::ImageFileInfo(const std::string& filename)
+{
+    this->filename = filename;
 
     do {
         /// validate filename format
@@ -195,80 +190,75 @@ FileInfo get_meta_info(const std::string& filename)
         // len(ext) >= 3
         if (!(ext_pos > 0 && ext_pos <= filename.length() - 4))
         {
-            file_info.valid = false;
-            file_info.err_msg = "invalid image path format " + filename + " , required format is [head].[ext] , where len(head)>0 and len(ext)>=3";
+            valid = false;
+            err_msg = "invalid image path format " + filename + " , required format is [head].[ext] , where len(head)>0 and len(ext)>=3";
             break;
         }
 
         /// split filename's head and ext
-        std::string raw_ext = filename.substr(ext_pos + 1);
-        file_info.raw_ext = raw_ext;
+        std::string ext = filename.substr(ext_pos + 1);
+        this->ext = ext;
 
         int last_slash_pos = filename.find_last_of('/');
         std::string head = filename.substr(last_slash_pos + 1, ext_pos - last_slash_pos - 1);
         //std::cout << head << "." << raw_ext << std::endl;
 
-        std::string ext = raw_ext;
-        for (int i = 0; i < ext.size(); i++)
-        {
-            if (isalpha(ext[i]))
-            {
-                ext[i] = tolower(ext[i]);
-            }
-        }
+        std::string lower_ext = to_lower(ext);
+
         // convert raw extension (lowercase) to identical extention
         bool do_opencv_identical_ext_mapping = true;
         if (do_opencv_identical_ext_mapping)
         {
-            if (ext == "yuv" || ext == "iyuv")
+            if (lower_ext == "yuv" || lower_ext == "iyuv")
             {
-                ext = "i420";
+                lower_ext = "i420";
             }
-            else if (ext == "y422" || ext == "uynv")
+            else if (lower_ext == "y422" || lower_ext == "uynv")
             {
-                ext = "uyvy";
+                lower_ext = "uyvy";
             }
         }
 
         bool do_yuvviewer_identical_ext_mapping = true;
         if (do_yuvviewer_identical_ext_mapping)
         {
-            if (ext == "grey")
+            if (lower_ext == "grey")
             {
-                ext = "gray";
+                lower_ext = "gray";
             }
-            else if (ext == "yv24")
+            else if (lower_ext == "yv24")
             {
-                ext = "i444";
+                lower_ext = "i444";
             }
         }
-        file_info.head = head;
-        file_info.ext = ext;
+        this->head = head;
+        this->lower_ext = lower_ext;
 
         /// validate filename's ext
         bool found = false;
         std::vector<std::string> valid_ext = get_supported_image_file_exts();
         for (int i = 0; i < valid_ext.size(); i++)
         {
-            if (valid_ext[i] == ext)
+            if (valid_ext[i] == lower_ext)
             {
                 found = true;
+                break;
             }
         }
         if (!found)
         {
-            file_info.valid = false;
-            file_info.err_msg = "invalid filename extension! Currently only supports these: (case insensitive) ";
+            this->err_msg = "invalid filename extension! Currently only supports these: (case insensitive) ";
             for (int i = 0; i < valid_ext.size(); i++)
             {
-                file_info.err_msg = file_info.err_msg + " " + valid_ext[i];
+                this->err_msg = this->err_msg + " " + valid_ext[i];
             }
             break;
         }
 
         // validate filename's head
-        if (ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "bmp")
+        if (lower_ext == "jpg" || lower_ext == "jpeg" || lower_ext == "png" || lower_ext == "bmp")
         {
+            valid = true;
             break;
         }
 
@@ -283,8 +273,7 @@ FileInfo get_meta_info(const std::string& filename)
         fprintf(stderr, "underline_pos = %d\n", underline_pos);
         if (underline_pos != -1 && underline_pos > static_cast<int>(head.length()) - 4)
         {
-            file_info.valid = false;
-            file_info.err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
+            this->err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
             break;
         }
 
@@ -302,8 +291,7 @@ FileInfo get_meta_info(const std::string& filename)
         fprintf(stderr, "non_digit_cnt is %d\n", non_digit_cnt);
         if (non_digit_cnt != 1)
         {
-            file_info.valid = false;
-            file_info.err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
+            this->err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
             break;
         }
 
@@ -316,78 +304,76 @@ FileInfo get_meta_info(const std::string& filename)
         {
             height = height * 10 + (dim_str[i] - '0');
         }
-        file_info.height = height;
-        file_info.width = width;
+        this->height = height;
+        this->width = width;
 
-        int actual_size = imcmp::get_file_size(filename);
+        int actual_size = kantu::get_file_size(filename);
         int expected_size = -1;
-        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "yv12")
+        if (lower_ext == "nv21" || lower_ext == "nv12" || lower_ext == "i420" || lower_ext == "yv12")
         {
             expected_size = height * width * 3 / 2;
         }
-        else if (ext == "rgb24" || ext == "bgr24")
+        else if (lower_ext == "rgb24" || lower_ext == "bgr24")
         {
             expected_size = height * width * 3;
         }
-        else if (ext == "rgba32" || ext == "bgra32")
+        else if (lower_ext == "rgba32" || lower_ext == "bgra32")
         {
             expected_size = height * width * 4;
         }
-        else if (ext == "gray")
+        else if (lower_ext == "gray")
         {
             expected_size = height * width;
         }
-        else if (ext == "uyvy" || ext == "yuyv" || ext == "yvyu")
+        else if (lower_ext == "uyvy" || lower_ext == "yuyv" || lower_ext == "yvyu")
         {
             expected_size = height * width * 2;
         }
-        else if (ext == "i444")
+        else if (lower_ext == "i444")
         {
             expected_size = height * width * 3;
         }
-        fprintf(stderr, "ext is %s\n", ext.c_str());
+        fprintf(stderr, "ext is %s\n", lower_ext.c_str());
 
         if (expected_size != actual_size)
         {
-            file_info.valid = false;
-            file_info.err_msg = "invalid file size, filename described different that actual";
+            this->err_msg = "invalid file size, filename described different that actual";
             fprintf(stderr, "expected_size: %d, actual_size: %d\n", expected_size, actual_size);
             break;
         }
 
-        if (ext == "nv21" || ext == "nv12" || ext == "i420" || ext == "uyvy" || ext == "yuyv" || ext == "yv12" || ext == "yvyu")
+        if (lower_ext == "nv21" || lower_ext == "nv12" || lower_ext == "i420" || lower_ext == "uyvy" || lower_ext == "yuyv" || lower_ext == "yv12" || lower_ext == "yvyu")
         {
             if (height % 2 != 0 || width % 2 != 0)
             {
-                file_info.valid = false;
-                file_info.err_msg = "file dimension invalid. both height and width should be even number";
+                this->err_msg = "file dimension invalid. both height and width should be even number";
                 break;
             }
         }
+        valid = true;
     } while (0);
-
-    return file_info;
 }
 
-} // namespace
+} // namespace kantu
 
-int imcmp::get_file_size(const Str256& filepath)
+int kantu::get_file_size(const Str256& filepath)
 {
     std::filesystem::path p{filepath.c_str()};
     return std::filesystem::file_size(p);
 }
 
-cv::Mat imcmp::load_image(const std::string& image_path)
+cv::Mat kantu::load_image(const std::string& image_path)
 {
     /// check if file exist or not
-    if (!imcmp::file_exist(image_path))
+    if (!kantu::file_exist(image_path))
     {
         fprintf(stderr, "file %s does not exist\n", image_path.c_str());
         return cv::Mat(100, 100, CV_8UC3);
     }
 
-    FileInfo file_info = get_meta_info(image_path);
-    if (!file_info.valid)
+    ImageFileInfo file_info(image_path);
+    bool valid = file_info.valid;
+    if (!valid)
     {
         fprintf(stderr, "%s\n", file_info.err_msg.c_str());
         return cv::Mat(100, 100, CV_8UC3);
@@ -403,7 +389,7 @@ cv::Mat imcmp::load_image(const std::string& image_path)
 /// @brief check if file exist
 /// @retval true file exist
 /// @retval false file not exist
-bool imcmp::file_exist(const char* filename)
+bool kantu::file_exist(const char* filename)
 {
     FILE* fp = fopen(filename, "r");
     if (fp == NULL)
@@ -417,12 +403,12 @@ bool imcmp::file_exist(const char* filename)
     }
 }
 
-bool imcmp::file_exist(const std::string& filename)
+bool kantu::file_exist(const std::string& filename)
 {
     return file_exist(filename.c_str());
 }
 
-std::vector<std::string> imcmp::get_supported_image_file_exts()
+std::vector<std::string> kantu::get_supported_image_file_exts()
 {
     static std::vector<std::string> exts = {
         "jpg",
@@ -477,131 +463,3 @@ std::vector<std::string> imcmp::get_supported_image_file_exts()
     return exts;
 }
 
-// behave same as opencv(exclude carotene)
-void RGBfromYUV_BT601_u8(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t Y, uint8_t U, uint8_t V)
-{
-    // double dR, dG, dB;
-    // double dY = Y;
-    // double dU = U;
-    // double dV = V;
-    // RGBfromYUV_BT601(dR, dG, dB, dY, dU, dV);
-
-    // R = dR;
-    // G = dG;
-    // B = dB;
-
-    static const int ITUR_BT_601_CY = 1220542;
-    static const int ITUR_BT_601_CUB = 2116026;
-    static const int ITUR_BT_601_CUG = -409993;
-    static const int ITUR_BT_601_CVG = -852492;
-    static const int ITUR_BT_601_CVR = 1673527;
-    static const int ITUR_BT_601_SHIFT = 20;
-
-
-    #define CLIP_TO_UCHAR(x) ((x) < 0 ? 0 : ((x) > 255 ? 255 : (x)))
-
-    int u = U - 128;///
-    int v = V - 128;///
-
-    int shift = 1 << (ITUR_BT_601_SHIFT - 1);
-    int ruv = shift + ITUR_BT_601_CVR * v;
-    int guv = shift + ITUR_BT_601_CVG * v + ITUR_BT_601_CUG * u;
-    int buv = shift + ITUR_BT_601_CUB * u;
-
-
-    int y00 = std::max(0, Y-16) * ITUR_BT_601_CY;
-    R = CLIP_TO_UCHAR( (y00 + ruv) >> ITUR_BT_601_SHIFT );
-    G = CLIP_TO_UCHAR( (y00 + guv) >> ITUR_BT_601_SHIFT );
-    B = CLIP_TO_UCHAR( (y00 + buv) >> ITUR_BT_601_SHIFT );
-
-    #undef CLIP_TO_UCHAR
-}
-
-void imcmp::chw_to_hwc(const cv::Mat& src, cv::Mat& dst)
-{
-    if (src.depth() != CV_8U)
-    {
-        fprintf(stderr, "error: src's depth() should be CV_8U\n");
-        return;
-    }
-    if (src.channels() != 3)
-    {
-        fprintf(stderr, "error: currently only support 3 channel\n");
-        return;
-    }
-    dst.create(src.size(), src.type());
-
-    int width = src.cols;
-    int height = src.rows;
-    const int channels = src.channels();
-    uint8_t* rgb = dst.data;
-
-    const int chw_pitch = width;
-
-    const uint8_t* chw_plane0 = src.data;
-    const uint8_t* chw_plane1 = src.data + width * height;
-    const uint8_t* chw_plane2 = src.data + width * height * 2;
-
-    const int dstPitch = width * channels;
-    for (int i = 0; i < height; i++)
-    {
-        const uint8_t* pY = chw_plane0 + i * chw_pitch;
-        const uint8_t* pU = chw_plane1 + i * chw_pitch;
-        const uint8_t* pV = chw_plane2 + i * chw_pitch;
-        
-        uint8_t* prgb = rgb + i * dstPitch;
-        for (int j = 0; j < width; j++)
-        {
-            uint8_t y, u, v;
-            y = *pY++;
-            u = *pU++;
-            v = *pV++;
-            *prgb++ = y;
-            *prgb++ = u;
-            *prgb++ = v;
-        }
-    }
-
-    cv::cvtColor(dst, dst, cv::COLOR_BGR2RGB);
-}
-
-void imcmp::my_chw_to_hwc(cv::InputArray src, cv::OutputArray dst) {                      
-    const auto& src_size = src.getMat().size;                                     
-    const int src_c = src_size[0];                                                
-    const int src_h = src_size[1];                                                
-    const int src_w = src_size[2];                                                
-
-    auto c_hw = src.getMat().reshape(0, {src_c, src_h * src_w});                  
-
-    dst.create(src_h, src_w, CV_MAKETYPE(src.depth(), src_c));                    
-    cv::Mat dst_1d = dst.getMat().reshape(src_c, {src_h, src_w});                 
-
-    cv::transpose(c_hw, dst_1d);                                                  
-}
-
-
-
-void imcmp::i444_to_rgb(uint8_t* i444, uint8_t* rgb, int height, int width)
-{
-    uint8_t* src = i444;
-    uint8_t* dst = rgb;
-    const int w = width;
-    const int h = height;
-
-    printf("!! calling %s\n", __FUNCTION__);
-
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            uint8_t y = src[0 * w * h + i * w + j];
-            uint8_t u = src[1 * w * h + i * w + j];
-            uint8_t v = src[2 * w * h + i * w + j];
-            uint8_t r, g, b;
-            RGBfromYUV_BT601_u8(r, g, b, y, u, v);
-            dst[i * w * 3 + j * 3 + 0] = r;
-            dst[i * w * 3 + j * 3 + 1] = g;
-            dst[i * w * 3 + j * 3 + 2] = b;
-        }
-    }
-}

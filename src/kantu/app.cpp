@@ -16,11 +16,11 @@
 
 #include "image_compare.hpp"
 #include "image_render.hpp"
-#include "imgInspect.h"
+#include "image_inspect.h"
 
 #define STR_IMPLEMENTATION
 #include "Str.h"
-using namespace imcmp;
+using namespace kantu;
 
 class MyApp : public App<MyApp>
 {
@@ -419,7 +419,7 @@ void MyApp::InitFileFilters()
 {
     filter_msg1 = "Image Files (";
     filter_msg2 = "";
-    std::vector<std::string> exts = imcmp::get_supported_image_file_exts();
+    std::vector<std::string> exts = kantu::get_supported_image_file_exts();
     for (int i = 0; i < exts.size(); i++)
     {
         if (i > 0)

@@ -55,7 +55,7 @@
             // "type": "cppdbg", // cpptools plugin
             "type": "lldb", // clangd + codelldb plugins
             "request": "launch",
-            "program": "${workspaceFolder}/build/linux-x64/testbed",
+            "program": "${workspaceFolder}/build/linux-x64/KantuImageCompare",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -69,7 +69,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "cmake build",
+            "preLaunchTask": "linux-x64-build",
             "miDebuggerPath": "/home/zz/soft/lldb-mi/bin/lldb-mi",
             //"miDebuggerPath": "/usr/bin/lldb-mi",
         },
