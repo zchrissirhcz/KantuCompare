@@ -95,23 +95,29 @@ class SledPackage(object):
         if (not found_build_type):
             cmd += " -DCMAKE_BUILD_TYPE={:s}".format(self.build_type)
         if is_windows():
-            cmd += '-G "Visual Studio 17 2022" -A x64'
+            cmd += ' -G "Visual Studio 17 2022" -A x64'
 
         print("  cmake configure command is: {:s}".format(cmd))
         CommandRunner.run(cmd)
 
-    def cmake_build(self):
+    def cmake_build(self, build_type = None):
         print("[build] {:s}".format(self.name))
+        cmd = "cmake --build {:s} -j4".format(self.build_dir)
+        if (build_type is not None):
+            cmd += " --config {:s}".format(build_type)
+        print("  cmake install cmd: ", cmd)
         # if (os.path.exists(self.build_dir)):
         #     print("  build dir {:s} already exist, skip build".format(self.build_dir))
         #     return
-        cmd = "cmake --build {:s} -j4 --config {:s}".format(self.build_dir, self.build_type)
         CommandRunner.run(cmd)
 
-    def cmake_install(self):
+    def cmake_install(self, build_type = None):
         print("[install] {:s}".format(self.name))
-        if (os.path.exists(self.install_dir)):
-            print("  install dir {:s} already exist, skip install".format(self.install_dir))
-            return
-        cmd = "cmake --install {:s} --config {:s}".format(self.build_dir, self.build_type)
+        cmd = "cmake --install {:s}".format(self.build_dir)
+        if (build_type is not None):
+            cmd += " --config {:s}".format(build_type)
+        print("  cmake install cmd: ", cmd)
+        # if (os.path.exists(self.install_dir)):
+        #     print("  install dir {:s} already exist, skip install".format(self.install_dir))
+        #     return
         CommandRunner.run(cmd)

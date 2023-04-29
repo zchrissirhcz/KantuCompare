@@ -177,10 +177,26 @@ std::string to_lower(const std::string& str)
     return lower_str;
 }
 
-ImageFileInfo::ImageFileInfo(const std::string& filename)
+std::string& replace_all(std::string& src, const std::string& old_value, const std::string& new_value)
 {
-    this->filename = filename;
+    for (std::string::size_type pos(0); pos != std::string::npos; pos += new_value.length())
+    {
+        if ((pos = src.find(old_value, pos)) != std::string::npos)
+        {
+            src.replace(pos, old_value.length(), new_value);
+        }
+        else
+        {
+            break;
+        }
+    }
+    return src;
+}
 
+ImageFileInfo::ImageFileInfo(const std::string& _filename)
+{
+    std::string raw_filename = _filename;
+    filename = replace_all(raw_filename, "\\", "/");
     do {
         /// validate filename format
         int ext_pos = filename.find_last_of(".");
@@ -200,7 +216,7 @@ ImageFileInfo::ImageFileInfo(const std::string& filename)
         this->ext = ext;
 
         int last_slash_pos = filename.find_last_of('/');
-        std::string head = filename.substr(last_slash_pos + 1, ext_pos - last_slash_pos - 1);
+        this->head = filename.substr(last_slash_pos + 1, ext_pos - last_slash_pos - 1);
         //std::cout << head << "." << raw_ext << std::endl;
 
         std::string lower_ext = to_lower(ext);
@@ -368,7 +384,8 @@ cv::Mat kantu::load_image(const std::string& image_path)
     if (!kantu::file_exist(image_path))
     {
         fprintf(stderr, "file %s does not exist\n", image_path.c_str());
-        return cv::Mat(100, 100, CV_8UC3);
+        cv::Mat image(100, 100, CV_8UC3, cv::Scalar(0, 0, 0));
+        return image;
     }
 
     ImageFileInfo file_info(image_path);

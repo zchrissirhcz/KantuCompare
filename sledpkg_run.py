@@ -1,4 +1,6 @@
 import sledpkg as sp
+import shutil
+import os
 
 def prepare_imgui():
     pkg = sp.SledPackage('imgui')
@@ -10,7 +12,7 @@ def prepare_imgui():
 
 def preprare_portable_file_dialogs():
     pkg = sp.SledPackage('portable-file-dialogs')
-    pkg.clone_repo('https://github.com/samhocevar/portable-file-dialogs')
+    pkg.clone_repo('https://github.com/samhocevar/portable-file-dialogs', mirror_url='https://gitee.com/mirrors_samhocevar/portable-file-dialogs')
     # pkg.cmake_configure()
     # pkg.cmake_build()
     # pkg.cmake_install()
@@ -41,12 +43,17 @@ def prepare_gtest():
 
 def prepare_opencv():
     pkg = sp.SledPackage('opencv')
-    pkg.clone_repo('https://github.com/opencv/opencv', tag='4.7.0', mirror_url='https://gitee.com/mirrors/opencv')
+    #pkg.clone_repo('https://github.com/opencv/opencv', tag='4.7.0', mirror_url='https://gitee.com/mirrors/opencv')
+    pkg.clone_repo('https://github.com/opencv/opencv', mirror_url='https://gitee.com/mirrors/opencv')
+    gapi_dir = pkg.src_dir + "/modules/gapi"
+    if (os.path.exists(gapi_dir)):
+        shutil.rmtree(gapi_dir)
     pkg.cmake_configure(
         [
             "-D BUILD_SHARED_LIBS=OFF",
+            "-D BUILD_WITH_STATIC_CRT=OFF",
             "-D OPENCV_GENERATE_PKGCONFIG=ON",
-            "-D BUILD_LIST=core,imgproc,highgui,gapi",
+            "-D BUILD_LIST=core,imgproc,imgcodecs,highgui",
             "-D BUILD_TESTS=OFF",
             "-D BUILD_PERF_TESTS=OFF",
             "-D WITH_CUDA=OFF",
@@ -64,13 +71,20 @@ def prepare_opencv():
             "-D WITH_OPENCL=OFF",
         ]
     )
-    pkg.cmake_build()
-    pkg.cmake_install()
+    if sp.is_windows():
+        pkg.cmake_build('Debug')
+        pkg.cmake_install('Debug')
+
+        pkg.cmake_build('Release')
+        pkg.cmake_install('Release')
+    else:
+        pkg.cmake_build()
+        pkg.cmake_install()
 
 if __name__ == '__main__':
-    # prepare_imgui()
-    # preprare_portable_file_dialogs()
-    # prepare_glfw()
+    prepare_imgui()
+    preprare_portable_file_dialogs()
+    prepare_glfw()
     prepare_str()
-    # prepare_gtest()
-    # prepare_opencv()
+    prepare_gtest()
+    prepare_opencv()

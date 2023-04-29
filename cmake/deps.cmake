@@ -6,7 +6,11 @@
 #   brew install opencv # mac
 #----------------------------------------------------------------------
 if(EXISTS "${CMAKE_SOURCE_DIR}/deps/opencv/install")
-  set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/install/x64/staticlib") # TODO: 用 python 生成这个目录
+  if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+    set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/install/x64/vc17/staticlib")
+  else()
+    set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/install/x64/staticlib")
+  endif()
 else()
   #set(OpenCV_DIR "D:/artifacts/opencv/windows/OpenCV-4.6.0-vs2015-x64-static")
 endif()

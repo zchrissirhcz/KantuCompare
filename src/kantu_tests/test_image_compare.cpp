@@ -54,3 +54,12 @@ TEST(ImageFileName, non_raw)
 //         EXPECT_EQ(fileinfo.width, width);
 //     }
 // }
+
+TEST(ImageFileName, head)
+{
+#if _MSC_VER
+    std::string image_path = "C:/Users/zz/data/1920x1080.NV21";
+    kantu::ImageFileInfo fileinfo(image_path);
+    EXPECT_EQ(fileinfo.head, "1920X1080");
+#endif
+}

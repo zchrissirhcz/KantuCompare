@@ -6,9 +6,6 @@
 
 namespace kantu {
 
-Image loadImage(const std::string path);
-void saveImage(const std::string path, Image& image);
-
 class ImageFileInfo
 {
 public:
@@ -28,7 +25,14 @@ public:
     std::string err_msg = "";
 };
 
+// string utilities
 std::string to_lower(const std::string& str);
+std::string& replace_all(std::string& src, const std::string& old_value, const std::string& new_value);
+
+
+Image loadImage(const std::string path);
+void saveImage(const std::string path, Image& image);
+
 
 int get_file_size(const Str256& filepath);
 bool file_exist(const char* filename);

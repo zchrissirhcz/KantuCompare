@@ -18,10 +18,10 @@ include("cmake/lldb-debug.cmake")
 
 set(CMAKE_BUILD_TYPE Debug)
 
+add_subdirectory(src/kantu)
 
 if(KANTU_TESTING)
   enable_testing()
+  add_subdirectory(src/kantu_tests)
 endif()
 
-add_subdirectory(src/kantu)
-add_subdirectory(src/kantu_tests)

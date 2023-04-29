@@ -19,7 +19,7 @@ add_library(kantu_image_compare STATIC
 target_include_directories(kantu_image_compare PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(kantu_image_compare PUBLIC ${OpenCV_LIBS})
 
-add_executable(KantuImageCompare
+add_executable(KantuCompare
   app.cpp
   image_render.hpp
   image_render.cpp
@@ -32,7 +32,7 @@ add_executable(KantuImageCompare
   ${IMGUI_DIR}/imgui_widgets.cpp
   ${IMGUI_DIR}/imgui_demo.cpp
 )
-target_link_libraries(KantuImageCompare
+target_link_libraries(KantuCompare
   glfw
   ${OPENGL_LIBRARIES}
   kantu_image_compare
@@ -49,7 +49,7 @@ if(KANTU_USE_PVS)
   include(cmake/PVS-Studio.cmake)
   pvs_studio_add_target(TARGET example2.analyze ALL
     OUTPUT FORMAT errorfile
-    RECURSIVE ANALYZE ImageCompare
+    RECURSIVE ANALYZE KantuCompare
     MODE GA:1,2
     LOG target.err
   )

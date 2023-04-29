@@ -14,9 +14,9 @@
 #include "app_design.hpp"
 #include "portable-file-dialogs.h"
 
-#include "image_compare.hpp"
-#include "image_render.hpp"
-#include "image_inspect.h"
+#include "kantu/image_compare.hpp"
+#include "kantu/image_render.hpp"
+#include "kantu/image_inspect.h"
 
 #define STR_IMPLEMENTATION
 #include "Str.h"
@@ -33,7 +33,7 @@ public:
     void StartUp()
     {
         // Title
-        glfwSetWindowTitle(window, u8"Image Compare");
+        glfwSetWindowTitle(window, u8"KantuCompare");
         glfwSetWindowSize(window, 960, 640);
 
         // Style
