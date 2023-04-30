@@ -62,7 +62,7 @@ TEST(ImageFileName, non_raw)
     {
         std::string lower_ext = kantu::to_lower(ext);
         std::string image_path = head + "." + ext;
-        kantu::ImageFileInfo fileinfo(image_path);
+        kantu::FourccFileInfo fileinfo(image_path);
 
         EXPECT_EQ(fileinfo.valid, true);
         EXPECT_EQ(fileinfo.filepath, image_path);

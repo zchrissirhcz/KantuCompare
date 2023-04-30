@@ -10,7 +10,7 @@ enum class Transformer {
     RGB_to_BGR
 };
 
-void transformFormat(const Image& src, Image& dst, const Transformer& transformer);
+void transformFormat(const FourccImage& src, FourccImage& dst, const Transformer& transformer);
 
 void chw_to_hwc(const cv::Mat& src, cv::Mat& dst);
 void my_chw_to_hwc(cv::InputArray src, cv::OutputArray dst);

@@ -1,7 +1,7 @@
 # sledpkg:  Semi-precise package manager
 # Author:   Zhuo Zhang <imzhuo#foxmail.com>
 # Created:  2023.04.28 00:00:00
-# Modified: 2023.04.30 00:03:00
+# Modified: 2023.04.30 16:15:00
 
 import git
 from git import RemoteProgress
@@ -130,7 +130,7 @@ class SledPackage(object):
 
     def cmake_build(self, build_type = None):
         print("[build] {:s}".format(self.name))
-        cmd = "cmake --build {:s} -j4".format(self.build_dir)
+        cmd = "cmake --build {:s} -j{:d}".format(self.build_dir, os.cpu_count())
         if (build_type is not None):
             cmd += " --config {:s}".format(build_type)
         print("  cmake install cmd: ", cmd)

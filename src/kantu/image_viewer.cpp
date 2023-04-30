@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 
     std::string filename = argv[1];
 
-    cv::Mat image = kantu::load_image(filename);
+    cv::Mat image = kantu::load_as_displayable_image(filename);
     std::string win_name = filename;
     cv::namedWindow(win_name, cv::WINDOW_NORMAL);
     cv::resizeWindow(win_name, cv::Size{600, 800});

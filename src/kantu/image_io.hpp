@@ -3,16 +3,17 @@
 #include "kantu/image.hpp"
 #include <string>
 #include "str/Str.h"
+#include "kantu/string.hpp"
 
 namespace kantu {
 
-class ImageFileInfo
+class FourccFileInfo
 {
 public:
-    ImageFileInfo() 
+    FourccFileInfo() 
     {
     }
-    ImageFileInfo(const std::string& filename);
+    FourccFileInfo(const FilePath& path);
 
 public:
     std::string filepath = "";
@@ -26,8 +27,10 @@ public:
     int filesize = 0;
 };
 
-Image loadImage(const std::string path);
-void saveImage(const std::string path, Image& image);
+cv::Mat convert_fourcc_to_mat(const FourccImage& tu);
+
+FourccImage loadImage(const std::string path);
+void saveImage(const std::string path, FourccImage& image);
 
 
 int get_file_size(const Str256& filepath);
@@ -35,6 +38,6 @@ bool file_exist(const char* filename);
 bool file_exist(const std::string& filename);
 
 std::vector<std::string> get_supported_image_file_exts();
-cv::Mat load_image(const std::string& image_path);
+cv::Mat load_as_displayable_image(const std::string& image_path);
 
 } // namespace kantu

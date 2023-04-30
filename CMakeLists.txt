@@ -13,6 +13,7 @@ include("cmake/output_dir.cmake")
 include("cmake/deps.cmake")
 include("cmake/lldb-debug.cmake")
 include("cmake/overlook.cmake")
+include("cmake/ninja_colorful_output.cmake")
 #include("cmake/asan.cmake")
 #include("cmake/tsan.cmake")
 

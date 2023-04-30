@@ -76,7 +76,7 @@ void RichImage::load_from_file(const Str256& filepath)
 {
     //cv::Mat mat = cv::imread(filepath.c_str(), cv::IMREAD_UNCHANGED);
     std::string imagepath = filepath.c_str();
-    cv::Mat mat = load_image(imagepath);
+    cv::Mat mat = load_as_displayable_image(imagepath);
     if (mat.empty()) return;
     switch (mat.channels())
     {

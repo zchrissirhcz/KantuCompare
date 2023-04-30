@@ -3,6 +3,7 @@
 #include "kantu/transform_format.hpp"
 #include "kantu/string.hpp"
 #include <filesystem>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <unordered_map>
 #include <vector>
@@ -17,23 +18,24 @@ using namespace Shadow;
 PixelFormat get_pixel_format_from_file_ext(const std::string& ext)
 {
     std::unordered_map<std::string, PixelFormat> mp = {
-        { "gray", PixelFormat::GRAY8 },
+        { "nv21", PixelFormat::NV21 },
+        { "nv12", PixelFormat::NV12 },
+        { "i420", PixelFormat::I420 },
+        { "yv12", PixelFormat::YV12 },
+
+        { "uyvy", PixelFormat::UYVY },
+        { "yuyv", PixelFormat::YUYV },
+        { "yvyu", PixelFormat::YVYU },
+
+        { "i444", PixelFormat::I444 },
 
         { "rgb24", PixelFormat::RGB24 },
         { "bgr24", PixelFormat::BGR24 },
 
-        { "nv21", PixelFormat::NV21 },
-        { "nv12", PixelFormat::NV12 },
-
-        { "i420", PixelFormat::I420 },
-        { "yv12", PixelFormat::YV12 },
-        { "uyvy", PixelFormat::UYVY },
-        { "yuyv", PixelFormat::YUYV },
-        { "yvyu", PixelFormat::YVYU },
-        
-        { "i444", PixelFormat::I444 },
         { "bgra32", PixelFormat::BGRA32 },
         { "rgba32", PixelFormat::RGBA32 },
+
+        { "gray", PixelFormat::GRAY8 },
     };
 
     if (mp.count(ext))
@@ -44,281 +46,361 @@ PixelFormat get_pixel_format_from_file_ext(const std::string& ext)
     return PixelFormat::NONE;
 }
 
-cv::Mat load_fourcc_and_convert_to_mat(const ImageFileInfo& file_info)
+FourccImage load_fourcc(const FourccFileInfo& file_info)
 {
-    Image tu;
+    FourccImage fourcc;
 
     std::ifstream fs(file_info.filepath, std::ios::in | std::ios::binary);
-    cv::Mat total(1, file_info.filesize, CV_8UC1);
-    fs.read(reinterpret_cast<char*>(total.data), file_info.filesize);
+    cv::Mat view1d(1, file_info.filesize, CV_8UC1);
+    fs.read(reinterpret_cast<char*>(view1d.data), file_info.filesize);
 
     int height = file_info.height;
     int width = file_info.width;
+    fourcc.view1d = view1d;
+    fourcc.height = height;
+    fourcc.width = width;
 
-    cv::Mat image;
     PixelFormat fmt = get_pixel_format_from_file_ext(file_info.mapped_ext);
+    fourcc.format = fmt;
+    switch (fmt)
+    {
+    case PixelFormat::NV21:
+    case PixelFormat::NV12:
+    {
+        fourcc.view2d = view1d.reshape(1, height * 3 / 2);
 
-    // 3/2
-    if (fmt == PixelFormat::NV21)
-    {
-        cv::Mat nv21 = total.reshape(1, height * 3 / 2);
-        cv::cvtColor(nv21, image, cv::COLOR_YUV2BGR_NV21);
-    }
-    else if (fmt == PixelFormat::NV12)
-    {
-        cv::Mat nv12 = total.reshape(1, height * 3 / 2);
-        cv::cvtColor(nv12, image, cv::COLOR_YUV2BGR_NV12);
-    }
-    else if (fmt == PixelFormat::I420)
-    {
-        cv::Mat i420 = total.reshape(1, height * 3 / 2);
-        cv::cvtColor(i420, image, cv::COLOR_YUV2BGR_I420);
-    }
-    else if (fmt == PixelFormat::YV12)
-    {
-        cv::Mat yv12 = total.reshape(1, height * 3 / 2);
-        cv::cvtColor(yv12, image, cv::COLOR_YUV2BGR_YV12);
+        cv::Range y_range(0, height * width);
+        cv::Range uv_range(y_range.end, view1d.total());
+        cv::Mat Y = view1d.colRange(y_range).reshape(1, height);
+        cv::Mat UV = view1d.colRange(uv_range).reshape(2, height / 2);
+        fourcc.planes.emplace_back(Y);
+        fourcc.planes.emplace_back(UV);
+        break;
     }
 
-    // 2
-    else if (fmt == PixelFormat::UYVY)
+    case PixelFormat::I420:
     {
-        cv::Mat uyvy = total.reshape(2, height);
-        cv::cvtColor(uyvy, image, cv::COLOR_YUV2BGR_UYVY);
+        fourcc.view2d = view1d.reshape(1, height * 3 / 2);
+
+        cv::Range y_range(0, height * width);
+        cv::Range u_range(y_range.end, y_range.end + (height / 2) * (width / 2));
+        cv::Range v_range(u_range.end, view1d.total());
+        cv::Mat Y = view1d.colRange(y_range).reshape(1, height);
+        cv::Mat U = view1d.colRange(u_range).reshape(2, height / 2);
+        cv::Mat V = view1d.colRange(v_range).reshape(2, height / 2);
+        fourcc.planes.emplace_back(Y);
+        fourcc.planes.emplace_back(U);
+        fourcc.planes.emplace_back(V);
+        break;
     }
-    else if (fmt == PixelFormat::YUYV)
+    case PixelFormat::YV12:
     {
-        cv::Mat yuyv = total.reshape(2, height);
-        cv::cvtColor(yuyv, image, cv::COLOR_YUV2BGR_YUYV);
+        fourcc.view2d = view1d.reshape(1, height * 3 / 2);
+
+        cv::Range y_range(0, height * width);
+        cv::Range v_range(y_range.end, y_range.end + (height / 2) * (width / 2));
+        cv::Range u_range(v_range.end, view1d.total());
+        cv::Mat Y = view1d.colRange(y_range).reshape(1, height);
+        cv::Mat V = view1d.colRange(v_range).reshape(2, height / 2);
+        cv::Mat U = view1d.colRange(u_range).reshape(2, height / 2);
+        fourcc.planes.emplace_back(Y);
+        fourcc.planes.emplace_back(V);
+        fourcc.planes.emplace_back(U);
+        break;
     }
-    else if (fmt == PixelFormat::YVYU)
+    
+    case PixelFormat::UYVY:
+    case PixelFormat::YUYV:
+    case PixelFormat::YVYU:
     {
-        cv::Mat yvyu = total.reshape(2, height);
-        cv::cvtColor(yvyu, image, cv::COLOR_YUV2BGR_YVYU);
+        fourcc.view2d = view1d.reshape(2, height);
+        fourcc.planes.emplace_back(fourcc.view2d);
+        break;
     }
 
-    // 3
-    else if (fmt == PixelFormat::I444)
+    case PixelFormat::I444:
     {
-        cv::Mat i444 = total.reshape(3, height);
-#if 1
-        image.create(i444.size(), i444.type());
-        i444_to_rgb(i444.data, image.data, width, height);
-        cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-#else
-        cv::cvtColor(yuv444_mat, image, cv::COLOR_YUV2BGR);
-        // cv::Mat tmp;
-        // chw_to_hwc(yuv444_mat, tmp);
-#endif
+        fourcc.view2d = view1d.reshape(3, height);
+        fourcc.planes.emplace_back(fourcc.view2d);
+        break;
+    }
+    
+    case PixelFormat::BGR24:
+    case PixelFormat::RGB24:
+    {
+        fourcc.view2d = view1d.reshape(3, height);
+        fourcc.planes.emplace_back(fourcc.view2d);
+        break;
     }
 
-    else if (fmt == PixelFormat::BGR24)
+    case PixelFormat::BGRA32:
+    case PixelFormat::RGBA32:
     {
-        image = total.reshape(3, height);
+        fourcc.view2d = view1d.reshape(4, height);
+        fourcc.planes.emplace_back(fourcc.view2d);
+        break;
     }
-    else if (fmt == PixelFormat::RGB24)
+
+    case PixelFormat::GRAY8:
     {
-        image = total.reshape(3, height);
-        cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+        fourcc.view2d = view1d.reshape(1, height);
+        fourcc.planes.emplace_back(fourcc.view2d);
+        break;
     }
-    else if (fmt == PixelFormat::BGRA32)
-    {
-        image = total.reshape(4, height);
+
+    default:
+        LOG(ERROR) << "not supported or not handled format\n";
+
     }
-    else if (fmt == PixelFormat::RGBA32)
-    {
-        image = total.reshape(4, height);
-        cv::cvtColor(image, image, cv::COLOR_RGBA2BGRA);
-    }
-    else if (fmt == PixelFormat::GRAY8)
-    {
-        image = total.reshape(1, height);
-    }
-    else
-    {
-        LOG(ERROR) << fmt1::format("not supported format {:s}\n", file_info.mapped_ext.c_str());
-    }
-    return image;
+
+    return fourcc;
 }
 
 } // namespace
 
 namespace kantu {
 
-ImageFileInfo::ImageFileInfo(const std::string& _filename)
+/// @return BGR, BGRA or GRAY
+cv::Mat convert_fourcc_to_mat(const FourccImage& fourcc)
 {
-    do {
-        FilePath path(_filename);
-        ext = path.ext();
-        if (ext.length() < 3)
+    cv::Mat total = fourcc.view1d;
+
+    int height = fourcc.height;
+    int width = fourcc.width;
+
+    cv::Mat mat;
+    PixelFormat fmt = fourcc.format;
+
+    switch (fmt)
+    {
+    case PixelFormat::NV21:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_NV21);
+        break;
+
+    case PixelFormat::NV12:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_NV12);
+        break;
+
+    case PixelFormat::I420:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_I420);
+        break;
+
+    case PixelFormat::YV12:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_YV12);
+        break;
+
+    case PixelFormat::UYVY:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_UYVY);
+        break;
+
+    case PixelFormat::YUYV:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_YUYV);
+        break;
+
+    case PixelFormat::YVYU:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_YUV2BGR_YVYU);
+        break;
+
+    case PixelFormat::I444:
+    {
+        cv::Mat i444 = fourcc.view2d;
+#if 1
+        mat.create(i444.size(), i444.type());
+        i444_to_rgb(i444.data, mat.data, width, height);
+        cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
+#else
+        cv::cvtColor(yuv444_mat, image, cv::COLOR_YUV2BGR);
+        // cv::Mat tmp;
+        // chw_to_hwc(yuv444_mat, tmp);
+#endif
+        break;
+    }
+
+    case PixelFormat::BGR24:
+        mat = fourcc.view2d;
+        break;
+
+    case PixelFormat::RGB24:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_RGB2BGR);
+        break;
+
+    case PixelFormat::BGRA32:
+        mat = fourcc.view2d;
+        break;
+
+    case PixelFormat::RGBA32:
+        cv::cvtColor(fourcc.view2d, mat, cv::COLOR_RGBA2BGRA);
+        break;
+
+    case PixelFormat::GRAY8:
+        mat = fourcc.view2d;
+        break;
+    
+    default:
+        LOG(ERROR) << fmt1::format("not supported format {:d}\n", fmt);
+    }
+
+    return mat;
+}
+
+FourccFileInfo::FourccFileInfo(const FilePath& path)
+{
+    ext = path.ext();
+    if (ext.length() < 3)
+    {
+        valid = false;
+        err_msg = "no valid ext found in filepath";
+        return;
+    }
+
+    filepath = path.path();
+    head = path.basename();
+
+    mapped_ext = to_lower(ext);
+    // convert raw extension (lowercase) to identical extention
+    bool do_opencv_identical_ext_mapping = true;
+    if (do_opencv_identical_ext_mapping)
+    {
+        if (mapped_ext == "yuv" || mapped_ext == "iyuv")
         {
-            valid = false;
-            err_msg = "no valid ext found in filepath";
+            mapped_ext = "i420";
+        }
+        else if (mapped_ext == "y422" || mapped_ext == "uynv")
+        {
+            mapped_ext = "uyvy";
+        }
+    }
+
+    bool do_yuvviewer_identical_ext_mapping = true;
+    if (do_yuvviewer_identical_ext_mapping)
+    {
+        if (mapped_ext == "grey")
+        {
+            mapped_ext = "gray";
+        }
+        else if (mapped_ext == "yv24")
+        {
+            mapped_ext = "i444";
+        }
+    }
+
+    /// validate filename's ext
+    bool found = false;
+    std::vector<std::string> valid_ext = get_supported_image_file_exts();
+    for (size_t i = 0; i < valid_ext.size(); i++)
+    {
+        if (valid_ext[i] == mapped_ext)
+        {
+            found = true;
             break;
         }
-
-        filepath = path.path();
-        head = path.basename();
-        mapped_ext = to_lower(ext);
-
-        // convert raw extension (lowercase) to identical extention
-        bool do_opencv_identical_ext_mapping = true;
-        if (do_opencv_identical_ext_mapping)
-        {
-            if (mapped_ext == "yuv" || mapped_ext == "iyuv")
-            {
-                mapped_ext = "i420";
-            }
-            else if (mapped_ext == "y422" || mapped_ext == "uynv")
-            {
-                mapped_ext = "uyvy";
-            }
-        }
-
-        bool do_yuvviewer_identical_ext_mapping = true;
-        if (do_yuvviewer_identical_ext_mapping)
-        {
-            if (mapped_ext == "grey")
-            {
-                mapped_ext = "gray";
-            }
-            else if (mapped_ext == "yv24")
-            {
-                mapped_ext = "i444";
-            }
-        }
-
-        /// validate filename's ext
-        bool found = false;
-        std::vector<std::string> valid_ext = get_supported_image_file_exts();
+    }
+    if (!found)
+    {
+        err_msg = "invalid filename extension! Currently only supports these: (case insensitive) ";
         for (size_t i = 0; i < valid_ext.size(); i++)
         {
-            if (valid_ext[i] == mapped_ext)
-            {
-                found = true;
-                break;
-            }
+            err_msg = err_msg + " " + valid_ext[i];
         }
-        if (!found)
-        {
-            err_msg = "invalid filename extension! Currently only supports these: (case insensitive) ";
-            for (size_t i = 0; i < valid_ext.size(); i++)
-            {
-                err_msg = err_msg + " " + valid_ext[i];
-            }
-            break;
-        }
+        return;
+    }
 
-        // validate filename's head
-        if (mapped_ext == "jpg" || mapped_ext == "jpeg" || mapped_ext == "png" || mapped_ext == "bmp")
-        {
-            valid = true;
-            break;
-        }
+    // (ext=="nv21" || ext=="nv12" || ext=="bgr24" || ext=="rgb24")
+    // valid format for head:
+    // [prefix]_[width]x[height]
+    // len(prefix)>0
+    // len(width)>0
+    // len(height)>0
+    // find and validate `_`
+    int underline_pos = head.find_last_of('_');
+    LOG(INFO) << fmt1::format("underline_pos = {:d}\n", underline_pos);
+    if (underline_pos != -1 && underline_pos > static_cast<int>(head.length()) - 4)
+    {
+        err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
+        return;
+    }
 
-        // (ext=="nv21" || ext=="nv12" || ext=="bgr24" || ext=="rgb24")
-        // valid format for head:
-        // [prefix]_[width]x[height]
-        // len(prefix)>0
-        // len(width)>0
-        // len(height)>0
-        // find and validate `_`
-        int underline_pos = head.find_last_of('_');
-        LOG(INFO) << fmt1::format("underline_pos = {:d}\n", underline_pos);
-        if (underline_pos != -1 && underline_pos > static_cast<int>(head.length()) - 4)
+    std::string dim_str = head.substr(underline_pos + 1);
+    int non_digit_cnt = 0;
+    int non_digit_pos = -1;
+    for (size_t i = 0; i < dim_str.length(); i++)
+    {
+        if (!isdigit(dim_str[i]))
         {
-            err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
-            break;
+            non_digit_cnt++;
+            non_digit_pos = i;
         }
+    }
+    LOG(INFO) << (fmt1::format("non_digit_cnt is {:d}\n", non_digit_cnt));
+    if (non_digit_cnt != 1)
+    {
+        err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
+        return;
+    }
 
-        std::string dim_str = head.substr(underline_pos + 1);
-        int non_digit_cnt = 0;
-        int non_digit_pos = -1;
-        for (size_t i = 0; i < dim_str.length(); i++)
-        {
-            if (!isdigit(dim_str[i]))
-            {
-                non_digit_cnt++;
-                non_digit_pos = i;
-            }
-        }
-        LOG(INFO) << (fmt1::format("non_digit_cnt is {:d}\n", non_digit_cnt));
-        if (non_digit_cnt != 1)
-        {
-            err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
-            break;
-        }
+    std::string width_str = dim_str.substr(0, non_digit_pos);
+    std::string height_str = dim_str.substr(non_digit_pos + 1);
+    width = std::stoi(width_str);
+    height = std::stoi(height_str);
 
-        height = 0, width = 0;
-        for (int i = 0; i < non_digit_pos; i++)
-        {
-            width = width * 10 + (dim_str[i] - '0');
-        }
-        for (size_t i = non_digit_pos + 1; i < dim_str.length(); i++)
-        {
-            height = height * 10 + (dim_str[i] - '0');
-        }
+    int actual_size = kantu::get_file_size(filepath);
+    int expected_size = -1;
+    filesize = actual_size;
 
-        int actual_size = kantu::get_file_size(filepath);
-        int expected_size = -1;
-        filesize = actual_size;
-        
-        // std::unordered_map<PixelFormat, PlaneInfo[4]> mp;
-        
-        // // nv21
-        // mp[PixelFormat::PIX_FMT_NV21][0] = PlaneInfo(height, width, 1);
-        // mp[PixelFormat::PIX_FMT_NV21][1] = PlaneInfo(height / 2, width / 2, 2);
+    PixelFormat fmt = get_pixel_format_from_file_ext(mapped_ext);
+    switch (fmt)
+    {
+    case PixelFormat::NV21:
+    case PixelFormat::NV12:
+    case PixelFormat::I420:
+    case PixelFormat::YV12:
+        expected_size = height * width * 3 / 2;
+        break;
+    
+    case PixelFormat::RGB24:
+    case PixelFormat::BGR24:
+        expected_size = height * width * 3;
+        break;
 
-        // // nv12
-        // mp[PixelFormat::PIX_FMT_NV12][0] = PlaneInfo(height, width, 1);
-        // mp[PixelFormat::PIX_FMT_NV12][1] = PlaneInfo(height / 2, width / 2, 2);
+    case PixelFormat::RGBA32:
+    case PixelFormat::BGRA32:
+        expected_size = height * width * 4;
+        break;
 
-        // // i420
+    case PixelFormat::GRAY8:
+        expected_size = height * width;
+        break;
 
+    case PixelFormat::UYVY:
+    case PixelFormat::YUYV:
+    case PixelFormat::YVYU:
+        expected_size = height * width * 2;
+        break;
 
-        if (mapped_ext == "nv21" || mapped_ext == "nv12" || mapped_ext == "i420" || mapped_ext == "yv12")
-        {
-            expected_size = height * width * 3 / 2;
-        }
-        else if (mapped_ext == "rgb24" || mapped_ext == "bgr24")
-        {
-            expected_size = height * width * 3;
-        }
-        else if (mapped_ext == "rgba32" || mapped_ext == "bgra32")
-        {
-            expected_size = height * width * 4;
-        }
-        else if (mapped_ext == "gray")
-        {
-            expected_size = height * width;
-        }
-        else if (mapped_ext == "uyvy" || mapped_ext == "yuyv" || mapped_ext == "yvyu")
-        {
-            expected_size = height * width * 2;
-        }
-        else if (mapped_ext == "i444")
-        {
-            expected_size = height * width * 3;
-        }
+    case PixelFormat::I444:
+        expected_size = height * width * 3;
+        break;
+    
+    default:
         LOG(INFO) << fmt1::format("lower_ext is {:s}\n", mapped_ext.c_str());
+    }
 
-        if (expected_size != actual_size)
-        {
-            err_msg = "invalid file size, filename described different that actual";
-            LOG(ERROR) << fmt1::format("expected_size: {:d}, actual_size: {:d}\n", expected_size, actual_size);
-            break;
-        }
+    if (expected_size != actual_size)
+    {
+        err_msg = "invalid file size, filename described different that actual";
+        LOG(ERROR) << fmt1::format("expected_size: {:d}, actual_size: {:d}\n", expected_size, actual_size);
+        return;
+    }
 
-        if (mapped_ext == "nv21" || mapped_ext == "nv12" || mapped_ext == "i420" || mapped_ext == "uyvy" || mapped_ext == "yuyv" || mapped_ext == "yv12" || mapped_ext == "yvyu")
+    if (mapped_ext == "nv21" || mapped_ext == "nv12" || mapped_ext == "i420" || mapped_ext == "uyvy" || mapped_ext == "yuyv" || mapped_ext == "yv12" || mapped_ext == "yvyu")
+    {
+        if (height % 2 != 0 || width % 2 != 0)
         {
-            if (height % 2 != 0 || width % 2 != 0)
-            {
-                err_msg = "file dimension invalid. both height and width should be even number";
-                break;
-            }
+            err_msg = "file dimension invalid. both height and width should be even number";
+            return;
         }
-        valid = true;
-    } while (0);
+    }
+    valid = true;
 }
 
 } // namespace kantu
@@ -329,35 +411,59 @@ int kantu::get_file_size(const Str256& filepath)
     return std::filesystem::file_size(p);
 }
 
-cv::Mat kantu::load_image(const std::string& image_path)
+static cv::Mat convert_mat_to_bgra(const cv::Mat& src)
 {
-    /// check if file exist or not
+    cv::Mat dst = src;
+    switch (src.channels())
+    {
+    case 1:
+        cv::cvtColor(src, dst, cv::COLOR_GRAY2BGRA);
+        break;
+    case 3:
+        cv::cvtColor(src, dst, cv::COLOR_BGR2BGRA);
+        break;
+    case 4:
+        dst = src;
+    default:
+        LOG(ERROR) << "only 1, 3, 4 channel image supported\n";
+    }
+    return dst;
+}
+
+/// displayable means `bgra`
+cv::Mat kantu::load_as_displayable_image(const std::string& image_path)
+{
+    cv::Mat empty_image;
+
     if (!kantu::file_exist(image_path))
     {
         LOG(ERROR) << fmt1::format("file {:s} does not exist\n", image_path.c_str());
-        return cv::Mat::zeros(100, 100, CV_8UC3);
+        return empty_image;
     }
 
-    ImageFileInfo file_info(image_path);
+    FilePath path(image_path);
+    for (const std::string& encoded_ext : { "jpg", "jpeg", "png", "bmp" })
+    {
+        if (to_lower(path.ext()) == encoded_ext)
+        {
+            cv::Mat image = cv::imread(image_path, cv::IMREAD_UNCHANGED);
+            return convert_mat_to_bgra(image);
+        }
+    }
+
+    FourccFileInfo file_info(path);
     bool valid = file_info.valid;
     if (!valid)
     {
         LOG(ERROR) << fmt1::format("{:s}\n", file_info.err_msg.c_str());
-        return cv::Mat::zeros(100, 100, CV_8UC3);
+        return empty_image;
     }
     else
     {
         LOG(INFO) << fmt1::format("reading file {:s}\n", image_path.c_str());
-        cv::Mat image;
-        for (const std::string& encoded_ext : { "bmp", "jpg", "jpeg", "png" })
-        {
-            if (file_info.mapped_ext == encoded_ext)
-            {
-                return cv::imread(file_info.filepath, cv::IMREAD_UNCHANGED);
-            }
-        }
-
-        return load_fourcc_and_convert_to_mat(file_info);
+        FourccImage fourcc = load_fourcc(file_info);
+        cv::Mat image = convert_fourcc_to_mat(fourcc);
+        return convert_mat_to_bgra(image);
     }
 }
 
