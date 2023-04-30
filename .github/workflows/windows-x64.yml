@@ -25,7 +25,7 @@ jobs:
 
     - name: cache-deps
       id: cache-deps
-      uses: actions/cache@v3.2.3
+      uses: actions/cache@v3.3.1
       with:
         path: deps
         key: deps-windows-x64
