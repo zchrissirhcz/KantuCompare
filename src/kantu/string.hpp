@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <algorithm>
 
 namespace kantu {
 
@@ -95,5 +97,17 @@ private:
     std::string m_basename;
     std::string m_ext;
 };
+
+template<typename T>
+int find(const std::vector<T>& vec, const T& target)
+{
+    int pos = -1;
+    typename std::vector<T>::const_iterator iter = std::find(vec.begin(), vec.end(), target);
+    if (iter != vec.end())
+    {
+        pos = std::distance(vec.begin(), iter);
+    }
+    return pos;
+}
 
 } // namespace kantu

@@ -64,7 +64,7 @@ TEST(ImageFileName, non_raw)
         std::string image_path = head + "." + ext;
         kantu::FourccFileInfo fileinfo(image_path);
 
-        EXPECT_EQ(fileinfo.valid, true);
+        EXPECT_EQ(fileinfo.valid, false);
         EXPECT_EQ(fileinfo.filepath, image_path);
         EXPECT_EQ(fileinfo.head, head);
         EXPECT_EQ(fileinfo.ext, ext);
@@ -72,6 +72,24 @@ TEST(ImageFileName, non_raw)
         EXPECT_EQ(fileinfo.height, 0);
         EXPECT_EQ(fileinfo.width, 0);
     }
+}
+
+TEST(find, t1)
+{
+    std::vector<std::string> exts = { "jpg", "png", "bmp" };
+    int pos = -1;
+    
+    pos = kantu::find(exts, std::string("jpg"));
+    EXPECT_EQ(pos, 0);
+
+    pos = kantu::find(exts, std::string("png"));
+    EXPECT_EQ(pos, 1);
+
+    pos = kantu::find(exts, std::string("bmp"));
+    EXPECT_EQ(pos, 2);
+
+    pos = kantu::find(exts, std::string("qaq"));
+    EXPECT_EQ(pos, -1);
 }
 
 // TEST(ImageFileName, raw)

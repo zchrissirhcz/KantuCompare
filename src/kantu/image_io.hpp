@@ -10,9 +10,7 @@ namespace kantu {
 class FourccFileInfo
 {
 public:
-    FourccFileInfo() 
-    {
-    }
+    FourccFileInfo()  {}
     FourccFileInfo(const FilePath& path);
 
 public:
@@ -27,17 +25,13 @@ public:
     int filesize = 0;
 };
 
+FourccImage load_fourcc(const FourccFileInfo& file_info);
+PixelFormat get_pixel_format_from_file_ext(const std::string& ext);
 cv::Mat convert_fourcc_to_mat(const FourccImage& tu);
-
-FourccImage loadImage(const std::string path);
-void saveImage(const std::string path, FourccImage& image);
-
-
+std::vector<std::string> get_supported_image_file_exts();
+cv::Mat load_as_displayable_image(const std::string& image_path);
 int get_file_size(const Str256& filepath);
 bool file_exist(const char* filename);
 bool file_exist(const std::string& filename);
-
-std::vector<std::string> get_supported_image_file_exts();
-cv::Mat load_as_displayable_image(const std::string& image_path);
 
 } // namespace kantu
