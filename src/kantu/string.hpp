@@ -27,7 +27,7 @@ public:
 private:
     void get_directory_and_filename()
     {
-        int pos = m_path.length() - 1;
+        int pos = (int)m_path.length() - 1;
         for (; pos >= 0; pos--)
         {
             if (m_path[pos] == '/' || m_path[pos] == '\\')
@@ -48,8 +48,8 @@ private:
 
     void get_basename_and_ext()
     {
-        int pos = m_filename.find_last_of('.');
-        if (pos == -1)
+        std::string::size_type pos = m_filename.find_last_of('.');
+        if (pos == std::string::npos)
         {
             m_basename = m_filename;
         }
@@ -105,7 +105,7 @@ int find(const std::vector<T>& vec, const T& target)
     typename std::vector<T>::const_iterator iter = std::find(vec.begin(), vec.end(), target);
     if (iter != vec.end())
     {
-        pos = std::distance(vec.begin(), iter);
+        pos = (int)std::distance(vec.begin(), iter);
     }
     return pos;
 }

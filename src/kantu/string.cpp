@@ -7,7 +7,7 @@ std::string kantu::to_lower(const std::string& str)
     {
         if (isalpha(str[i]))
         {
-            lower_str[i] = tolower(str[i]);
+            lower_str[i] = (char)tolower(str[i]);
         }
     }
     return lower_str;

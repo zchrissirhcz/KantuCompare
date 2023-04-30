@@ -1,0 +1,60 @@
+name: windows-x64
+on: [push, pull_request]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  BUILD_DIR: windows-x64
+  GITHUB_ACTION: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        image: [ 'windows-latest' ]
+
+    steps:
+    - name: cancel-previous-runs
+      uses: styfle/cancel-workflow-action@0.11.0
+      with:
+        access_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Clone repository
+      uses: actions/checkout@v3
+
+    - name: cache-deps
+      id: cache-deps
+      uses: actions/cache@v3.2.3
+      with:
+        path: deps
+        key: deps-windows-x64
+    
+    - name: checkout-and-build-deps
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        pip3 install -r requirements.txt
+        python3 sledpkg_run.py
+
+    - name: Configure the project
+      working-directory: ${{github.workspace}}/build
+      run: cmake -S .. -B ${{env.BUILD_DIR}}
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} -j2
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build/${{env.BUILD_DIR}}
+      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+    
+    - name: Install
+      working-directory: ${{github.workspace}}/build
+      run: cmake --install ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: KantuCompareApp-${{runner.os}}-x64
+        path: ${{github.workspace}}/build/${{env.BUILD_DIR}}/install

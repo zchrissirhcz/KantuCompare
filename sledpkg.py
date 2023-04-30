@@ -19,6 +19,11 @@ def is_windows():
 def is_linux():
     return platform.system().lower() == "linux"
 
+def is_github_action():
+    s = os.environ.get('GITHUB_ACTION', None)
+    if (s is not None):
+        return True
+    return False
 
 class CommandRunner(object):
     @staticmethod
@@ -55,7 +60,7 @@ class SledPackage(object):
         self.src_dir = None
 
     def clone_repo(self, git_url, branch=None, tag=None, commit_id=None, mirror_url=None, shallow=True, save_dir='deps'):
-        if (mirror_url is not None):
+        if (not is_github_action()) and (mirror_url is not None):
             git_url = mirror_url
         repo_name = git_url.split('/')[-1]
         to_path = '{:s}/{:s}'.format(save_dir, repo_name)

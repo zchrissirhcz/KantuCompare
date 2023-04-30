@@ -1,5 +1,7 @@
 # KantuCompare
 
+<img alt="GitHub" src="https://img.shields.io/github/license/zchrissirhcz/KantuCompare"> [![linux-x64](https://github.com/zchrissirhcz/KantuCompare/actions/workflows/linux-x64.yml/badge.svg)](https://github.com/zchrissirhcz/KantuCompare/actions/workflows/linux-x64.yml) [![windows-x64](https://github.com/zchrissirhcz/KantuCompare/actions/workflows/windows-x64.yml/badge.svg)](https://github.com/zchrissirhcz/KantuCompare/actions/workflows/windows-x64.yml) [![mac-x64](https://github.com/zchrissirhcz/KantuCompare/actions/workflows/mac-x64.yml/badge.svg)](https://github.com/zchrissirhcz/KantuCompare/actions/workflows/mac-x64.yml)
+
 A GUI for image difference visualization.
 
 ![](images/snapshots/snapshot_2022-06-12.png)

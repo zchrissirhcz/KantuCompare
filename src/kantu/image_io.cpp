@@ -207,9 +207,9 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
     // len(width)>0
     // len(height)>0
     // find and validate `_`
-    int underline_pos = head.find_last_of('_');
+    std::string::size_type underline_pos = head.find_last_of('_');
     // LOG(INFO) << fmt1::format("underline_pos = {:d}\n", underline_pos);
-    if (underline_pos != -1 && underline_pos > static_cast<int>(head.length()) - 4)
+    if (underline_pos != std::string::npos && (int)underline_pos > static_cast<int>(head.length()) - 4)
     {
         err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
         return;
@@ -223,7 +223,7 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
         if (!isdigit(dim_str[i]))
         {
             non_digit_cnt++;
-            non_digit_pos = i;
+            non_digit_pos = (int)i;
         }
     }
     // LOG(INFO) << (fmt1::format("non_digit_cnt is {:d}\n", non_digit_cnt));
@@ -265,7 +265,7 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
 int kantu::get_file_size(const Str256& filepath)
 {
     std::filesystem::path p{filepath.c_str()};
-    return std::filesystem::file_size(p);
+    return (int)std::filesystem::file_size(p);
 }
 
 static cv::Mat convert_mat_to_bgra(const cv::Mat& src)
@@ -423,7 +423,7 @@ FourccImage kantu::load_fourcc(const FourccFileInfo& file_info)
         fourcc.view2d = view1d.reshape(1, height * 3 / 2);
 
         cv::Range y_range(0, height * width);
-        cv::Range uv_range(y_range.end, view1d.total());
+        cv::Range uv_range(y_range.end, (int)view1d.total());
         cv::Mat Y = view1d.colRange(y_range).reshape(1, height);
         cv::Mat UV = view1d.colRange(uv_range).reshape(2, height / 2);
         fourcc.planes.emplace_back(Y);
@@ -437,7 +437,7 @@ FourccImage kantu::load_fourcc(const FourccFileInfo& file_info)
 
         cv::Range y_range(0, height * width);
         cv::Range u_range(y_range.end, y_range.end + (height / 2) * (width / 2));
-        cv::Range v_range(u_range.end, view1d.total());
+        cv::Range v_range(u_range.end, (int)view1d.total());
         cv::Mat Y = view1d.colRange(y_range).reshape(1, height);
         cv::Mat U = view1d.colRange(u_range).reshape(2, height / 2);
         cv::Mat V = view1d.colRange(v_range).reshape(2, height / 2);
@@ -452,7 +452,7 @@ FourccImage kantu::load_fourcc(const FourccFileInfo& file_info)
 
         cv::Range y_range(0, height * width);
         cv::Range v_range(y_range.end, y_range.end + (height / 2) * (width / 2));
-        cv::Range u_range(v_range.end, view1d.total());
+        cv::Range u_range(v_range.end, (int)view1d.total());
         cv::Mat Y = view1d.colRange(y_range).reshape(1, height);
         cv::Mat V = view1d.colRange(v_range).reshape(2, height / 2);
         cv::Mat U = view1d.colRange(u_range).reshape(2, height / 2);

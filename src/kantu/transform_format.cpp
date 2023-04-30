@@ -88,7 +88,7 @@ static void RGBfromYUV_BT601_u8(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t Y, u
     static const int ITUR_BT_601_SHIFT = 20;
 
 
-    #define CLIP_TO_UCHAR(x) ((x) < 0 ? 0 : ((x) > 255 ? 255 : (x)))
+    #define CLIP_TO_UCHAR(x) (uint8_t)((x) < 0 ? 0 : ((x) > 255 ? 255 : (x)))
 
     int u = U - 128;///
     int v = V - 128;///

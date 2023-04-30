@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 
+if(NOT DEFINED CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory")
+endif()
+
 project(KantuCompare)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -16,8 +20,6 @@ include("cmake/overlook.cmake")
 include("cmake/ninja_colorful_output.cmake")
 #include("cmake/asan.cmake")
 #include("cmake/tsan.cmake")
-
-set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(src/kantu)
 

@@ -76,6 +76,7 @@ def prepare_opencv():
             "-D CV_DISABLE_OPTIMIZATION=OFF",
             "-D OPENCV_DOWNLOAD_MIRROR_ID=gitcode",
             "-D WITH_OPENCL=OFF",
+            "-D WITH_OPENEXR=OFF"
         ]
     )
     if sp.is_windows():
