@@ -68,7 +68,7 @@ TEST(ImageFileName, non_raw)
         EXPECT_EQ(fileinfo.filepath, image_path);
         EXPECT_EQ(fileinfo.head, head);
         EXPECT_EQ(fileinfo.ext, ext);
-        EXPECT_EQ(fileinfo.lower_ext, lower_ext);
+        EXPECT_EQ(fileinfo.mapped_ext, lower_ext);
         EXPECT_EQ(fileinfo.height, 0);
         EXPECT_EQ(fileinfo.width, 0);
     }

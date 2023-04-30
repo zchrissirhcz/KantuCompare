@@ -52,12 +52,20 @@ public:
         // Load Fonts only on specific OS for portability
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
-#if __APPLE__ && __ARM_NEON
-        std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
-        ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
-        io.Fonts->Build();
-        IM_ASSERT(font != NULL);
-#endif
+        io.Fonts->AddFontFromFileTTF("xkcd-script.ttf", 23);
+        
+        //std::string font_path = "ark-pixel-16px-proportional-zh_cn.otf";
+        //io.Fonts->AddFontFromFileTTF(font_path.c_str(), 23);
+// #if __APPLE__ && __ARM_NEON
+//         std::string font_path = "/Users/zz/Library/Fonts/SourceHanSansCN-Normal.otf"; // user installed
+//         ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+//         io.Fonts->Build();
+//         IM_ASSERT(font != NULL);
+// #endif
+
+        // ImFont* font = io.Fonts->AddFontFromFileTTF(font_path.c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        // io.Fonts->Build();
+        // IM_ASSERT(font != NULL);
 
         //io.ConfigWindowsMoveFromTitleBarOnly = true;
 
@@ -425,7 +433,7 @@ void MyApp::InitFileFilters()
     filter_msg1 = "Image Files (";
     filter_msg2 = "";
     std::vector<std::string> exts = kantu::get_supported_image_file_exts();
-    for (int i = 0; i < exts.size(); i++)
+    for (size_t i = 0; i < exts.size(); i++)
     {
         if (i > 0)
         {
@@ -542,7 +550,7 @@ int MyApp::UI_ChooseImageFile()
     // Check that a backend is available
     if (!pfd::settings::available())
     {
-        std::cout << "Portable File Dialogs are not available on this platform.\n";
+        LOG(ERROR) << "Portable File Dialogs are not available on this platform.\n";
         return 1;
     }
 
@@ -568,8 +576,7 @@ int MyApp::UI_ChooseImageFile()
     );
     if (f.result().size() > 0)
     {
-        std::cout << "Selected files:";
-        std::cout << f.result()[0] << std::endl;
+        LOG(INFO) << "Selected files:" << f.result()[0] << std::endl;
 
         filepath.setf("%s", f.result()[0].c_str());
     }

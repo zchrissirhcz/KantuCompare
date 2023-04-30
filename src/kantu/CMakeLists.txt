@@ -42,6 +42,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   add_definitions(-DGL_SILENCE_DEPRECATION)
 endif()
 
+add_custom_command(TARGET KantuCompareApp
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xkcd-script.ttf ${CMAKE_BINARY_DIR}/
+)
+
 if(KANTU_USE_PVS)
   include(cmake/PVS-Studio.cmake)
   pvs_studio_add_target(TARGET example2.analyze ALL

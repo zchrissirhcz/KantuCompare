@@ -55,7 +55,7 @@
             // "type": "cppdbg", // cpptools plugin
             "type": "lldb", // clangd + codelldb plugins
             "request": "launch",
-            "program": "${workspaceFolder}/build/linux-x64/KantuCompare",
+            "program": "${workspaceFolder}/build/linux-x64/KantuCompareApp",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

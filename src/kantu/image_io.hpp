@@ -18,11 +18,12 @@ public:
     std::string filepath = "";
     std::string head = "";
     std::string ext = ""; // same as file
-    std::string lower_ext; // converted to lowercase, then mapping to identical one
+    std::string mapped_ext; // converted to lowercase, then mapping to identical one
     int height = 0;
     int width = 0;
     bool valid = false;
     std::string err_msg = "";
+    int filesize = 0;
 };
 
 Image loadImage(const std::string path);

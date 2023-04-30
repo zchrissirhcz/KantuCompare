@@ -10,9 +10,9 @@ option(KANTU_USE_PVS "Use PVS-Studio for analysis?" OFF)
 option(KANTU_TESTING "Build unit test?" ON)
 
 include("cmake/output_dir.cmake")
-include("cmake/sleek.cmake")
 include("cmake/deps.cmake")
 include("cmake/lldb-debug.cmake")
+include("cmake/overlook.cmake")
 #include("cmake/asan.cmake")
 #include("cmake/tsan.cmake")
 
@@ -25,3 +25,4 @@ if(KANTU_TESTING)
   add_subdirectory(src/kantu_tests)
 endif()
 
+include(cmake/summary.cmake)
