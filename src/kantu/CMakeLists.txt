@@ -62,3 +62,11 @@ add_executable(kantu_image_viewer
   image_viewer.cpp
 )
 target_link_libraries(kantu_image_viewer kantu_basic)
+
+
+install(TARGETS KantuCompareApp
+  RUNTIME DESTINATION .
+)
+install(FILES ${CMAKE_SOURCE_DIR}/xkcd-script.ttf
+  DESTINATION .
+)

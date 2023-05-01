@@ -52,8 +52,11 @@ public:
         // Load Fonts only on specific OS for portability
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
-        io.Fonts->AddFontFromFileTTF("xkcd-script.ttf", 23);
-        
+        std::string font_path = "xkcd-script.ttf";
+        if (kantu::file_exist(font_path))
+        {
+            io.Fonts->AddFontFromFileTTF(font_path.c_str(), 23);
+        }
         //std::string font_path = "ark-pixel-16px-proportional-zh_cn.otf";
         //io.Fonts->AddFontFromFileTTF(font_path.c_str(), 23);
 // #if __APPLE__ && __ARM_NEON

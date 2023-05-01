@@ -6,12 +6,16 @@ A GUI for image difference visualization.
 
 ![](images/snapshots/snapshot_2022-06-12.png)
 
+## Features
+- Support various image formats: encoded and Fourcc images (`[prefix_]WIDTHxHEIGHT.ext`):
+    - `.jpg`, `.png`, `.bmp`, `.jpeg`
+    - `test_1280x720.NV21`, `test_1280x720.NV12`, `hello_7680x4320.nv21`, `yes_640x480.i420`
+    - `lena_1280x720.rgb24`, `lena_1280x720.bgr24`, `lena_1280x720.gray`
+- Automatically compare and display difference image, just like Beyond Compare
+
 ## Usage
 Click "Load" buttons to load images. Once both two input images loaded, the diff image is computed and displayed.
 
-- Supported image extensions:
-    - `.jpg`, `.jpeg`, `.bmp`, `.png`
-    - `.nv21`, `.nv12`, `.i420`, `.gray`, `.rgb24`, `.bgr24`, `.rgba32`, `.bgra32`
 - Change `Tolerance` slider to get different compare result.
 - Change `Zoom` slider or use mouse wheel to scale images.
 
@@ -23,13 +27,12 @@ See [images](https://github.com/zchrissirhcz/KantuCompare/tree/main/images) dire
 https://github.com/zchrissirhcz/KantuCompare
 cd KantuCompare
 
-# clone, build and install dependencies
-# you may use the provided python script for dependencies preparation
+# clone, build and install dependencies by provided script
 pip install -r requirements.txt
 python sledpkg_run.py
 # alternatively, go to cmake/deps.cmake and modify it
 
-# build KantuCompare
+# build the project itself
 cd build
 ./vs2022-x64.cmd # for Windows
 ./linux-x64.sh   # for Linux/MacOSX
