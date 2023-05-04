@@ -23,8 +23,8 @@
 using namespace kantu;
 
 #include "kantu/log.hpp"
-#include "mlcc/fmt1.h"
-#include "mlcc/filefunc.h"
+#include <filesystem>
+#include <fmt/core.h>
 
 class MyApp : public App<MyApp>
 {
@@ -37,7 +37,7 @@ public:
     void StartUp()
     {
         // Title
-        glfwSetWindowTitle(window, u8"KantuCompare");
+        glfwSetWindowTitle(window, "KantuCompare");
         glfwSetWindowSize(window, 960, 640);
 
         // Style
@@ -53,11 +53,11 @@ public:
         // Load Fonts only on specific OS for portability
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
-        std::string font_path = "xkcd-script.ttf";
-        if (filefunc::fileExist(font_path))
+        std::filesystem::path font_path = "xkcd-script.ttf";
+        if (std::filesystem::exists(font_path))
         {
-            LOG(INFO) << fmt1::format("Using font {:s}", font_path);
-            io.Fonts->AddFontFromFileTTF(font_path.c_str(), 23);
+            LOG(INFO) << fmt::format("Using font {:}", font_path.string());
+            io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), 23);
         }
         //std::string font_path = "ark-pixel-16px-proportional-zh_cn.otf";
         //io.Fonts->AddFontFromFileTTF(font_path.c_str(), 23);
@@ -567,7 +567,7 @@ int MyApp::UI_ChooseImageFile()
 #else
     const char* home_dir = getenv("HOME");
     std::string default_image_directory = home_dir;
-    LOG(INFO) << fmt1::format("[DEBUG] default_image_directory: {:s}\n", default_image_directory.c_str());
+    LOG(INFO) << fmt::format("[DEBUG] default_image_directory: {:s}\n", default_image_directory.c_str());
 #endif
 
     // NOTE: file extension filter not working on macOSX

@@ -5,15 +5,14 @@
 #define STR_IMPLEMENTATION 1
 #endif
 #include "kantu/image_io.hpp"
-
 #include "kantu/log.hpp"
-#include "mlcc/fmt1.h"
+#include <fmt/core.h>
 
 using namespace Shadow;
 
 static void help(const char* exe_name)
 {
-    LOG(INFO) << fmt1::format("Usage: {:s} image_path\n", exe_name);
+    LOG(INFO) << fmt::format("Usage: {:s} image_path\n", exe_name);
 }
 
 int main(int argc, char** argv)

@@ -1,7 +1,6 @@
 #include "kantu/image_render.hpp"
 #include "kantu/image_io.hpp"
 #include "kantu/log.hpp"
-#include "mlcc/fmt1.h"
 
 using namespace Shadow;
 

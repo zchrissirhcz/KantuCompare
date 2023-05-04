@@ -32,7 +32,7 @@ jobs:
       uses: actions/cache@v3.3.1
       with:
         path: deps
-        key: deps-mac-x64
+        key: deps-mac-x64-v2
     
     - name: checkout-and-build-deps
       if: steps.cache-deps.outputs.cache-hit != 'true'

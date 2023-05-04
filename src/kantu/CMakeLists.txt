@@ -8,7 +8,7 @@ add_library(kantu_basic STATIC
   string.cpp
 )
 target_include_directories(kantu_basic PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(kantu_basic PUBLIC ${OpenCV_LIBS} str mlcc)
+target_link_libraries(kantu_basic PUBLIC ${OpenCV_LIBS} str fmt::fmt)
 
 # compare RGB/Gray images
 add_library(kantu_compare STATIC

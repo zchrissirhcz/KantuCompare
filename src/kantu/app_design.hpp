@@ -13,13 +13,13 @@
 #include <stdlib.h>
 
 #include "kantu/log.hpp"
-#include "mlcc/fmt1.h"
+#include <fmt/core.h>
 
 using namespace Shadow;
 
 static void glfw_error_callback(int error, const char* description)
 {
-    LOG(ERROR) << fmt1::format("Glfw Error {:d}: {:s}\n", error, description);
+    LOG(ERROR) << fmt::format("Glfw Error {:d}: {:s}\n", error, description);
 }
 
 static const char* decide_gl_glsl_versions()

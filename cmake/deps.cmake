@@ -46,29 +46,29 @@ include_directories(
 #   mirror: https://gitee.com/mirrors/glfw
 #----------------------------------------------------------------------
 if(EXISTS "${CMAKE_SOURCE_DIR}/deps/glfw")
-  set(GLFW_DIR "${CMAKE_SOURCE_DIR}/deps/glfw")
+  set(glfw_src_dir "${CMAKE_SOURCE_DIR}/deps/glfw")
 else()
-  #set(GLFW_DIR "$ENV{HOME}/.sled/work_repos/glfw/master")
+  #set(glfw_src_dir "$ENV{HOME}/.sled/work_repos/glfw/master")
 endif()
 # find_package(glfw3 REQUIRED)
-#set(GLFW_DIR "$ENV{HOME}/work/github/glfw") # Set this to point to an up-to-date GLFW repo
+#set(glfw_src_dir "$ENV{HOME}/work/github/glfw") # Set this to point to an up-to-date GLFW repo
 option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" OFF)
 option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
-add_subdirectory(${GLFW_DIR} ${CMAKE_BINARY_DIR}/glfw EXCLUDE_FROM_ALL)
+add_subdirectory(${glfw_src_dir} ${CMAKE_BINARY_DIR}/glfw EXCLUDE_FROM_ALL)
 
 
 #----------------------------------------------------------------------
 # portable-file-dialogs
 #----------------------------------------------------------------------
 if(EXISTS "${CMAKE_SOURCE_DIR}/deps/portable-file-dialogs")
-  set(portable_file_dialogs_DIR "${CMAKE_SOURCE_DIR}/deps/portable-file-dialogs")
+  set(portable_file_dialogs_src_dir "${CMAKE_SOURCE_DIR}/deps/portable-file-dialogs")
 else()
-  #set(portable_file_dialogs_DIR "$ENV{HOME}/.sled/work_repos/portable-file-dialogs/master")
+  #set(portable_file_dialogs_src_dir "$ENV{HOME}/.sled/work_repos/portable-file-dialogs/master")
 endif()
-add_subdirectory(${portable_file_dialogs_DIR} ${CMAKE_BINARY_DIR}/portable_file_dialogs)
+add_subdirectory(${portable_file_dialogs_src_dir} ${CMAKE_BINARY_DIR}/portable_file_dialogs)
 
 
 #----------------------------------------------------------------------
@@ -106,9 +106,19 @@ endif()
 #----------------------------------------------------------------------
 # MLCC
 #----------------------------------------------------------------------
-add_library(mlcc STATIC
+# Not using mlcc currently. Maybe one day I'll use it again.
+add_library(mlcc INTERFACE
   ${CMAKE_SOURCE_DIR}/deps/mlcc/fmt1.h
-  ${CMAKE_SOURCE_DIR}/deps/mlcc/filefunc.h
-  ${CMAKE_SOURCE_DIR}/deps/mlcc/filefunc.cpp
 )
 target_include_directories(mlcc INTERFACE ${CMAKE_SOURCE_DIR}/deps)
+
+
+#----------------------------------------------------------------------
+# fmt
+#----------------------------------------------------------------------
+if(EXISTS "${CMAKE_SOURCE_DIR}/deps/fmt")
+  set(fmt_src_dir "${CMAKE_SOURCE_DIR}/deps/fmt")
+else()
+  # use your one
+endif()
+add_subdirectory(${fmt_src_dir} ${CMAKE_BINARY_DIR}/fmt EXCLUDE_FROM_ALL)

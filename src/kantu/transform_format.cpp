@@ -1,6 +1,6 @@
 #include "kantu/transform_format.hpp"
 #include "kantu/log.hpp"
-#include "mlcc/fmt1.h"
+#include <fmt/core.h>
 
 using namespace Shadow;
 
@@ -115,7 +115,7 @@ void kantu::i444_to_rgb(uint8_t* i444, uint8_t* rgb, int height, int width)
     const int w = width;
     const int h = height;
 
-    LOG(INFO) << fmt1::format("!! calling {:s}\n", __FUNCTION__);
+    LOG(INFO) << fmt::format("!! calling {:s}\n", __FUNCTION__);
 
     for (int i = 0; i < height; i++)
     {

@@ -92,7 +92,12 @@ def prepare_opencv():
 
 def prepare_mlcc():
     pkg = sp.SledPackage('mlcc')
-    pkg.clone_repo('https://github.com/scarsty/mlcc', commit_id='c61dacb')
+    pkg.clone_repo('https://github.com/scarsty/mlcc', commit_id='64c25fb')
+
+
+def prepare_fmt():
+    pkg = sp.SledPackage('fmt')
+    pkg.clone_repo('https://github.com/fmtlib/fmt', tag='9.1.0')
 
 
 if __name__ == '__main__':
@@ -103,3 +108,4 @@ if __name__ == '__main__':
     prepare_gtest()
     prepare_opencv()
     prepare_mlcc()
+    prepare_fmt()

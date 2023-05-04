@@ -8,10 +8,9 @@
 #include <unordered_map>
 #include <vector>
 #include <fstream>
-#include "mlcc/fmt1.h"
 #include "mlcc/filefunc.h"
 #include "log.hpp"
-
+#include <fmt/core.h>
 
 using namespace Shadow;
 
@@ -92,7 +91,7 @@ cv::Mat kantu::convert_fourcc_to_mat(const FourccImage& fourcc)
         break;
     
     default:
-        LOG(ERROR) << fmt1::format("not supported format {:d}\n", fmt);
+        LOG(ERROR) << fmt::format("not supported format {:d}\n", (int)fmt);
     }
 
     return mat;
@@ -138,7 +137,7 @@ int get_expected_fourcc_file_size(std::string mapped_ext, int height, int width)
         break;
     
     default:
-        LOG(INFO) << fmt1::format("un handled lower_ext: {:s}\n", mapped_ext.c_str());
+        LOG(INFO) << fmt::format("un handled lower_ext: {:s}\n", mapped_ext.c_str());
     }
 
     return expected_size;
@@ -210,7 +209,7 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
     // len(height)>0
     // find and validate `_`
     std::string::size_type underline_pos = head.find_last_of('_');
-    // LOG(INFO) << fmt1::format("underline_pos = {:d}\n", underline_pos);
+    // LOG(INFO) << fmt::format("underline_pos = {:d}\n", underline_pos);
     if (underline_pos != std::string::npos && (int)underline_pos > static_cast<int>(head.length()) - 4)
     {
         err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, `_` position invalid now";
@@ -228,7 +227,7 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
             non_digit_pos = (int)i;
         }
     }
-    // LOG(INFO) << (fmt1::format("non_digit_cnt is {:d}\n", non_digit_cnt));
+    // LOG(INFO) << (fmt::format("non_digit_cnt is {:d}\n", non_digit_cnt));
     if ((non_digit_cnt != 1) || (dim_str[non_digit_pos] != 'x'))
     {
         err_msg = "filename's head invalid.  [prefix]_[width]x[height] required, dim str wrong now";
@@ -247,7 +246,7 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
     if (expected_size != actual_size)
     {
         err_msg = "invalid file size, filename described different that actual";
-        LOG(ERROR) << fmt1::format("expected_size: {:d}, actual_size: {:d}\n", expected_size, actual_size);
+        LOG(ERROR) << fmt::format("expected_size: {:d}, actual_size: {:d}\n", expected_size, actual_size);
         return;
     }
 
@@ -294,9 +293,10 @@ cv::Mat kantu::load_as_displayable_image(const std::string& image_path)
 {
     cv::Mat empty_image;
 
-    if (!filefunc::fileExist(image_path))
+    std::filesystem::path image_path_ = image_path;
+    if (!std::filesystem::exists(image_path_))
     {
-        LOG(ERROR) << fmt1::format("file {:s} does not exist\n", image_path.c_str());
+        LOG(ERROR) << fmt::format("file {:s} does not exist\n", image_path.c_str());
         return empty_image;
     }
 
@@ -313,12 +313,12 @@ cv::Mat kantu::load_as_displayable_image(const std::string& image_path)
     bool valid = file_info.valid;
     if (!valid)
     {
-        LOG(ERROR) << fmt1::format("{:s}\n", file_info.err_msg.c_str());
+        LOG(ERROR) << fmt::format("{:s}\n", file_info.err_msg.c_str());
         return empty_image;
     }
     else
     {
-        LOG(INFO) << fmt1::format("reading file {:s}\n", image_path.c_str());
+        LOG(INFO) << fmt::format("reading file {:s}\n", image_path.c_str());
         FourccImage fourcc = load_fourcc(file_info);
         cv::Mat image = convert_fourcc_to_mat(fourcc);
         return convert_mat_to_bgra(image);
@@ -519,6 +519,6 @@ PixelFormat kantu::get_pixel_format_from_file_ext(const std::string& ext)
     {
         return mp[ext];
     }
-    LOG(ERROR) << fmt1::format("Un-supported image file extension {:s} for mapping\n", ext.c_str());
+    LOG(ERROR) << fmt::format("Un-supported image file extension {:s} for mapping\n", ext.c_str());
     return PixelFormat::NONE;
 }

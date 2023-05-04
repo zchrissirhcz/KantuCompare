@@ -1,6 +1,6 @@
 #include "kantu/compare.hpp"
 #include "kantu/log.hpp"
-#include "mlcc/fmt1.h"
+#include <fmt/core.h>
 
 using namespace Shadow;
 
@@ -190,7 +190,7 @@ cv::Mat kantu::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
         }
 
         diff = image_compare.clone();
-        LOG(INFO) << fmt1::format("Compare get pixel diff: ({:d}, {:d}, {:d}) with thresh {:d}\n",
+        LOG(INFO) << fmt::format("Compare get pixel diff: ({:d}, {:d}, {:d}) with thresh {:d}\n",
                (int)pixel_diff.val[0],
                (int)pixel_diff.val[1],
                (int)pixel_diff.val[2],
