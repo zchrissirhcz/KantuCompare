@@ -106,7 +106,9 @@ endif()
 #----------------------------------------------------------------------
 # MLCC
 #----------------------------------------------------------------------
-add_library(mlcc INTERFACE
+add_library(mlcc STATIC
   ${CMAKE_SOURCE_DIR}/deps/mlcc/fmt1.h
+  ${CMAKE_SOURCE_DIR}/deps/mlcc/filefunc.h
+  ${CMAKE_SOURCE_DIR}/deps/mlcc/filefunc.cpp
 )
 target_include_directories(mlcc INTERFACE ${CMAKE_SOURCE_DIR}/deps)

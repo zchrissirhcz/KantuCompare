@@ -24,6 +24,7 @@ using namespace kantu;
 
 #include "kantu/log.hpp"
 #include "mlcc/fmt1.h"
+#include "mlcc/filefunc.h"
 
 class MyApp : public App<MyApp>
 {
@@ -53,8 +54,9 @@ public:
         //std::string font_path = "/System/Library/Fonts/PingFang.ttc"; // system wide
         ImGuiIO& io = ImGui::GetIO();
         std::string font_path = "xkcd-script.ttf";
-        if (kantu::file_exist(font_path))
+        if (filefunc::fileExist(font_path))
         {
+            LOG(INFO) << fmt1::format("Using font {:s}", font_path);
             io.Fonts->AddFontFromFileTTF(font_path.c_str(), 23);
         }
         //std::string font_path = "ark-pixel-16px-proportional-zh_cn.otf";

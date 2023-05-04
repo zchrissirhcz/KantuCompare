@@ -42,6 +42,13 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   add_definitions(-DGL_SILENCE_DEPRECATION)
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  set_target_properties(
+    KantuCompareApp PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  )
+endif()
+
 add_custom_command(TARGET KantuCompareApp
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/xkcd-script.ttf ${CMAKE_BINARY_DIR}/

@@ -7,9 +7,11 @@
 #include <opencv2/imgproc.hpp>
 #include <unordered_map>
 #include <vector>
-#include "mlcc/fmt1.h"
-#include "log.hpp"
 #include <fstream>
+#include "mlcc/fmt1.h"
+#include "mlcc/filefunc.h"
+#include "log.hpp"
+
 
 using namespace Shadow;
 
@@ -292,7 +294,7 @@ cv::Mat kantu::load_as_displayable_image(const std::string& image_path)
 {
     cv::Mat empty_image;
 
-    if (!kantu::file_exist(image_path))
+    if (!filefunc::fileExist(image_path))
     {
         LOG(ERROR) << fmt1::format("file {:s} does not exist\n", image_path.c_str());
         return empty_image;
@@ -321,25 +323,6 @@ cv::Mat kantu::load_as_displayable_image(const std::string& image_path)
         cv::Mat image = convert_fourcc_to_mat(fourcc);
         return convert_mat_to_bgra(image);
     }
-}
-
-bool kantu::file_exist(const char* filename)
-{
-    FILE* fp = fopen(filename, "r");
-    if (fp == NULL)
-    {
-        return false;
-    }
-    else
-    {
-        fclose(fp);
-        return true;
-    }
-}
-
-bool kantu::file_exist(const std::string& filename)
-{
-    return file_exist(filename.c_str());
 }
 
 std::vector<std::string> kantu::get_supported_image_file_exts()

@@ -31,7 +31,5 @@ cv::Mat convert_fourcc_to_mat(const FourccImage& tu);
 std::vector<std::string> get_supported_image_file_exts();
 cv::Mat load_as_displayable_image(const std::string& image_path);
 int get_file_size(const Str256& filepath);
-bool file_exist(const char* filename);
-bool file_exist(const std::string& filename);
 
 } // namespace kantu
