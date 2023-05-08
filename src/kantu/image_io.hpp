@@ -10,18 +10,18 @@ namespace kantu {
 class FourccFileInfo
 {
 public:
-    FourccFileInfo()  {}
-    FourccFileInfo(const FilePath& path);
+    FourccFileInfo()  = default;
+    explicit FourccFileInfo(const FilePath& path);
 
 public:
-    std::string filepath = "";
-    std::string head = "";
-    std::string ext = ""; // same as file
+    std::string filepath;
+    std::string head;
+    std::string ext; // same as file
     std::string mapped_ext; // converted to lowercase, then mapping to identical one
     int height = 0;
     int width = 0;
     bool valid = false;
-    std::string err_msg = "";
+    std::string err_msg;
     int filesize = 0;
 };
 

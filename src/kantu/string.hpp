@@ -13,7 +13,7 @@ std::string& replace_all(std::string& src, const std::string& old_value, const s
 class FilePath
 {
 public:
-    FilePath(const std::string filepath) :
+    FilePath(const std::string& filepath) :
         m_path(filepath),
         m_directory(""),
         m_filename(""),
@@ -61,27 +61,27 @@ private:
     }
 
 public:
-    std::string path() const
+    [[nodiscard]] std::string path() const
     {
         return m_path;
     }
 
-    std::string directory() const
+    [[nodiscard]] std::string directory() const
     {
         return m_directory;
     }
 
-    std::string filename() const
+    [[nodiscard]] std::string filename() const
     {
         return m_filename;
     }
 
-    std::string basename() const
+    [[nodiscard]] std::string basename() const
     {
         return m_basename;
     }
 
-    std::string ext() const
+    [[nodiscard]] std::string ext() const
     {
         return m_ext;
     }

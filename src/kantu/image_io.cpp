@@ -161,7 +161,7 @@ FourccFileInfo::FourccFileInfo(const FilePath& path)
     head = path.basename();
 
     mapped_ext = to_lower(ext);
-    // convert raw extension (lowercase) to identical extention
+    // convert raw extension (lowercase) to identical extension
     bool do_opencv_identical_ext_mapping = true;
     if (do_opencv_identical_ext_mapping)
     {

@@ -145,7 +145,7 @@ void RichImage::update_mat(cv::Mat& frame, bool change_color_order)
                     GL_UNSIGNED_BYTE, frame.ptr());
 }
 
-// clear texture and realease all memory associated with it
+// clear texture and release all memory associated with it
 void RichImage::clear()
 {
     glDeleteTextures(1, &texture);
@@ -168,7 +168,7 @@ void RichImage::set_name(const Str256& _name)
 }
 
 //then GetName
-const char* RichImage::get_name()
+const char* RichImage::get_name() const
 {
     return name.c_str();
 }

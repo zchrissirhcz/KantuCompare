@@ -4,7 +4,7 @@
 
 using namespace Shadow;
 
-void kantu::get_diff_image(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar below, cv::Scalar above)
+void kantu::get_diff_image(const cv::Mat& src1, const cv::Mat& src2, cv::Mat& diff, int thresh, cv::Scalar& below, cv::Scalar& above)
 {
     CV_Assert(src1.rows == src2.rows && src1.cols == src2.cols);
     CV_Assert(src1.channels() == src2.channels());
@@ -159,7 +159,7 @@ cv::Mat kantu::compare_two_mat(const cv::Mat& image_left, const cv::Mat& image_r
 
         if (sum == 0)
         {
-            // if the left and right image is differnt size, but same in the overlaped region, we compute the gray image, but assign to RGB pixels
+            // if the left and right image is different size, but same in the overlapped region, we compute the gray image, but assign to RGB pixels
             cv::Size diff_size = diff_image_compare.size();
             for (int i = 0; i < diff_size.height; i++)
             {

@@ -49,7 +49,7 @@ namespace ImageInspect
 {
     inline void histogram(const int width, const int height, const unsigned char* const bits)
     {
-        unsigned int count[4][256] = {0};
+        unsigned int count[4][256] = {{0}};
 
         const unsigned char* ptrCols = bits;
 

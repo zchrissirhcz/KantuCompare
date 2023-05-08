@@ -113,7 +113,7 @@ public:
         // ImVec2 display_size(io.DisplaySize.x, io.DisplaySize.y);
         // ImGui::SetNextWindowSize(display_size);
 
-        ImGui::Begin("Testing menu", NULL, flags);
+        ImGui::Begin("Testing menu", nullptr, flags);
 
         ImGui::BeginChild("##PathRegion", ImVec2(ImGui::GetWindowWidth() - 50, ImGui::GetWindowHeight() * 1 / 10), true, ImGuiWindowFlags_NoScrollbar);
         {
@@ -363,7 +363,7 @@ void MyApp::myUpdateMouseWheel()
     ImGuiWindow* cur_window = g.WheelingWindow;
 
     // Reset the locked window if we move the mouse or after the timer elapses
-    if (cur_window != NULL)
+    if (cur_window != nullptr)
     {
         // std::string window_name = cur_window->Name;
         // if (window_name.length() < 5 || window_name.find("Image") == std::string::npos)

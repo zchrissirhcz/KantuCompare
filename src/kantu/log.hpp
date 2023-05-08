@@ -1,4 +1,4 @@
-// https://github.com/junluan/shadow/blob/master/shadow/util/log.hpp
+// based on https://github.com/junluan/shadow/blob/master/shadow/util/log.hpp
 #ifndef SHADOW_UTIL_LOG_HPP_
 #define SHADOW_UTIL_LOG_HPP_
 
@@ -124,7 +124,7 @@ class LogMessage {
   void operator=(const LogMessage&) = delete;
 
  private:
-  std::string demangle(const char* symbol) {
+  static std::string demangle(const char* symbol) {
     std::string symbol_str(symbol);
 #if defined(__linux__) || defined(__APPLE__)
     auto func_start = symbol_str.find("_Z");
@@ -146,7 +146,7 @@ class LogMessage {
     return symbol_str;
   }
 
-  std::string stack_trace(int start_frame, int stack_size = 20) {
+  static std::string stack_trace(int start_frame, int stack_size = 20) {
     std::stringstream ss;
 #if defined(__linux__) || defined(__APPLE__)
 #if !defined(__ANDROID__) && !defined(ANDROID)

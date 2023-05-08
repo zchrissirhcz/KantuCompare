@@ -27,11 +27,11 @@ public:
     void reload();
     void load_mat(cv::Mat& frame);
     void update_mat(cv::Mat& frame, bool change_color_order = false);
-    void clear(); // clear texture and realease all memory associated with it
+    void clear(); // clear texture and release all memory associated with it
     GLuint get_texture() const;
     bool* get_open();
     void set_name(const Str256& _name);
-    const char* get_name();
+    const char* get_name() const;
 };
 
 } // namespace kantu
