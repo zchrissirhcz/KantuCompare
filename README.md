@@ -21,7 +21,13 @@ Click "Load" buttons to load images. Once both two input images loaded, the diff
 
 See [images](https://github.com/zchrissirhcz/KantuCompare/tree/main/images) directory for testing images.
 
-## Build
+## Installation
+
+### Download Prebuilt
+
+There are prebuilt executable packages in the [Releases page](https://github.com/zchrissirhcz/KantuCompare/releases), support Windows-x64, Linux-x64, MacOSX-x64.
+
+### Build from source
 ```bash
 # clone repo
 https://github.com/zchrissirhcz/KantuCompare
