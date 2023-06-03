@@ -49,7 +49,7 @@ cd linux-x64
 ```
 
 ## Remarks
-The [initial trial](https://github.com/zchrissirhcz/KantuCompare/tree/qt) was based on Qt.
+The [initial trial](https://github.com/zchrissirhcz/KantuCompare/releases/tag/v0) was based on Qt.
 
 ## References
 - https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
