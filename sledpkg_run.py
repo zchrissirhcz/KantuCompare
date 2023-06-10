@@ -95,9 +95,9 @@ def prepare_mlcc():
     pkg.clone_repo('https://github.com/scarsty/mlcc', commit_id='64c25fb')
 
 
-def prepare_fmt():
-    pkg = sp.SledPackage('fmt')
-    pkg.clone_repo('https://github.com/fmtlib/fmt', tag='9.1.0')
+def prepare_fmtlib():
+    pkg = sp.SledPackage('fmtlib')
+    pkg.clone_repo('https://github.com/fmtlib/fmt', tag='9.1.0', mirror_url='https://gitee.com/chooosky/fmt')
 
 
 if __name__ == '__main__':
@@ -108,4 +108,4 @@ if __name__ == '__main__':
     prepare_gtest()
     prepare_opencv()
     prepare_mlcc()
-    prepare_fmt()
+    prepare_fmtlib()
