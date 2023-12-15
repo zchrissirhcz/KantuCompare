@@ -54,7 +54,7 @@ jobs:
       run: cmake --install ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
 
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: KantuCompareApp-${{runner.os}}-x64
         path: ${{github.workspace}}/build/${{env.BUILD_DIR}}/install
